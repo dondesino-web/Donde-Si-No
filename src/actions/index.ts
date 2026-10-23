@@ -24,12 +24,14 @@ import {
 	valoresDe,
 	type RespuestaAccion,
 } from './ayudas.ts';
+import { datosDelLocal } from './local.ts';
 import { promocionesYMenu } from './promociones.ts';
 import { PRECIO_MAXIMO, parsearPrecio, validarCategoria, validarProducto } from '../lib/validacion/carta.ts';
 
 
 export const server = {
 	...promocionesYMenu,
+	...datosDelLocal,
 
 	guardarProducto: defineAction({
 		accept: 'form',

@@ -75,3 +75,9 @@ fieldset.campo legend { font-weight: 600; padding-inline: var(--espacio-2); }
 .admin-producto__precio { display: flex; gap: var(--espacio-2); }
 .admin-producto__precio input { flex: 1; min-width: 0; min-height: var(--objetivo-tactil); padding: var(--espacio-2) var(--espacio-3); border: 2px solid var(--color-borde-fuerte); border-radius: var(--radio-sm); }
 .admin-producto__precio .boton { width: auto; white-space: nowrap; }
+
+.horario-dia { margin-top: var(--espacio-3); }
+.horario-dia legend { text-transform: capitalize; }
+.horario-tramo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-3); }
+.campo input[type='time'] { min-width: 0; }
+fieldset fieldset.campo { border-style: dashed; }

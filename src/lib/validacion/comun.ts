@@ -60,13 +60,20 @@ export const fechaOpcionalSchema = z
 	.refine((valor) => valor === '' || esFechaISO(valor), MENSAJE_FECHA)
 	.transform(aNuloSiVacio);
 
+// Tope antes de validar: ningún campo legítimo se acerca, y evita trabajar con valores enormes.
+const LARGO_MAXIMO_ENTRADA = 5000;
+const VALORES_MAXIMOS_LISTA = 50;
+
 export const cadena = (formulario: FormData, clave: string): string => {
 	const valor = formulario.get(clave);
 	// El navegador envía los saltos de línea de un textarea como CRLF, pero `maxlength` los cuenta como uno.
-	return typeof valor === 'string' ? valor.replaceAll('\r\n', '\n') : '';
+	return typeof valor === 'string' ? valor.slice(0, LARGO_MAXIMO_ENTRADA).replaceAll('\r\n', '\n') : '';
 };
 export const lista = (formulario: FormData, clave: string): string[] =>
-	formulario.getAll(clave).filter((v): v is string => typeof v === 'string');
+	formulario
+		.getAll(clave)
+		.slice(0, VALORES_MAXIMOS_LISTA)
+		.filter((v): v is string => typeof v === 'string');
 export const casilla = (formulario: FormData, clave: string): boolean => formulario.has(clave);
 
 export function aResultado<T>(analisis: { success: true; data: T } | { success: false; error: z.ZodError }): ResultadoValidacion<T> {

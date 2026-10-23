@@ -31,6 +31,20 @@ export function agruparPorCategoria(categorias: Categoria[], productos: Producto
 		.filter((c) => c.productos.length > 0);
 }
 
+/** Defensa en profundidad: lo que va a un `href` público debe ser https, venga de donde venga (semilla, panel o un script). */
+const soloHttps = (url: string | null): string | null => (url !== null && /^https:\/\//i.test(url) ? url : null);
+
+function conEnlacesSeguros(negocio: Negocio): Negocio {
+	return {
+		...negocio,
+		mapsUrl: soloHttps(negocio.mapsUrl),
+		resenaUrl: soloHttps(negocio.resenaUrl),
+		instagramUrl: soloHttps(negocio.instagramUrl),
+		facebookUrl: soloHttps(negocio.facebookUrl),
+		ubereatsUrl: soloHttps(negocio.ubereatsUrl),
+	};
+}
+
 /** Lee todo lo que la carta pública necesita. Lanza si el local aún no fue sembrado. */
 export async function obtenerCartaPublica(bd: Bd, ahora: Date = new Date()): Promise<CartaPublica> {
 	const hoy = fechaLocalISO(ahora);
@@ -61,7 +75,7 @@ export async function obtenerCartaPublica(bd: Bd, ahora: Date = new Date()): Pro
 	if (!fila) throw new Error('No hay datos del local: falta ejecutar la semilla (npm run db:seed).');
 
 	return {
-		negocio: fila,
+		negocio: conEnlacesSeguros(fila),
 		categorias: agruparPorCategoria(categorias, productos),
 		promociones,
 		menuDia: menus[0] ?? null,
