@@ -1,0 +1,97 @@
+---
+import type { Idioma } from '../../i18n/ui.ts';
+import { rutaPagina, traductor } from '../../i18n/utils.ts';
+import { formatearTelefono } from '../../lib/dominio/formato.ts';
+import { agruparHorario, tieneHorario } from '../../lib/dominio/horario.ts';
+import { DIAS_SEMANA } from '../../lib/dominio/tipos.ts';
+import type { Negocio } from '../../lib/repositorios/cartaRepo.ts';
+
+interface Props {
+	negocio: Negocio;
+	idioma: Idioma;
+	/** La versión imprimible no necesita el enlace a sí misma. */
+	conEnlaceImprimir?: boolean;
+}
+
+const { negocio, idioma, conEnlaceImprimir = true } = Astro.props;
+const t = traductor(idioma);
+
+const grupos = agruparHorario(negocio.horario);
+const nombreDia = (d: (typeof DIAS_SEMANA)[number]) => t(`dia.${d}`);
+const etiquetaDias = (dias: (typeof DIAS_SEMANA)[number][]) =>
+	dias.length === 1 ? nombreDia(dias[0]) : t('horario.rangoDias', { desde: nombreDia(dias[0]), hasta: nombreDia(dias[dias.length - 1]) });
+const servicios = (Object.keys(negocio.servicios) as (keyof typeof negocio.servicios)[]).filter((s) => negocio.servicios[s]);
+---
+
+<footer class="pie">
+	<div class="envoltorio">
+		<section aria-labelledby="pie-ubicacion">
+			<h2 id="pie-ubicacion">{t('pie.ubicacion')}</h2>
+			<address>
+				{negocio.direccion}<br />{negocio.comuna}, {negocio.region}
+			</address>
+		</section>
+
+		<section aria-labelledby="pie-horario">
+			<h2 id="pie-horario">{t('pie.horario')}</h2>
+			{
+				tieneHorario(negocio.horario) ? (
+					<dl>
+						{grupos.map((g) => (
+							<>
+								<dt>{etiquetaDias(g.dias)}</dt>
+								<dd>{g.rangos.length ? g.rangos.map((r) => `${r.abre}–${r.cierra}`).join(' · ') : t('pie.cerrado')}</dd>
+							</>
+						))}
+					</dl>
+				) : (
+					<p>{t('pie.horarioPendiente')}</p>
+				)
+			}
+		</section>
+
+		{
+			(negocio.telefono || servicios.length > 0) && (
+				<section aria-labelledby="pie-contacto">
+					<h2 id="pie-contacto">{t('pie.contacto')}</h2>
+					{negocio.telefono && (
+						<p>
+							<a href={`tel:${negocio.telefono}`}>{formatearTelefono(negocio.telefono)}</a>
+						</p>
+					)}
+					{negocio.instagramUrl && (
+						<p>
+							<a href={negocio.instagramUrl} target="_blank" rel="noopener noreferrer">Instagram</a>
+						</p>
+					)}
+					{negocio.facebookUrl && (
+						<p>
+							<a href={negocio.facebookUrl} target="_blank" rel="noopener noreferrer">Facebook</a>
+						</p>
+					)}
+				</section>
+			)
+		}
+
+		{
+			servicios.length > 0 && (
+				<section aria-labelledby="pie-servicios">
+					<h2 id="pie-servicios">{t('servicios.titulo')}</h2>
+					<ul class="servicios">
+						{servicios.map((s) => <li>{t(`servicio.${s}`)}</li>)}
+					</ul>
+				</section>
+			)
+		}
+
+		<p class="pie__nota">
+			{t('pie.precios')}
+			{conEnlaceImprimir && (
+				<>
+					{' '}
+					<a class="no-imprimir" href={rutaPagina(idioma, 'imprimir')}>{t('pie.imprimir')}</a>
+				</>
+			)}
+		</p>
+	</div>
+</footer>

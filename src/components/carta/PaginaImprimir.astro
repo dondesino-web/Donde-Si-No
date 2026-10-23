@@ -1,0 +1,65 @@
+---
+import type { Idioma } from '../../i18n/ui.ts';
+import { rutaPagina, textoLocal, traductor } from '../../i18n/utils.ts';
+import LayoutCarta from '../../layouts/LayoutCarta.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { formatearPrecio } from '../../lib/dominio/formato.ts';
+import { obtenerCartaPublica } from '../../lib/repositorios/cartaRepo.ts';
+import PieLocal from './PieLocal.astro';
+
+interface Props {
+	idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const t = traductor(idioma);
+const { negocio, categorias } = await obtenerCartaPublica(obtenerBd());
+---
+
+<LayoutCarta
+	idioma={idioma}
+	pagina="imprimir"
+	titulo={`${negocio.nombre} · ${t('meta.tituloImprimir')}`}
+	descripcion={textoLocal(idioma, negocio.descripcionEs, negocio.descripcionEn).texto}
+	clase="imprimir"
+>
+	<main id="contenido" class="envoltorio">
+		<div class="imprimir-barra no-imprimir">
+			<button type="button" class="boton" id="imprimir">{t('imprimir.boton')}</button>
+			<a class="boton boton--secundario" href={rutaPagina(idioma, 'carta')}>{t('imprimir.volver')}</a>
+		</div>
+		<h1>{negocio.nombre}</h1>
+		{
+			categorias.map((c) => (
+				<section class="categoria">
+					<h2 lang={textoLocal(idioma, c.nombreEs, c.nombreEn).idioma}>{textoLocal(idioma, c.nombreEs, c.nombreEn).texto}</h2>
+					<ul class="lista-simple">
+						{c.productos.map((p) => {
+							const nom = textoLocal(idioma, p.nombreEs, p.nombreEn);
+							const desc = textoLocal(idioma, p.descripcionEs, p.descripcionEn);
+							return (
+								<li>
+									<div class="linea">
+										<span lang={nom.idioma}>{nom.texto}</span>
+										<span class="linea__puntos" aria-hidden="true" />
+										<strong>{p.disponible ? (formatearPrecio(p.precio, idioma) ?? t('precio.consultar')) : t('producto.agotado')}</strong>
+									</div>
+									{desc.texto && <p class="linea__desc" lang={desc.idioma}>{desc.texto}</p>}
+								</li>
+							);
+						})}
+					</ul>
+				</section>
+			))
+		}
+	</main>
+	<PieLocal negocio={negocio} idioma={idioma} conEnlaceImprimir={false} />
+</LayoutCarta>
+
+<script>
+	document.getElementById('imprimir')?.addEventListener('click', () => window.print());
+</script>
+
+<style is:global>
+	.lista-simple { list-style: none; padding: 0; }
+</style>

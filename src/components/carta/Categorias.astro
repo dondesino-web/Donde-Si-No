@@ -1,0 +1,84 @@
+---
+import type { Idioma } from '../../i18n/ui.ts';
+import { textoLocal, traductor } from '../../i18n/utils.ts';
+import { formatearPrecio } from '../../lib/dominio/formato.ts';
+import type { CategoriaConProductos } from '../../lib/repositorios/cartaRepo.ts';
+import Foto from './Foto.astro';
+
+interface Props {
+	categorias: CategoriaConProductos[];
+	idioma: Idioma;
+}
+
+const { categorias, idioma } = Astro.props;
+const t = traductor(idioma);
+---
+
+{
+	categorias.length === 0 ? (
+		<p class="envoltorio vacia">{t('carta.vacia')}</p>
+	) : (
+		<>
+			<nav class="nav-categorias no-imprimir" aria-label={t('nav.etiqueta')}>
+				<ul>
+					{categorias.map((c) => {
+						const nombre = textoLocal(idioma, c.nombreEs, c.nombreEn);
+						return (
+							<li>
+								<a href={`#${c.slug}`} lang={nombre.idioma}>
+									{nombre.texto}
+								</a>
+							</li>
+						);
+					})}
+				</ul>
+			</nav>
+
+			{categorias.map((c) => {
+				const nombre = textoLocal(idioma, c.nombreEs, c.nombreEn);
+				return (
+					<section class="envoltorio seccion" id={c.slug} aria-labelledby={`t-${c.slug}`}>
+						<h2 id={`t-${c.slug}`} lang={nombre.idioma}>
+							{nombre.texto}
+						</h2>
+						<ul class="productos">
+							{c.productos.map((p) => {
+								const nom = textoLocal(idioma, p.nombreEs, p.nombreEn);
+								const desc = textoLocal(idioma, p.descripcionEs, p.descripcionEn);
+								const precio = formatearPrecio(p.precio, idioma);
+								return (
+									<li class:list={['producto', { 'producto--agotado': !p.disponible }]}>
+										<h3 class="producto__nombre" lang={nom.idioma}>
+											{nom.texto}
+										</h3>
+										<p class:list={['producto__precio', { 'producto__precio--consultar': precio === null }]}>
+											{precio ?? t('precio.consultar')}
+										</p>
+										{desc.texto && (
+											<p class="producto__desc" lang={desc.idioma}>
+												{desc.texto}
+											</p>
+										)}
+										{p.imagen && <Foto imagen={p.imagen} idioma={idioma} />}
+										{(!p.disponible || p.destacado || p.etiquetas.length > 0 || p.alergenos.length > 0) && (
+											<div class="producto__meta">
+												{!p.disponible && <span class="insignia insignia--agotado">{t('producto.agotado')}</span>}
+												{p.destacado && <span class="insignia insignia--destacado">{t('producto.recomendado')}</span>}
+												{p.etiquetas.map((e) => <span class="insignia">{t(`etiqueta.${e}`)}</span>)}
+												{p.alergenos.length > 0 && (
+													<span class="alergenos">
+														{t('alergenos.contiene')}: {p.alergenos.map((a) => t(`alergeno.${a}`)).join(', ')}
+													</span>
+												)}
+											</div>
+										)}
+									</li>
+								);
+							})}
+						</ul>
+					</section>
+				);
+			})}
+		</>
+	)
+}

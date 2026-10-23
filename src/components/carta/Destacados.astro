@@ -1,0 +1,68 @@
+---
+import type { Idioma } from '../../i18n/ui.ts';
+import { textoLocal, traductor } from '../../i18n/utils.ts';
+import { formatearPrecio } from '../../lib/dominio/formato.ts';
+import type { CartaPublica } from '../../lib/repositorios/cartaRepo.ts';
+import Foto from './Foto.astro';
+
+interface Props {
+	carta: CartaPublica;
+	idioma: Idioma;
+}
+
+const { carta, idioma } = Astro.props;
+const t = traductor(idioma);
+const { promociones, menuDia, fotos } = carta;
+---
+
+{
+	menuDia && (
+		<section class="envoltorio seccion" aria-labelledby="menu-dia">
+			<h2 id="menu-dia">{t('menuDia.titulo')}</h2>
+			<article class="promo menu-dia">
+				<h3 lang={textoLocal(idioma, menuDia.tituloEs, menuDia.tituloEn).idioma}>
+					{textoLocal(idioma, menuDia.tituloEs, menuDia.tituloEn).texto}
+				</h3>
+				{menuDia.descripcionEs && (
+					<p lang={textoLocal(idioma, menuDia.descripcionEs, menuDia.descripcionEn).idioma} set:text={textoLocal(idioma, menuDia.descripcionEs, menuDia.descripcionEn).texto} />
+				)}
+				<p class="promo__precio">{formatearPrecio(menuDia.precio, idioma) ?? t('precio.consultar')}</p>
+			</article>
+		</section>
+	)
+}
+
+{
+	promociones.length > 0 && (
+		<section class="envoltorio seccion" aria-labelledby="promos">
+			<h2 id="promos">{t('promos.titulo')}</h2>
+			{promociones.map((p) => {
+				const titulo = textoLocal(idioma, p.tituloEs, p.tituloEn);
+				const descripcion = textoLocal(idioma, p.descripcionEs, p.descripcionEn);
+				return (
+					<article class="promo">
+						<h3 lang={titulo.idioma}>{titulo.texto}</h3>
+						{descripcion.texto && <p lang={descripcion.idioma}>{descripcion.texto}</p>}
+						{p.precio !== null && <p class="promo__precio">{formatearPrecio(p.precio, idioma)}</p>}
+						{p.imagen && <Foto imagen={p.imagen} idioma={idioma} />}
+					</article>
+				);
+			})}
+		</section>
+	)
+}
+
+{
+	fotos.length > 0 && (
+		<section class="envoltorio seccion" aria-labelledby="galeria">
+			<h2 id="galeria">{t('galeria.titulo')}</h2>
+			<ul class="galeria" tabindex="0" aria-label={t('galeria.titulo')}>
+				{fotos.map((f) => (
+					<li>
+						<Foto imagen={f.imagen} idioma={idioma} />
+					</li>
+				))}
+			</ul>
+		</section>
+	)
+}
