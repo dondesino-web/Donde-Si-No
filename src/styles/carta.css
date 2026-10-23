@@ -92,6 +92,8 @@
 	gap: var(--espacio-2);
 }
 .promo + .promo { margin-top: var(--espacio-3); }
+/* Respeta los saltos de línea que escribe el dueño (detalle del menú, condiciones). */
+.promo p { white-space: pre-line; }
 .promo h3 { color: var(--color-azul); font-size: var(--texto-lg); }
 .promo__precio { font-weight: 800; font-size: var(--texto-lg); }
 .promo img { border-radius: var(--radio-sm); width: 100%; height: auto; }

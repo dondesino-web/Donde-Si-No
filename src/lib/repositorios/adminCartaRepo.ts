@@ -87,7 +87,7 @@ export async function eliminarProducto(bd: Bd, id: number): Promise<boolean> {
  * Intercambia la posición con el vecino y reescribe 0..n-1 en todo el grupo: así funciona aunque los
  * valores guardados estén repetidos (la semilla los deja todos en 0). Devuelve `false` si ya estaba en el extremo.
  */
-async function moverEnGrupo(bd: Bd, ids: { orden: number; id: number }[], id: number, direccion: Direccion, actualizar: (ejecutor: Ejecutor, id: number, orden: number) => Promise<unknown>): Promise<boolean> {
+export async function moverEnGrupo(bd: Bd, ids: { orden: number; id: number }[], id: number, direccion: Direccion, actualizar: (ejecutor: Ejecutor, id: number, orden: number) => Promise<unknown>): Promise<boolean> {
 	const ordenados = [...ids].sort(porOrden).map((fila) => fila.id);
 	const posicion = ordenados.indexOf(id);
 	const destino = direccion === 'arriba' ? posicion - 1 : posicion + 1;

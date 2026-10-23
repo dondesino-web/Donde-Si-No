@@ -10,7 +10,8 @@
 	background: var(--color-azul);
 	color: #fff;
 }
-.admin-barra__nav { display: flex; gap: var(--espacio-4); }
+.admin-barra { flex-wrap: wrap; }
+.admin-barra__nav { display: flex; flex-wrap: wrap; column-gap: var(--espacio-4); }
 .admin-barra a { color: #fff; font-weight: 600; display: inline-flex; align-items: center; min-height: var(--objetivo-tactil); }
 .admin-barra :focus-visible { outline-color: var(--color-amarillo); }
 .admin-barra__salir { width: auto; }

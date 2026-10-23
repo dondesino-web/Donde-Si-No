@@ -1,10 +1,8 @@
 import { z } from 'astro/zod';
 import { ALERGENOS, ETIQUETAS, type Alergeno, type Etiqueta } from '../dominio/tipos.ts';
+import { aNuloSiVacio, aResultado, cadena, casilla, lista, precioSchema, texto, textoOpcional, type ResultadoValidacion } from './comun.ts';
 
-export const PRECIO_MAXIMO = 1_000_000;
-const MENSAJE_PRECIO = 'El precio debe ser solo números (por ejemplo 4500 o 4.500).';
-
-export type ResultadoValidacion<T> = { ok: true; datos: T } | { ok: false; errores: Record<string, string> };
+export { PRECIO_MAXIMO, parsearPrecio, type ResultadoValidacion } from './comun.ts';
 
 export interface DatosProductoFormulario {
 	categoriaId: number;
@@ -25,43 +23,6 @@ export interface DatosCategoriaFormulario {
 	nombreEn: string | null;
 	visible: boolean;
 }
-
-/**
- * Interpreta el precio escrito por una persona: `4500`, `4.500` o `$ 4.500` (el punto es separador de miles).
- * Vacío = «Consultar» (`null`). Cualquier otra cosa = inválido (`undefined`).
- */
-export function parsearPrecio(texto: string): number | null | undefined {
-	const limpio = texto.trim().replace(/^\$\s*/, '');
-	if (limpio === '') return null;
-	if (!/^(\d+|\d{1,3}(\.\d{3})+)$/.test(limpio)) return undefined;
-
-	const precio = Number(limpio.replaceAll('.', ''));
-	return precio <= PRECIO_MAXIMO ? precio : undefined;
-}
-
-const texto = (mensajeVacio: string, maximo: number, nombreCampo: string) =>
-	z
-		.string()
-		.trim()
-		.min(1, mensajeVacio)
-		.max(maximo, `${nombreCampo} no puede pasar de ${maximo} caracteres.`);
-
-const textoOpcional = (maximo: number, nombreCampo: string) =>
-	z
-		.string()
-		.trim()
-		.max(maximo, `${nombreCampo} no puede pasar de ${maximo} caracteres.`);
-
-const aNuloSiVacio = (valor: string): string | null => (valor === '' ? null : valor);
-
-const precioSchema = z.string().transform((valor, contexto) => {
-	const precio = parsearPrecio(valor);
-	if (precio === undefined) {
-		contexto.addIssue({ code: 'custom', message: MENSAJE_PRECIO });
-		return z.NEVER;
-	}
-	return precio;
-});
 
 const sinRepetidos = <T>(valores: T[]): T[] => [...new Set(valores)];
 
@@ -94,25 +55,6 @@ const categoriaSchema = z.object({
 	nombreEn: textoOpcional(60, 'El nombre en inglés').transform(aNuloSiVacio),
 	visible: z.boolean(),
 });
-
-const cadena = (formulario: FormData, clave: string): string => {
-	const valor = formulario.get(clave);
-	return typeof valor === 'string' ? valor : '';
-};
-const lista = (formulario: FormData, clave: string): string[] =>
-	formulario.getAll(clave).filter((v): v is string => typeof v === 'string');
-const casilla = (formulario: FormData, clave: string): boolean => formulario.has(clave);
-
-function aResultado<T>(analisis: { success: true; data: T } | { success: false; error: z.ZodError }): ResultadoValidacion<T> {
-	if (analisis.success) return { ok: true, datos: analisis.data };
-
-	const errores: Record<string, string> = {};
-	for (const problema of analisis.error.issues) {
-		const campo = String(problema.path[0] ?? 'formulario');
-		errores[campo] ??= problema.message;
-	}
-	return { ok: false, errores };
-}
 
 export function validarProducto(formulario: FormData): ResultadoValidacion<DatosProductoFormulario> {
 	return aResultado(

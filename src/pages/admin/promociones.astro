@@ -1,0 +1,88 @@
+---
+import { actions } from 'astro:actions';
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { formatearPrecio } from '../../lib/dominio/formato.ts';
+import { fechaLocalISO } from '../../lib/dominio/horario.ts';
+import { estadoPromocion, type EstadoPromocion } from '../../lib/dominio/vigencia.ts';
+import { listarPromociones } from '../../lib/repositorios/adminPromosRepo.ts';
+
+const AVISOS: Record<string, string> = { creada: 'Promoción creada.', guardada: 'Promoción guardada.', eliminada: 'Promoción eliminada.' };
+// `Object.hasOwn`: un parámetro como ?aviso=constructor no debe encontrar propiedades heredadas.
+const avisoDe = (clave: string | null): string | undefined => (clave !== null && Object.hasOwn(AVISOS, clave) ? AVISOS[clave] : undefined);
+
+const ESTADOS: Record<EstadoPromocion, string> = {
+	vigente: 'Se muestra en la carta',
+	programada: 'Programada: aún no empieza',
+	vencida: 'Vencida: ya no se muestra',
+	inactiva: 'Apagada: no se muestra',
+};
+const formatearFecha = (iso: string) => iso.split('-').reverse().join('-');
+
+const resultado = [actions.establecerPromocionActiva, actions.moverPromocion, actions.eliminarPromocion]
+	.map((accion) => Astro.getActionResult(accion))
+	.find((r) => r !== undefined);
+
+const aviso = resultado?.data?.ok ? resultado.data.mensaje : avisoDe(Astro.url.searchParams.get('aviso'));
+const errores = resultado?.data && !resultado.data.ok ? resultado.data.errores : undefined;
+const errorGeneral = resultado?.error ? resultado.error.message : undefined;
+
+const hoy = fechaLocalISO(new Date());
+const promociones = await listarPromociones(obtenerBd());
+---
+
+<LayoutAdmin titulo="Promociones">
+	<h1>Promociones</h1>
+
+	<div aria-live="polite" class="avisos">
+		{aviso && <p class="aviso aviso--ok" role="status">{aviso}</p>}
+		{(errores || errorGeneral) && <p class="aviso aviso--error" role="alert">{Object.values(errores ?? {}).join(' ') || errorGeneral}</p>}
+	</div>
+
+	<p><a class="boton" href="/admin/promocion/nuevo">Agregar promoción</a></p>
+
+	{promociones.length === 0 && <p class="vacia">Todavía no hay promociones.</p>}
+
+	<ul class="admin-productos">
+		{
+			promociones.map((p, i) => {
+				const estado = estadoPromocion(p, hoy);
+				return (
+					<li class:list={['admin-producto', { 'admin-producto--agotado': estado !== 'vigente' }]}>
+						<div class="admin-producto__info">
+							<a class="admin-producto__nombre" href={`/admin/promocion/${p.id}`}>{p.tituloEs}</a>
+							<span class="admin-producto__estado">
+								{ESTADOS[estado]}
+								{p.precio !== null && ` · ${formatearPrecio(p.precio, 'es')}`}
+								{p.desde && ` · desde ${formatearFecha(p.desde)}`}
+								{p.hasta && ` · hasta ${formatearFecha(p.hasta)}`}
+							</span>
+						</div>
+
+						<form method="POST" action={actions.establecerPromocionActiva}>
+							<input type="hidden" name="id" value={p.id} />
+							<input type="hidden" name="activa" value={String(!p.activa)} />
+							<button type="submit" class:list={['boton', p.activa ? 'boton--secundario' : 'boton--ok']}>
+								{p.activa ? 'Apagar' : 'Activar'}
+								<span class="solo-lectores"> {p.tituloEs}</span>
+							</button>
+						</form>
+
+						<div class="mover">
+							<form method="POST" action={actions.moverPromocion}>
+								<input type="hidden" name="id" value={p.id} />
+								<input type="hidden" name="direccion" value="arriba" />
+								<button type="submit" class="boton boton--icono boton--secundario" disabled={i === 0} aria-label={`Subir ${p.tituloEs}`}>↑</button>
+							</form>
+							<form method="POST" action={actions.moverPromocion}>
+								<input type="hidden" name="id" value={p.id} />
+								<input type="hidden" name="direccion" value="abajo" />
+								<button type="submit" class="boton boton--icono boton--secundario" disabled={i === promociones.length - 1} aria-label={`Bajar ${p.tituloEs}`}>↓</button>
+							</form>
+						</div>
+					</li>
+				);
+			})
+		}
+	</ul>
+</LayoutAdmin>
