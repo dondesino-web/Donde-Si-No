@@ -11,6 +11,8 @@ export const onRequest = defineMiddleware(async (contexto, siguiente) => {
 	const token = contexto.cookies.get(NOMBRE_COOKIE_SESION)?.value;
 	const haySesion = SESSION_SECRET ? verificarTokenSesion(SESSION_SECRET, token, new Date()) : false;
 
+	contexto.locals.haySesion = haySesion;
+
 	switch (decidirAcceso(pathname, haySesion)) {
 		case 'login':
 			return new Response(null, { status: 303, headers: { ...SIN_CACHE, Location: '/admin/login' } });

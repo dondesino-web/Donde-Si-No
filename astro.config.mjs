@@ -24,6 +24,8 @@ export default defineConfig({
 			exclude: [/^\/admin(\/|$)/, /^\/api\//, /^\/_actions\//, '/qr'],
 		},
 	}),
+	// La barra flotante de desarrollo tapa botones al pie de la página y estorba a las pruebas E2E.
+	devToolbar: { enabled: false },
 	// Rechaza POST de otro origen (CSRF). Es el valor por defecto; se explicita porque el panel depende de él.
 	security: { checkOrigin: true },
 	i18n: {
@@ -38,6 +40,8 @@ export default defineConfig({
 			BLOB_READ_WRITE_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
 			// Sin ambas, el panel queda desactivado (el login avisa en vez de abrirse sin contraseña).
 			ADMIN_PASSWORD_HASH: envField.string({ context: 'server', access: 'secret', optional: true }),
+			// El mismo token que usa el adaptador de Vercel: sin él, guardar en el panel no refresca la caché pública.
+			ISR_BYPASS_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
 			SESSION_SECRET: envField.string({ context: 'server', access: 'secret', optional: true, min: 32 }),
 		},
 	},

@@ -1,0 +1,121 @@
+---
+import { actions } from 'astro:actions';
+import { traductor } from '../../i18n/utils.ts';
+import { ALERGENOS, ETIQUETAS } from '../../lib/dominio/tipos.ts';
+import type { Categoria, Producto } from '../../lib/repositorios/cartaRepo.ts';
+
+interface Props {
+	categorias: Categoria[];
+	/** Producto que se edita; sin él, el formulario crea uno nuevo. */
+	producto?: Producto;
+	categoriaInicial?: number;
+	/** Lo escrito en un envío anterior con errores. */
+	valores?: Record<string, string[]>;
+	errores?: Record<string, string>;
+}
+
+const { categorias, producto, categoriaInicial, valores, errores = {} } = Astro.props;
+const t = traductor('es');
+
+const texto = (campo: string, respaldo: string): string => valores?.[campo]?.[0] ?? respaldo;
+const marcada = (campo: string, respaldo: boolean): boolean => (valores ? campo in valores : respaldo);
+const enLista = (campo: 'alergenos' | 'etiquetas', valor: string, guardados: readonly string[]): boolean =>
+	valores ? (valores[campo] ?? []).includes(valor) : guardados.includes(valor);
+
+const categoriaActual = Number(texto('categoriaId', String(producto?.categoriaId ?? categoriaInicial ?? '')));
+const describedby = (campo: string) => (errores[campo] ? `error-${campo}` : undefined);
+---
+
+<form method="POST" action={actions.guardarProducto} class="formulario">
+	{producto && <input type="hidden" name="id" value={producto.id} />}
+
+	{
+		errores.formulario && (
+			<p class="aviso aviso--error" role="alert">
+				{errores.formulario}
+			</p>
+		)
+	}
+
+	<div class="campo">
+		<label for="categoriaId">Categoría</label>
+		<select id="categoriaId" name="categoriaId" required aria-invalid={errores.categoriaId ? 'true' : undefined} aria-describedby={describedby('categoriaId')}>
+			<option value="" disabled selected={!categoriaActual}>Elige una categoría</option>
+			{categorias.map((c) => <option value={c.id} selected={c.id === categoriaActual}>{c.nombreEs}</option>)}
+		</select>
+		{errores.categoriaId && <p class="campo__error" id="error-categoriaId">{errores.categoriaId}</p>}
+	</div>
+
+	<div class="campo">
+		<label for="nombreEs">Nombre</label>
+		<input id="nombreEs" name="nombreEs" required maxlength="80" value={texto('nombreEs', producto?.nombreEs ?? '')} aria-invalid={errores.nombreEs ? 'true' : undefined} aria-describedby={describedby('nombreEs')} />
+		{errores.nombreEs && <p class="campo__error" id="error-nombreEs">{errores.nombreEs}</p>}
+	</div>
+
+	<div class="campo">
+		<label for="nombreEn">Nombre en inglés <span class="campo__ayuda">(opcional)</span></label>
+		<input id="nombreEn" name="nombreEn" maxlength="80" value={texto('nombreEn', producto?.nombreEn ?? '')} aria-describedby={describedby('nombreEn')} />
+		{errores.nombreEn && <p class="campo__error" id="error-nombreEn">{errores.nombreEn}</p>}
+	</div>
+
+	<div class="campo">
+		<label for="descripcionEs">Descripción <span class="campo__ayuda">(opcional)</span></label>
+		<textarea id="descripcionEs" name="descripcionEs" rows="3" maxlength="300" aria-describedby={describedby('descripcionEs')}>{texto('descripcionEs', producto?.descripcionEs ?? '')}</textarea>
+		{errores.descripcionEs && <p class="campo__error" id="error-descripcionEs">{errores.descripcionEs}</p>}
+	</div>
+
+	<div class="campo">
+		<label for="descripcionEn">Descripción en inglés <span class="campo__ayuda">(opcional)</span></label>
+		<textarea id="descripcionEn" name="descripcionEn" rows="3" maxlength="300" aria-describedby={describedby('descripcionEn')}>{texto('descripcionEn', producto?.descripcionEn ?? '')}</textarea>
+		{errores.descripcionEn && <p class="campo__error" id="error-descripcionEn">{errores.descripcionEn}</p>}
+	</div>
+
+	<div class="campo">
+		<label for="precio">Precio en pesos</label>
+		<input id="precio" name="precio" inputmode="numeric" autocomplete="off" placeholder="Vacío = Consultar" value={texto('precio', producto?.precio != null ? String(producto.precio) : '')} aria-invalid={errores.precio ? 'true' : undefined} aria-describedby={describedby('precio')} />
+		{errores.precio && <p class="campo__error" id="error-precio">{errores.precio}</p>}
+	</div>
+
+	<fieldset class="campo">
+		<legend>Contiene (alérgenos)</legend>
+		<div class="casillas">
+			{
+				ALERGENOS.map((a) => (
+					<label class="casilla">
+						<input type="checkbox" name="alergenos" value={a} checked={enLista('alergenos', a, producto?.alergenos ?? [])} />
+						{t(`alergeno.${a}`)}
+					</label>
+				))
+			}
+		</div>
+		{errores.alergenos && <p class="campo__error">{errores.alergenos}</p>}
+	</fieldset>
+
+	<fieldset class="campo">
+		<legend>Etiquetas</legend>
+		<div class="casillas">
+			{
+				ETIQUETAS.map((e) => (
+					<label class="casilla">
+						<input type="checkbox" name="etiquetas" value={e} checked={enLista('etiquetas', e, producto?.etiquetas ?? [])} />
+						{t(`etiqueta.${e}`)}
+					</label>
+				))
+			}
+		</div>
+	</fieldset>
+
+	<fieldset class="campo">
+		<legend>Estado</legend>
+		<div class="casillas">
+			<label class="casilla"><input type="checkbox" name="disponible" checked={marcada('disponible', producto?.disponible ?? true)} /> Disponible (desmarca si está agotado)</label>
+			<label class="casilla"><input type="checkbox" name="visible" checked={marcada('visible', producto?.visible ?? true)} /> Visible en la carta</label>
+			<label class="casilla"><input type="checkbox" name="destacado" checked={marcada('destacado', producto?.destacado ?? false)} /> Recomendado</label>
+		</div>
+	</fieldset>
+
+	<div class="formulario__acciones">
+		<button type="submit" class="boton">{producto ? 'Guardar cambios' : 'Crear producto'}</button>
+		<a class="boton boton--secundario" href="/admin/carta">Cancelar</a>
+	</div>
+</form>
