@@ -12,11 +12,11 @@ const { negocio, idioma } = Astro.props;
 const t = traductor(idioma);
 
 const enlaces = [
-	negocio.telefono && { href: `tel:${negocio.telefono}`, texto: t('accion.llamar'), principal: true },
-	negocio.mapsUrl && { href: negocio.mapsUrl, texto: t('accion.mapa'), principal: true },
-	negocio.ubereatsUrl && { href: negocio.ubereatsUrl, texto: t('accion.ubereats'), principal: false },
-	negocio.resenaUrl && { href: negocio.resenaUrl, texto: t('accion.resena'), principal: false },
-].filter((e): e is { href: string; texto: string; principal: boolean } => !!e);
+	negocio.telefono && { href: `tel:${negocio.telefono}`, texto: t('accion.llamar'), principal: true, evento: 'clic_llamar' },
+	negocio.mapsUrl && { href: negocio.mapsUrl, texto: t('accion.mapa'), principal: true, evento: 'clic_mapa' },
+	negocio.ubereatsUrl && { href: negocio.ubereatsUrl, texto: t('accion.ubereats'), principal: false, evento: 'clic_ubereats' },
+	negocio.resenaUrl && { href: negocio.resenaUrl, texto: t('accion.resena'), principal: false, evento: 'clic_resena' },
+].filter((e): e is { href: string; texto: string; principal: boolean; evento: string } => !!e);
 const externo = (href: string) => (href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {});
 ---
 
@@ -25,7 +25,7 @@ const externo = (href: string) => (href.startsWith('http') ? { target: '_blank',
 		{
 			enlaces.map((e) => (
 				<li>
-					<a class:list={['boton', { 'boton--secundario': !e.principal }]} href={e.href} {...externo(e.href)}>
+					<a class:list={['boton', { 'boton--secundario': !e.principal }]} href={e.href} data-evento={e.evento} {...externo(e.href)}>
 						{e.texto}
 					</a>
 				</li>
@@ -36,6 +36,7 @@ const externo = (href: string) => (href.startsWith('http') ? { target: '_blank',
 				type="button"
 				class="boton boton--secundario"
 				id="compartir"
+				data-evento="clic_compartir"
 				data-titulo={negocio.nombre}
 				data-texto={t('compartir.texto', { nombre: negocio.nombre })}
 				data-copiado={t('compartir.copiado')}

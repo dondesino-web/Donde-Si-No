@@ -29,7 +29,12 @@ const ESPERA_ARCHIVO_BLOQUEADO_MS = 5000;
  */
 export async function abrirBd(config: ConfigBd): Promise<{ bd: Bd; cliente: Client }> {
 	const conexion = crearClienteBd(config);
-	if (config.url.startsWith('file:')) await conexion.cliente.execute(`pragma busy_timeout = ${ESPERA_ARCHIVO_BLOQUEADO_MS}`);
+	if (config.url.startsWith('file:')) {
+		await conexion.cliente.execute(`pragma busy_timeout = ${ESPERA_ARCHIVO_BLOQUEADO_MS}`);
+		// WAL: las lecturas no bloquean las escrituras ni al revés. En el modo por defecto, una lectura que pasa a escritura
+		// mientras otra conexión escribe falla al instante con SQLITE_BUSY, sin esperar siquiera el tiempo configurado.
+		await conexion.cliente.execute('pragma journal_mode = wal');
+	}
 	return conexion;
 }
 

@@ -15,7 +15,15 @@ process.env.E2E_SESSION_SECRET = SECRETO_SESION_PRUEBA;
 
 export default defineConfig({
 	testDir: 'tests/e2e',
+	globalSetup: './tests/e2e/calentar.ts',
 	outputDir: 'test-results',
+	// El servidor de desarrollo compila al vuelo y comparte un archivo SQLite: pocas pruebas en paralelo y esperas holgadas
+	// dan una suite estable; con más trabajadores aparecen fallos por tiempo que no son defectos de la aplicación.
+	workers: 4,
+	// Un reintento absorbe los raros estancamientos del servidor de desarrollo (sin errores en la aplicación); Playwright marca
+	// esas pruebas como «flaky» en el informe, así que no pasan inadvertidas.
+	retries: 1,
+	expect: { timeout: 10_000 },
 	reporter: [['list']],
 	use: {
 		baseURL: `http://localhost:${PUERTO}`,

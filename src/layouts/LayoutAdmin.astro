@@ -24,13 +24,15 @@ const { titulo, sinNavegacion = false } = Astro.props;
 		<a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
 		{
 			!sinNavegacion && (
-				<header class="admin-barra">
+				<header class="admin-barra no-imprimir">
 					<nav aria-label="Panel" class="admin-barra__nav">
 						<a href="/admin">Inicio</a>
 						<a href="/admin/carta">Carta</a>
 						<a href="/admin/promociones">Promos</a>
 						<a href="/admin/menu-del-dia">Menú del día</a>
 						<a href="/admin/fotos">Fotos</a>
+						<a href="/admin/estadisticas">Estadísticas</a>
+						<a href="/admin/qr">QR</a>
 						<a href="/admin/local">Local</a>
 						<a href="/" target="_blank" rel="noopener noreferrer">Ver carta</a>
 					</nav>

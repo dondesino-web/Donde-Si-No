@@ -34,15 +34,22 @@ Detalle de cada fase en [`PLAN_CARTA_DIGITAL.md`](./documentacion-aidlc/diseno/P
   - Cabeceras de seguridad en todas las respuestas y cuatro revisiones de seguridad aplicadas.
   - 364 tests unitarios y de integración, y 85 E2E estables.
 
+- [x] **Fase 3 · QR y estadísticas** (2026-10-23):
+  - `/qr` cuenta el escaneo y redirige a la carta; el QR impreso apunta siempre ahí, así que es permanente.
+  - Beacon `/api/evento` sin cookies ni IPs, con una lista cerrada de eventos, verificación de origen y tope de tamaño. No cuenta robots, previsualizaciones ni al administrador con sesión.
+  - Panel: resumen de hoy y de la semana en el inicio, `/admin/estadisticas` (7, 14 o 30 días, gráfico accesible y tabla) y `/admin/qr` con descarga en SVG y PNG y tarjeta de mesa imprimible (1 o 4 por hoja, en español e inglés).
+  - 446 tests unitarios y de integración, y 108 E2E.
+
 ## 2. Siguiente
 
-- [ ] **Cierre pendiente de las Fases 1 y 2** (se hará con el despliegue de la Fase 4):
+- [ ] **Cierre pendiente de las Fases 1 a 3** (se hará con el despliegue de la Fase 4):
+  - **Límite de tasa** en Vercel Firewall sobre `/qr` y `/api/evento` (por ejemplo 30 por minuto por IP): sin cookies ni IPs en la aplicación, es la única defensa real contra quien infle las cifras o gaste escrituras de Turso.
+  - Probar el QR impreso en el tamaño final con varios celulares.
   - Probar contra Vercel real la revalidación ISR, Vercel Blob y el login detrás del proxy (`x-forwarded-for`).
   - Medir el presupuesto de bytes y validar el JSON-LD con el Rich Results Test.
   - CSP completa que restrinja scripts e imágenes (hoy es una CSP acotada).
   - Limpieza periódica de fotos subidas y nunca guardadas.
   - Probar la subida de fotos en Safari de iPhone (puede no escribir WebP).
-- [ ] **Fase 3 · QR y estadísticas:** `/qr` permanente, beacon sin cookies, panel de estadísticas y tarjeta de mesa.
 - [ ] **Fase 4 · Calidad y lanzamiento:**
   - Cobertura ≥ 80 %, revisiones de seguridad y Lighthouse ≥ 95.
   - CI en GitHub Actions.

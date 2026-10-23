@@ -8,6 +8,29 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-23 · Fase 3 de la carta digital: QR y estadísticas
+
+### Añadido
+- **QR permanente** (`/qr`): cuenta el escaneo y redirige a la carta con un 302 sin caché. El QR impreso apunta siempre a esta dirección, así que si algún día cambia el destino no hay que reimprimir.
+- **Estadísticas sin cookies** (`/api/evento`, `src/scripts/estadisticas.ts`): la carta avisa visitas, clics en llamar, mapa, reseña, Uber Eats y compartir, y el cambio a inglés. Solo se guarda un contador por día y evento: ni IPs ni identificadores.
+  - Lista cerrada de eventos; los escaneos del QR solo los suma `/qr`.
+  - Verificación de origen, tope de 256 bytes leído con límite real y respuesta 204.
+  - No cuenta robots (incluidos Playwright, Puppeteer y Selenium), previsualizaciones de enlaces, precargas ni al administrador con sesión.
+- **Panel:** resumen de hoy y de los últimos 7 días en el inicio; `/admin/estadisticas` con periodos de 7, 14 y 30 días, un gráfico accesible y la tabla por día (en hora de Chile).
+- **Código QR** (`/admin/qr`): vista previa, descarga en SVG y en PNG de 1200 px (generado en el navegador) y tarjeta de mesa imprimible, de una o cuatro por hoja, en español e inglés (`src/lib/qr.ts`, con `uqr`; exige `https`).
+- **Pruebas:** 446 tests unitarios y de integración y 108 E2E (QR, beacon, bots, origen, sesión, descargas, tarjeta, WCAG 2.2 AA).
+
+### Modificado
+- La conexión a SQLite local usa el modo WAL y espera su turno ante bloqueos: en el modo por defecto una lectura que pasa a escritura falla al instante con `SQLITE_BUSY`, aunque haya tiempo de espera configurado.
+- Los E2E calientan el servidor de desarrollo antes de empezar (con la caché vacía las pruebas en paralelo se atascaban juntas), corren con 4 trabajadores, esperas de 10 s y un reintento que Playwright informa como «flaky».
+- Los títulos del panel tienen más espacio respecto del texto anterior.
+
+### Seguridad
+- Revisión de la Fase 3 sin hallazgos críticos ni altos. Aplicado: lectura del cuerpo con tope real (también sin `Content-Length`), y tests de HEAD y de los cambios de horario de Chile.
+- Pendiente (infraestructura): límite de tasa en Vercel Firewall sobre `/qr` y `/api/evento`. Sin cookies ni IPs, la aplicación no puede impedir que alguien infle las cifras falsificando cabeceras. Anotado en [HOJA_RUTA.md](./HOJA_RUTA.md).
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-23 · Fase 2 de la carta digital: panel de administración
 
 ### Añadido

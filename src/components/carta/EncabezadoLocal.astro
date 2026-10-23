@@ -22,7 +22,7 @@ const datosEstado = tieneHorario(negocio.horario)
 <header class="encabezado">
 	<div class="envoltorio">
 		<div class="encabezado__idioma no-imprimir">
-			<a href={rutaPagina(otro, 'carta')} hreflang={otro} lang={otro} aria-label={t('idioma.otroEtiqueta')}>
+			<a href={rutaPagina(otro, 'carta')} hreflang={otro} lang={otro} aria-label={t('idioma.otroEtiqueta')} data-evento={otro === 'en' ? 'idioma_en' : undefined}>
 				{t('idioma.otro')}
 			</a>
 		</div>

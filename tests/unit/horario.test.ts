@@ -83,3 +83,23 @@ describe('agruparHorario', () => {
 		expect(agruparHorario({})).toEqual([]);
 	});
 });
+
+describe('fechaLocalISO en los cambios de horario de Chile', () => {
+	it('el cambio de día ocurre a medianoche de Chile, también al empezar el horario de verano', () => {
+		// 6 de septiembre de 2026: a las 00:00 (UTC-4) los relojes pasan a las 01:00 (UTC-3).
+		expect(fechaLocalISO(new Date('2026-09-06T03:59:59Z'))).toBe('2026-09-05');
+		expect(fechaLocalISO(new Date('2026-09-06T04:00:00Z'))).toBe('2026-09-06');
+	});
+
+	it('al terminar el horario de verano la hora repetida sigue siendo el mismo día', () => {
+		// 5 de abril de 2026: a las 00:00 (UTC-3) los relojes vuelven a las 23:00 (UTC-4) del día anterior.
+		expect(fechaLocalISO(new Date('2026-04-05T02:59:59Z'))).toBe('2026-04-04');
+		expect(fechaLocalISO(new Date('2026-04-05T03:00:00Z'))).toBe('2026-04-04');
+		expect(fechaLocalISO(new Date('2026-04-05T04:00:00Z'))).toBe('2026-04-05');
+	});
+
+	it('un visitante con otra zona horaria cuenta en el día de Chile, no en el suyo', () => {
+		// 23 de octubre de 2026, 02:30 UTC: en Chile todavía es el 22 (22:30).
+		expect(fechaLocalISO(new Date('2026-10-23T02:30:00Z'))).toBe('2026-10-22');
+	});
+});

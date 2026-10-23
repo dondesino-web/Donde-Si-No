@@ -59,6 +59,8 @@ test('apagarla y activarla la quita y la devuelve a la carta', async ({ page }) 
 
 	await page.goto('/admin/promociones');
 	await fila(page).getByRole('button', { name: /Activar/ }).click();
+	// Se espera el aviso: navegar de inmediato cancelaría el envío que todavía está en curso.
+	await expect(page.getByRole('status')).toHaveText('Promoción activada.');
 	await page.goto('/');
 	await expect(promoPublica(page)).toHaveCount(1);
 });

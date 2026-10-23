@@ -24,6 +24,32 @@ describe('abrirBd', () => {
 		}
 	});
 
+	it('con un archivo local usa el modo WAL: las lecturas no bloquean las escrituras (y al revés)', async () => {
+		const { cliente } = await abrirBd({ url: archivoNuevo() });
+		try {
+			const resultado = await cliente.execute('pragma journal_mode');
+
+			expect(String(resultado.rows[0][0]).toLowerCase()).toBe('wal');
+		} finally {
+			cliente.close();
+		}
+	});
+
+	it('dos conexiones al mismo archivo pueden leer y escribir a la vez sin SQLITE_BUSY', async () => {
+		const url = archivoNuevo();
+		const escritor = (await abrirBd({ url })).cliente;
+		const lector = (await abrirBd({ url })).cliente;
+		try {
+			await escritor.execute('create table if not exists t (n integer)');
+			const tareas = Array.from({ length: 50 }, (_, i) => [escritor.execute({ sql: 'insert into t values (?)', args: [i] }), lector.execute('select count(*) from t')]).flat();
+
+			await expect(Promise.all(tareas)).resolves.toBeDefined();
+		} finally {
+			escritor.close();
+			lector.close();
+		}
+	});
+
 	it('la espera ya está configurada en la primera consulta, aunque se lance sin esperar a nada más', async () => {
 		const { cliente } = await abrirBd({ url: archivoNuevo() });
 		try {

@@ -25,7 +25,8 @@
     "@libsql/client": "^0.18.0",
     "@vercel/blob": "^2.8.2",
     "astro": "^7.4.2",
-    "drizzle-orm": "^0.45.4"
+    "drizzle-orm": "^0.45.4",
+    "uqr": "^0.1.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",

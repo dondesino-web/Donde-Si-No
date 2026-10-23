@@ -56,7 +56,7 @@ const servicios = (Object.keys(negocio.servicios) as (keyof typeof negocio.servi
 					<h2 id="pie-contacto">{t('pie.contacto')}</h2>
 					{negocio.telefono && (
 						<p>
-							<a href={`tel:${negocio.telefono}`}>{formatearTelefono(negocio.telefono)}</a>
+							<a href={`tel:${negocio.telefono}`} data-evento="clic_llamar">{formatearTelefono(negocio.telefono)}</a>
 						</p>
 					)}
 					{negocio.instagramUrl && (

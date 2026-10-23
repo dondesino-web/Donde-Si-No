@@ -46,8 +46,12 @@ const imagenOg = new URL('/marca/logo-512.jpg', sitio).href;
 		<meta name="generator" content={Astro.generator} />
 		{jsonLd && <script is:inline type="application/ld+json" set:html={serializarJsonLd(jsonLd)} />}
 	</head>
-	<body class={clase}>
+	<body class={clase} data-estadisticas={pagina === 'carta' ? 'true' : undefined}>
 		<a class="saltar-contenido" href="#contenido">{t('saltar')}</a>
 		<slot />
 	</body>
 </html>
+
+<script>
+	import '../scripts/estadisticas.ts';
+</script>
