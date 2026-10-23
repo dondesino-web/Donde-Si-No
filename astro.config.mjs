@@ -24,6 +24,8 @@ export default defineConfig({
 			exclude: [/^\/admin(\/|$)/, /^\/api\//, /^\/_actions\//, '/qr'],
 		},
 	}),
+	// Rechaza POST de otro origen (CSRF). Es el valor por defecto; se explicita porque el panel depende de él.
+	security: { checkOrigin: true },
 	i18n: {
 		locales: ['es', 'en'],
 		defaultLocale: 'es',
@@ -34,6 +36,9 @@ export default defineConfig({
 			TURSO_DATABASE_URL: envField.string({ context: 'server', access: 'secret', default: 'file:local.db' }),
 			TURSO_AUTH_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
 			BLOB_READ_WRITE_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
+			// Sin ambas, el panel queda desactivado (el login avisa en vez de abrirse sin contraseña).
+			ADMIN_PASSWORD_HASH: envField.string({ context: 'server', access: 'secret', optional: true }),
+			SESSION_SECRET: envField.string({ context: 'server', access: 'secret', optional: true, min: 32 }),
 		},
 	},
 });

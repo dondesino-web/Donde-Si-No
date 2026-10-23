@@ -1,0 +1,38 @@
+@import './carta.css';
+
+/* Panel de administración: pensado para usarse con una mano, desde el celular. */
+.admin-barra {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--espacio-3);
+	padding: var(--espacio-2) var(--margen-lateral);
+	background: var(--color-azul);
+	color: #fff;
+}
+.admin-barra__nav { display: flex; gap: var(--espacio-4); }
+.admin-barra a { color: #fff; font-weight: 600; display: inline-flex; align-items: center; min-height: var(--objetivo-tactil); }
+.admin-barra :focus-visible { outline-color: var(--color-amarillo); }
+.admin-barra__salir { width: auto; }
+
+.admin-contenido {
+	width: min(100% - 2 * var(--margen-lateral), 36rem);
+	margin: var(--espacio-8) auto;
+}
+.admin-contenido h1 { font-size: var(--texto-2xl); margin-bottom: var(--espacio-4); }
+
+.formulario { display: grid; gap: var(--espacio-4); }
+.campo { display: grid; gap: var(--espacio-1); }
+.campo label { font-weight: 600; }
+.campo input, .campo select, .campo textarea {
+	min-height: var(--objetivo-tactil);
+	padding: var(--espacio-2) var(--espacio-3);
+	border: 2px solid var(--color-borde-fuerte);
+	border-radius: var(--radio-sm);
+	background: var(--color-superficie);
+}
+.aviso { padding: var(--espacio-3) var(--espacio-4); border-radius: var(--radio-sm); border: 2px solid; font-weight: 600; }
+.aviso--error { border-color: var(--color-rojo-oscuro); color: var(--color-rojo-oscuro); background: #fff; }
+.aviso--ok { border-color: var(--color-ok); color: var(--color-ok); background: #fff; }
+
+.accesos { display: grid; gap: var(--espacio-3); list-style: none; padding: 0; }
