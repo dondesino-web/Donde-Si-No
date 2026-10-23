@@ -1,12 +1,10 @@
 import { TURSO_AUTH_TOKEN, TURSO_DATABASE_URL } from 'astro:env/server';
-import { crearClienteBd, validarConfigBd, type Bd } from './cliente.ts';
+import { abrirBd, validarConfigBd, type Bd } from './cliente.ts';
 
-let instancia: Bd | undefined;
+// Se abre una vez al cargar el módulo (con espera de arranque): así la primera consulta ya encuentra la conexión configurada.
+const { bd } = await abrirBd(validarConfigBd({ url: TURSO_DATABASE_URL, authToken: TURSO_AUTH_TOKEN }, import.meta.env.PROD));
 
 /** Conexión compartida de la aplicación, configurada con las variables de entorno validadas por Astro. */
 export function obtenerBd(): Bd {
-	instancia ??= crearClienteBd(
-		validarConfigBd({ url: TURSO_DATABASE_URL, authToken: TURSO_AUTH_TOKEN }, import.meta.env.PROD),
-	).bd;
-	return instancia;
+	return bd;
 }

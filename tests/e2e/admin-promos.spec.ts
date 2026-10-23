@@ -1,7 +1,6 @@
-import { createClient } from '@libsql/client';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { iniciarSesion } from './ayudantes.ts';
+import { abrirBd, iniciarSesion } from './ayudantes.ts';
 
 const SUFIJO = Date.now();
 const PROMO = `Promo E2E ${SUFIJO}`;
@@ -12,7 +11,7 @@ test.describe.configure({ mode: 'serial' });
 
 // Deja la base como estaba: el menú del día es una sola fila y las pruebas la crean.
 async function limpiar(): Promise<void> {
-	const cliente = createClient({ url: 'file:local.db' });
+	const cliente = await abrirBd();
 	try {
 		await cliente.execute("delete from promocion where titulo_es like 'Promo E2E%'");
 		await cliente.execute("delete from menu_dia where titulo_es like 'Menú E2E%'");

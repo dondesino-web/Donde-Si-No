@@ -1,6 +1,7 @@
 ---
 import { actions } from 'astro:actions';
 import type { Promocion } from '../../lib/repositorios/cartaRepo.ts';
+import CampoFoto from './CampoFoto.astro';
 
 interface Props {
 	promocion?: Promocion;
@@ -62,6 +63,8 @@ const describedby = (campo: string) => (errores[campo] ? `error-${campo}` : unde
 			{errores.hasta && <p class="campo__error" id="error-hasta">{errores.hasta}</p>}
 		</div>
 	</fieldset>
+
+	<CampoFoto imagen={promocion?.imagen} altOrigen="#tituloEs" etiqueta="Foto de la promoción" valores={valores} errores={errores} />
 
 	<label class="casilla"><input type="checkbox" name="activa" checked={marcada} /> Activa (se muestra en la carta si está vigente)</label>
 

@@ -9,6 +9,7 @@ import {
 	eliminarCategoria,
 	eliminarProducto,
 	establecerDisponible,
+	obtenerProducto,
 	moverCategoria,
 	moverProducto,
 	type Direccion,
@@ -21,32 +22,54 @@ import {
 	falla,
 	noEncontrado,
 	publicar,
+	borrarArchivos,
+	reconoceFoto,
+	verificaSubida,
 	valoresDe,
 	type RespuestaAccion,
 } from './ayudas.ts';
+import { datosDeFotos } from './fotos.ts';
 import { datosDelLocal } from './local.ts';
 import { promocionesYMenu } from './promociones.ts';
+import { cadena } from '../lib/validacion/comun.ts';
+import { leerImagen, urlsAEliminar } from '../lib/validacion/imagenFormulario.ts';
 import { PRECIO_MAXIMO, parsearPrecio, validarCategoria, validarProducto } from '../lib/validacion/carta.ts';
 
 
 export const server = {
 	...promocionesYMenu,
 	...datosDelLocal,
+	...datosDeFotos,
 
 	guardarProducto: defineAction({
 		accept: 'form',
 		handler: async (formulario, contexto): Promise<RespuestaAccion> => {
 			exigirSesion(contexto);
-			const validado = validarProducto(formulario);
-			if (!validado.ok) return { ...validado, valores: valoresDe(formulario, CAMPOS_PRODUCTO) };
-
 			const bd = obtenerBd();
 			const id = entero(formulario, 'id');
-			if (id === undefined) {
-				await crearProducto(bd, validado.datos);
+			const actual = id === undefined ? undefined : await obtenerProducto(bd, id);
+			if (id !== undefined && !actual) return noEncontrado('El producto');
+
+			// Los errores del producto y de la foto se informan juntos.
+			const validado = validarProducto(formulario);
+			const foto = leerImagen(formulario, {
+				actual: actual?.imagen ?? null,
+				reconoce: reconoceFoto,
+				verifica: verificaSubida,
+				altPorDefecto: cadena(formulario, 'nombreEs'),
+			});
+			if (!validado.ok || !foto.ok) {
+				const errores = { ...(validado.ok ? {} : validado.errores), ...(foto.ok ? {} : foto.errores) };
+				return { ok: false, errores, valores: valoresDe(formulario, CAMPOS_PRODUCTO) };
+			}
+
+			const datos = { ...validado.datos, imagen: foto.datos.imagen };
+			if (!actual) {
+				await crearProducto(bd, datos);
 				return publicar(contexto, 'Producto creado.');
 			}
-			if (!(await actualizarProducto(bd, id, validado.datos))) return noEncontrado('El producto');
+			await actualizarProducto(bd, actual.id, datos);
+			await borrarArchivos(urlsAEliminar(actual.imagen, foto.datos.imagen));
 			return publicar(contexto, 'Cambios guardados.');
 		},
 	}),
@@ -98,8 +121,12 @@ export const server = {
 		accept: 'form',
 		handler: async (formulario, contexto): Promise<RespuestaAccion> => {
 			exigirSesion(contexto);
+			const bd = obtenerBd();
 			const id = entero(formulario, 'id');
-			if (id === undefined || !(await eliminarProducto(obtenerBd(), id))) return noEncontrado('El producto');
+			const producto = id === undefined ? undefined : await obtenerProducto(bd, id);
+			if (!producto || !(await eliminarProducto(bd, producto.id))) return noEncontrado('El producto');
+
+			await borrarArchivos(urlsAEliminar(producto.imagen, null));
 			return publicar(contexto, 'Producto eliminado.');
 		},
 	}),

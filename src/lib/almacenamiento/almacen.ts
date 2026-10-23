@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { del, put } from '@vercel/blob';
 
@@ -13,6 +13,13 @@ export interface AlmacenImagenes {
 	readonly tipo: 'local' | 'blob';
 	subir(datos: Uint8Array): Promise<ImagenSubida>;
 	eliminar(url: string): Promise<void>;
+	/** ¿Es esta URL una foto de la carta guardada en este almacén? Nada de otros sitios ni de otros archivos. */
+	reconoce(url: string): boolean;
+	/**
+	 * Solo el almacén local: lee una foto por su clave para servirla desde una ruta propia (`/uploads/<clave>`).
+	 * Escribir en `public/` haría que Vite recargue todas las páginas abiertas en desarrollo.
+	 */
+	leer?(clave: string): Promise<Uint8Array<ArrayBuffer> | undefined>;
 }
 
 export interface ConfigAlmacenLocal {
@@ -31,12 +38,24 @@ const SUFIJO_HOST_BLOB = '.public.blob.vercel-storage.com';
 const nuevaClave = (): string => `${randomUUID()}.webp`;
 const urlInvalida = (): Error => new Error('URL de imagen no válida');
 
-/** Solo para desarrollo: escribe en `public/uploads/`, que Astro sirve directamente. */
+/** Solo para desarrollo: guarda en una carpeta local que sirve la ruta `/uploads/[clave]`. */
 export function crearAlmacenLocal({ directorio, urlBase }: ConfigAlmacenLocal): AlmacenImagenes {
 	const prefijo = `${urlBase}/`;
+	// Solo se aceptan claves generadas por `subir`: impide salir del directorio (path traversal).
+	const claveDe = (url: string): string => (url.startsWith(prefijo) ? url.slice(prefijo.length) : '');
 
 	return {
 		tipo: 'local',
+		reconoce: (url) => CLAVE_VALIDA.test(claveDe(url)),
+		async leer(clave) {
+			if (!CLAVE_VALIDA.test(clave)) return undefined;
+			try {
+				return new Uint8Array(await readFile(join(directorio, clave)));
+			} catch (error) {
+				if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+				throw error;
+			}
+		},
 		async subir(datos) {
 			const clave = nuevaClave();
 			await mkdir(directorio, { recursive: true });
@@ -44,17 +63,33 @@ export function crearAlmacenLocal({ directorio, urlBase }: ConfigAlmacenLocal): 
 			return { clave, url: `${prefijo}${clave}` };
 		},
 		async eliminar(url) {
-			// Solo se aceptan claves generadas por `subir`: impide salir del directorio (path traversal).
-			const clave = url.startsWith(prefijo) ? url.slice(prefijo.length) : '';
+			const clave = claveDe(url);
 			if (!CLAVE_VALIDA.test(clave)) throw urlInvalida();
 			await rm(join(directorio, clave), { force: true });
 		},
 	};
 }
 
+/** El token de Vercel Blob lleva el identificador del store: `vercel_blob_rw_<storeId>_<secreto>`. */
+const storeIdDelToken = (token: string): string | undefined => /^vercel_blob_rw_([a-z0-9]+)_/i.exec(token)?.[1]?.toLowerCase();
+
+/**
+ * Solo fotos de la carta subidas por `subir`: https, de NUESTRO store (el host sale del token; otra cuenta de Vercel Blob
+ * no vale), sin puerto, usuario ni consulta, y de la carpeta de la carta.
+ */
+function esFotoDeLaCarta(url: string, token: string): boolean {
+	const destino = URL.parse(url);
+	if (destino?.protocol !== 'https:' || destino.port || destino.username || destino.password || destino.search || destino.hash) return false;
+
+	const storeId = storeIdDelToken(token);
+	const hostValido = storeId ? destino.hostname === `${storeId}${SUFIJO_HOST_BLOB}` : destino.hostname.endsWith(SUFIJO_HOST_BLOB);
+	return hostValido && RUTA_BLOB_VALIDA.test(destino.pathname);
+}
+
 export function crearAlmacenBlob({ token }: { token: string }): AlmacenImagenes {
 	return {
 		tipo: 'blob',
+		reconoce: (url) => esFotoDeLaCarta(url, token),
 		async subir(datos) {
 			const resultado = await put(`${CARPETA_BLOB}/${nuevaClave()}`, Buffer.from(datos), {
 				access: 'public',
@@ -68,13 +103,8 @@ export function crearAlmacenBlob({ token }: { token: string }): AlmacenImagenes 
 			return { clave: resultado.pathname, url: resultado.url };
 		},
 		async eliminar(url) {
-			// Solo fotos de la carta subidas por `subir`: nunca otros archivos del store.
-			const destino = URL.parse(url);
-			const esFotoDeLaCarta =
-				destino?.protocol === 'https:' &&
-				destino.hostname.endsWith(SUFIJO_HOST_BLOB) &&
-				RUTA_BLOB_VALIDA.test(destino.pathname);
-			if (!esFotoDeLaCarta) throw urlInvalida();
+			// Nunca otros archivos del store.
+			if (!esFotoDeLaCarta(url, token)) throw urlInvalida();
 			await del(url, { token });
 		},
 	};

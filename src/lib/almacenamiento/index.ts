@@ -8,7 +8,7 @@ export function obtenerAlmacen(): AlmacenImagenes {
 	instancia ??= elegirAlmacen({
 		blobToken: BLOB_READ_WRITE_TOKEN,
 		esProduccion: import.meta.env.PROD,
-		local: { directorio: 'public/uploads', urlBase: '/uploads' },
+		local: { directorio: '.uploads', urlBase: '/uploads' },
 	});
 	return instancia;
 }

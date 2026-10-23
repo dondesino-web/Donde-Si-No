@@ -1,13 +1,13 @@
-import { createClient, type InValue } from '@libsql/client';
+import type { Client, InValue } from '@libsql/client';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { ORIGEN, iniciarSesion } from './ayudantes.ts';
+import { ORIGEN, abrirBd, iniciarSesion } from './ayudantes.ts';
 
 // Estas pruebas modifican la única fila del local: se respalda y se restaura al terminar.
 let respaldo: Record<string, InValue> | undefined;
 
-async function conBase<T>(accion: (cliente: ReturnType<typeof createClient>) => Promise<T>): Promise<T> {
-	const cliente = createClient({ url: 'file:local.db' });
+async function conBase<T>(accion: (cliente: Client) => Promise<T>): Promise<T> {
+	const cliente = await abrirBd();
 	try {
 		return await accion(cliente);
 	} finally {

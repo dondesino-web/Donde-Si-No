@@ -1,12 +1,17 @@
 import { ActionError, type ActionAPIContext } from 'astro:actions';
-import { ISR_BYPASS_TOKEN } from 'astro:env/server';
+import { ISR_BYPASS_TOKEN, SESSION_SECRET } from 'astro:env/server';
+import { verificarSubida, type SubidaFirmada } from '../lib/almacenamiento/firma.ts';
+import { obtenerAlmacen } from '../lib/almacenamiento/index.ts';
+import { obtenerBd } from '../lib/db/index.ts';
+import { urlsSinUso } from '../lib/repositorios/referenciasFotos.ts';
 import { revalidar } from '../lib/revalidar.ts';
 
 export type RespuestaAccion =
 	| { ok: true; mensaje: string }
 	| { ok: false; errores: Record<string, string>; /** Lo que la persona escribió, para no perderlo al corregir. */ valores?: Record<string, string[]> };
 
-export const CAMPOS_PRODUCTO = ['id', 'categoriaId', 'nombreEs', 'nombreEn', 'descripcionEs', 'descripcionEn', 'precio', 'alergenos', 'etiquetas', 'disponible', 'destacado', 'visible'];
+export const CAMPOS_IMAGEN = ['imagen', 'imagenAltEs', 'imagenAltEn', 'quitarImagen'];
+export const CAMPOS_PRODUCTO = ['id', 'categoriaId', 'nombreEs', 'nombreEn', 'descripcionEs', 'descripcionEn', 'precio', 'alergenos', 'etiquetas', 'disponible', 'destacado', 'visible', ...CAMPOS_IMAGEN];
 export const CAMPOS_CATEGORIA = ['id', 'nombreEs', 'nombreEn', 'visible'];
 // Mayor que el máximo de cualquier campo (600): recortar aquí haría perder texto al corregir un error.
 const LARGO_MAXIMO_VALOR = 1000;
@@ -47,3 +52,24 @@ export const entero = (formulario: FormData, clave: string): number | undefined 
 };
 
 export const noEncontrado = (que: string): RespuestaAccion => falla('formulario', `${que} ya no existe. Recarga la página.`);
+
+/** ¿Esta URL es una foto de nuestro almacén? Impide guardar enlaces a otros sitios como si fueran fotos. */
+export const reconoceFoto = (url: string): boolean => obtenerAlmacen().reconoce(url);
+
+/** ¿La subida trae la firma que emitió este servidor? Sin ella no se acepta, aunque la URL tenga forma válida. */
+export const verificaSubida = (subida: SubidaFirmada): boolean => (SESSION_SECRET ? verificarSubida(SESSION_SECRET, subida) : false);
+
+/**
+ * Borra del almacén las fotos que ya no se usan. Antes comprueba que ningún otro producto, promoción o foto de la
+ * galería siga usándolas. Nunca debe deshacer un cambio ya guardado: si falla, solo queda
+ * un archivo huérfano (se registra en el servidor).
+ */
+export async function borrarArchivos(urls: string[]): Promise<void> {
+	const almacen = obtenerAlmacen();
+	const sinUso = await urlsSinUso(obtenerBd(), urls);
+	await Promise.all(
+		sinUso.map((url) =>
+			almacen.eliminar(url).catch((error: unknown) => console.error('[fotos] no se pudo borrar un archivo huérfano', url, error)),
+		),
+	);
+}

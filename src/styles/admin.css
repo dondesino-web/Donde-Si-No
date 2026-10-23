@@ -81,3 +81,11 @@ fieldset.campo legend { font-weight: 600; padding-inline: var(--espacio-2); }
 .horario-tramo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-3); }
 .campo input[type='time'] { min-width: 0; }
 fieldset fieldset.campo { border-style: dashed; }
+
+.campo-foto__vista { max-width: 100%; height: auto; border-radius: var(--radio-sm); border: 1px solid var(--color-borde); }
+.campo-foto__vista[hidden] { display: none; }
+.campo-foto__estado:empty { display: none; }
+.campo-foto[aria-busy='true'] .campo-foto__estado { border-style: dashed; }
+.admin-fotos { list-style: none; padding: 0; display: grid; gap: var(--espacio-3); }
+.admin-foto { display: grid; gap: var(--espacio-3); padding: var(--espacio-4); background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio-md); box-shadow: var(--sombra-tarjeta); }
+.admin-foto img { width: 100%; max-width: 20rem; height: auto; border-radius: var(--radio-sm); }

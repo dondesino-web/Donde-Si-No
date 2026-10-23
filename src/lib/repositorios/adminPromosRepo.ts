@@ -1,6 +1,7 @@
 import { asc, eq, max } from 'drizzle-orm';
 import type { Bd } from '../db/cliente.ts';
 import { menuDia, promocion } from '../db/esquema.ts';
+import type { Imagen } from '../dominio/tipos.ts';
 import { moverEnGrupo, type Direccion } from './adminCartaRepo.ts';
 import type { MenuDia, Promocion } from './cartaRepo.ts';
 
@@ -14,6 +15,8 @@ export interface DatosPromocion {
 	/** `YYYY-MM-DD` en hora de Chile; `null` = sin límite. */
 	desde: string | null;
 	hasta: string | null;
+	/** `undefined` = conservar la foto actual; `null` = quitarla. */
+	imagen?: Imagen | null;
 }
 
 export interface DatosMenuDia {

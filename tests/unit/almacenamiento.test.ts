@@ -151,3 +151,82 @@ describe('elegirAlmacen', () => {
 		);
 	});
 });
+
+describe('reconoce (qué URLs son fotos de este almacén)', () => {
+	const ID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+
+	it('el almacén local reconoce solo sus claves, sin salirse del directorio', () => {
+		const almacen = crearAlmacenLocal({ directorio: directorioNuevo(), urlBase: '/uploads' });
+
+		expect(almacen.reconoce(`/uploads/${ID}.webp`)).toBe(true);
+		for (const url of [
+			`/uploads/${ID}.png`,
+			`/uploads/../${ID}.webp`,
+			`/uploads/${ID}.webp/`,
+			`https://evil.com/uploads/${ID}.webp`,
+			`//evil.com/uploads/${ID}.webp`,
+			`/otra/${ID}.webp`,
+			'/uploads/logo.webp',
+			'javascript:alert(1)',
+			'',
+		]) {
+			expect(almacen.reconoce(url), url).toBe(false);
+		}
+	});
+
+	it('Vercel Blob reconoce solo fotos de la carta en https de su dominio', () => {
+		const almacen = crearAlmacenBlob({ token: 'token-de-prueba' });
+
+		expect(almacen.reconoce(`https://abc123.public.blob.vercel-storage.com/carta/${ID}.webp`)).toBe(true);
+		for (const url of [
+			`http://abc123.public.blob.vercel-storage.com/carta/${ID}.webp`,
+			`https://evil.com/carta/${ID}.webp`,
+			`https://abc123.public.blob.vercel-storage.com.evil.com/carta/${ID}.webp`,
+			`https://abc123.public.blob.vercel-storage.com/otra-carpeta/${ID}.webp`,
+			`https://abc123.public.blob.vercel-storage.com/carta/${ID}.png`,
+			`/uploads/${ID}.webp`,
+			'',
+		]) {
+			expect(almacen.reconoce(url), url).toBe(false);
+		}
+	});
+});
+
+describe('Vercel Blob: solo el store propio', () => {
+	const ID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+
+	it('con un token con identificador de store, solo reconoce fotos de ese store (sin puerto, usuario ni consulta)', () => {
+		const almacen = crearAlmacenBlob({ token: 'vercel_blob_rw_AbC123xyz_secretosecreto' });
+
+		expect(almacen.reconoce(`https://abc123xyz.public.blob.vercel-storage.com/carta/${ID}.webp`)).toBe(true);
+		for (const url of [
+			`https://otrostore.public.blob.vercel-storage.com/carta/${ID}.webp`,
+			`https://abc123xyz.public.blob.vercel-storage.com:8443/carta/${ID}.webp`,
+			`https://usuario:clave@abc123xyz.public.blob.vercel-storage.com/carta/${ID}.webp`,
+			`https://abc123xyz.public.blob.vercel-storage.com/carta/${ID}.webp?x=1`,
+		]) {
+			expect(almacen.reconoce(url), url).toBe(false);
+		}
+	});
+});
+
+describe('almacén local: leer (se sirve desde una ruta propia, no desde public/)', () => {
+	it('devuelve los bytes de una foto subida', async () => {
+		const almacen = crearAlmacenLocal({ directorio: directorioNuevo(), urlBase: '/uploads' });
+		const { clave } = await almacen.subir(WEBP);
+
+		expect(await almacen.leer?.(clave)).toEqual(WEBP);
+	});
+
+	it('devuelve undefined si no existe o si la clave no es una de las generadas (sin salirse del directorio)', async () => {
+		const almacen = crearAlmacenLocal({ directorio: directorioNuevo(), urlBase: '/uploads' });
+
+		for (const clave of ['0f8fad5b-d9cb-469f-a165-70867728950e.webp', '../secreto.txt', '..\\secreto.txt', 'logo.webp', '', 'a/b.webp']) {
+			expect(await almacen.leer?.(clave), clave).toBeUndefined();
+		}
+	});
+
+	it('el almacén de Vercel Blob no sirve archivos propios (las fotos van por su CDN)', () => {
+		expect(crearAlmacenBlob({ token: 'token-de-prueba' }).leer).toBeUndefined();
+	});
+});

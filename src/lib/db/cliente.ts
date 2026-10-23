@@ -19,6 +19,20 @@ export function validarConfigBd(config: ConfigBd, esProduccion: boolean): Config
 	return config;
 }
 
+const ESPERA_ARCHIVO_BLOQUEADO_MS = 5000;
+
+/**
+ * Igual que {@link crearClienteBd}, pero con la conexión lista para usarse. En un archivo local varias conexiones
+ * (el servidor, scripts, pruebas) pueden coincidir: se configura que esperen su turno unos segundos en vez de fallar
+ * al instante con SQLITE_BUSY. Hay que esperar la configuración antes del primer uso: lanzada en paralelo con la primera
+ * consulta, libsql la pierde. Las bases remotas (Turso) no tienen este problema.
+ */
+export async function abrirBd(config: ConfigBd): Promise<{ bd: Bd; cliente: Client }> {
+	const conexion = crearClienteBd(config);
+	if (config.url.startsWith('file:')) await conexion.cliente.execute(`pragma busy_timeout = ${ESPERA_ARCHIVO_BLOQUEADO_MS}`);
+	return conexion;
+}
+
 /** Crea la conexión a Turso/libSQL. Recibe la configuración explícita para poder usarse en tests y scripts. */
 export function crearClienteBd(config: ConfigBd): { bd: Bd; cliente: Client } {
 	if (!config.url) throw new Error('Falta la URL de la base de datos (TURSO_DATABASE_URL).');

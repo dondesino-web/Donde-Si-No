@@ -1,11 +1,11 @@
-import { createClient } from '@libsql/client';
+import { abrirBd } from './ayudantes.ts';
 import { expect, test } from '@playwright/test';
 
 const PASSWORD = process.env.E2E_PASSWORD ?? '';
 
 // El contador de intentos vive en la base local: se limpia para que las corridas no se contaminen.
 async function limpiarIntentos(): Promise<void> {
-	const cliente = createClient({ url: 'file:local.db' });
+	const cliente = await abrirBd();
 	try {
 		await cliente.execute('delete from intento_login');
 	} finally {

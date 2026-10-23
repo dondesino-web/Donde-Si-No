@@ -1,0 +1,80 @@
+---
+import { obtenerAlmacen } from '../../lib/almacenamiento/index.ts';
+import type { Imagen } from '../../lib/dominio/tipos.ts';
+
+interface Props {
+	/** Foto que tiene ahora (al editar). */
+	imagen?: Imagen | null;
+	/** Selector del campo cuyo valor se propone como texto de la foto (por ejemplo `#nombreEs`). */
+	altOrigen?: string;
+	/** Lo escrito en un envío anterior con errores. */
+	valores?: Record<string, string[]>;
+	errores?: Record<string, string>;
+	/** En la galería no hay «quitar»: se elimina la foto entera. */
+	permiteQuitar?: boolean;
+	etiqueta?: string;
+}
+
+const { imagen = null, altOrigen, valores, errores = {}, permiteQuitar = true, etiqueta = 'Foto' } = Astro.props;
+
+// Si el envío falló después de subir una foto nueva, se vuelve a mostrar (solo si es una foto de nuestro almacén).
+const pendiente = valores?.imagen?.[0] ?? '';
+let vistaPrevia: { sm: string; ancho: number; alto: number } | undefined;
+try {
+	const subida = pendiente ? JSON.parse(pendiente) : undefined;
+	if (subida && obtenerAlmacen().reconoce(String(subida.sm))) {
+		vistaPrevia = { sm: String(subida.sm), ancho: Number(subida.ancho) || 480, alto: Number(subida.alto) || 320 };
+	}
+} catch {
+	vistaPrevia = undefined;
+}
+const mostrada = vistaPrevia ?? (imagen ? { sm: imagen.sm, ancho: imagen.ancho, alto: imagen.alto } : undefined);
+
+const texto = (campo: string, respaldo: string): string => valores?.[campo]?.[0] ?? respaldo;
+---
+
+<fieldset class="campo campo-foto" data-campo-foto data-alt-origen={altOrigen}>
+	<legend>{etiqueta}</legend>
+
+	<img
+		data-foto-vista
+		class="campo-foto__vista"
+		src={mostrada?.sm}
+		width={mostrada?.ancho}
+		height={mostrada?.alto}
+		alt={mostrada ? 'Vista previa de la foto' : ''}
+		hidden={!mostrada}
+	/>
+
+	<div class="campo">
+		<label for="foto-archivo">{mostrada ? 'Cambiar la foto' : 'Elegir una foto'}</label>
+		<input id="foto-archivo" type="file" accept="image/jpeg,image/png,image/webp" data-foto-archivo />
+		<p class="campo__ayuda">Puedes sacarla con la cámara del celular. Se prepara y se sube sola.</p>
+	</div>
+	<p data-foto-estado role="status" class="aviso campo-foto__estado" aria-live="polite"></p>
+	<input type="hidden" name="imagen" value={pendiente} data-foto-valor />
+	{errores.imagen && <p class="campo__error">{errores.imagen}</p>}
+
+	<div class="campo">
+		<label for="imagenAltEs">Texto de la foto <span class="campo__ayuda">(lo lee quien no puede verla)</span></label>
+		<input id="imagenAltEs" name="imagenAltEs" maxlength="150" value={texto('imagenAltEs', imagen?.altEs ?? '')} data-foto-alt aria-invalid={errores.imagenAltEs ? 'true' : undefined} />
+		{errores.imagenAltEs && <p class="campo__error">{errores.imagenAltEs}</p>}
+	</div>
+	<div class="campo">
+		<label for="imagenAltEn">Texto de la foto en inglés <span class="campo__ayuda">(opcional)</span></label>
+		<input id="imagenAltEn" name="imagenAltEn" maxlength="150" value={texto('imagenAltEn', imagen?.altEn ?? '')} />
+		{errores.imagenAltEn && <p class="campo__error">{errores.imagenAltEn}</p>}
+	</div>
+
+	{
+		permiteQuitar && imagen && (
+			<label class="casilla">
+				<input type="checkbox" name="quitarImagen" data-foto-quitar /> Quitar la foto
+			</label>
+		)
+	}
+</fieldset>
+
+<script>
+	import '../../scripts/campoFoto.ts';
+</script>

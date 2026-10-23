@@ -2,7 +2,7 @@ import { and, asc, count, eq, like, max } from 'drizzle-orm';
 import type { Bd } from '../db/cliente.ts';
 import { categoria, producto } from '../db/esquema.ts';
 import { slugificar } from '../dominio/slug.ts';
-import type { Alergeno, Etiqueta } from '../dominio/tipos.ts';
+import type { Alergeno, Etiqueta, Imagen } from '../dominio/tipos.ts';
 import type { Categoria, CategoriaConProductos, Producto } from './cartaRepo.ts';
 
 // Lo único que necesitan los actualizadores; sirve tanto para la conexión como para una transacción.
@@ -22,6 +22,8 @@ export interface DatosProducto {
 	disponible: boolean;
 	destacado: boolean;
 	visible: boolean;
+	/** `undefined` = conservar la foto actual; `null` = quitarla. */
+	imagen?: Imagen | null;
 }
 
 export interface DatosCategoria {

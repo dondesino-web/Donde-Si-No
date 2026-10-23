@@ -26,6 +26,7 @@ local.db*
 
 # fotos subidas en desarrollo
 public/uploads/
+.uploads/
 
 # cobertura de tests
 coverage/

@@ -3,6 +3,7 @@ import { actions } from 'astro:actions';
 import { traductor } from '../../i18n/utils.ts';
 import { ALERGENOS, ETIQUETAS } from '../../lib/dominio/tipos.ts';
 import type { Categoria, Producto } from '../../lib/repositorios/cartaRepo.ts';
+import CampoFoto from './CampoFoto.astro';
 
 interface Props {
 	categorias: Categoria[];
@@ -113,6 +114,8 @@ const describedby = (campo: string) => (errores[campo] ? `error-${campo}` : unde
 			<label class="casilla"><input type="checkbox" name="destacado" checked={marcada('destacado', producto?.destacado ?? false)} /> Recomendado</label>
 		</div>
 	</fieldset>
+
+	<CampoFoto imagen={producto?.imagen} altOrigen="#nombreEs" etiqueta="Foto del producto" valores={valores} errores={errores} />
 
 	<div class="formulario__acciones">
 		<button type="submit" class="boton">{producto ? 'Guardar cambios' : 'Crear producto'}</button>
