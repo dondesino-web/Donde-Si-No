@@ -19,13 +19,29 @@ Detalle de cada fase en [`PLAN_CARTA_DIGITAL.md`](./documentacion-aidlc/diseno/P
   - Esquema Turso/Drizzle con migración, semilla con los datos del local y almacén de imágenes.
   - Tokens de diseño accesibles, íconos de marca y suite de tests (40 tests, ≈99 % de cobertura).
 
+- [x] **Fase 1 · Carta pública (ES/EN)** (2026-10-23):
+  - Carta con promociones, menú del día, fotos, alérgenos y estado agotado, en `/` y `/en/`.
+  - Versión imprimible, JSON-LD (`Restaurant` + `Menu`), sitemap, `robots.txt`, `hreflang` y OpenGraph.
+  - Estado «Abierto ahora» calculado en el navegador con la hora de Chile (la página se cachea 1 h).
+  - Playwright + axe: WCAG 2.2 AA sin violaciones y sin desborde horizontal de 320 a 1440 px.
+- [x] **Fase 2 · Panel de administración** (2026-10-23):
+  - Login con scrypt, sesión firmada de 7 días y límite de intentos atómico por IP; el panel queda desactivado sin configuración.
+  - Carta: precio en línea, **Agotado** de un toque, orden con ↑↓, productos y categorías (CRUD completo).
+  - Promociones con vigencia (desde/hasta) y menú del día único, con el estado explicado en el panel.
+  - Datos del local: horario de hasta dos tramos por día, servicios, redes y contacto; enlaces solo `https` y de hosts exactos.
+  - Fotos en productos y promociones, y galería de hasta 8 destacadas: el navegador las reduce a WebP, el servidor las valida por bytes y las firma, y los archivos huérfanos se borran.
+  - Cada cambio refresca la carta pública (revalidación ISR) y avisa si no pudo.
+  - Cabeceras de seguridad en todas las respuestas y cuatro revisiones de seguridad aplicadas.
+  - 364 tests unitarios y de integración, y 85 E2E estables.
+
 ## 2. Siguiente
 
-- [ ] **Fase 1 · Carta pública (ES/EN):**
-  - Carta con promociones, menú del día, fotos, alérgenos y estado agotado.
-  - Versión imprimible, JSON-LD, sitemap y OpenGraph.
-  - Playwright + axe.
-- [ ] **Fase 2 · Panel de administración:** login seguro, CRUD, subida de fotos, toggle de agotado y revalidación instantánea.
+- [ ] **Cierre pendiente de las Fases 1 y 2** (se hará con el despliegue de la Fase 4):
+  - Probar contra Vercel real la revalidación ISR, Vercel Blob y el login detrás del proxy (`x-forwarded-for`).
+  - Medir el presupuesto de bytes y validar el JSON-LD con el Rich Results Test.
+  - CSP completa que restrinja scripts e imágenes (hoy es una CSP acotada).
+  - Limpieza periódica de fotos subidas y nunca guardadas.
+  - Probar la subida de fotos en Safari de iPhone (puede no escribir WebP).
 - [ ] **Fase 3 · QR y estadísticas:** `/qr` permanente, beacon sin cookies, panel de estadísticas y tarjeta de mesa.
 - [ ] **Fase 4 · Calidad y lanzamiento:**
   - Cobertura ≥ 80 %, revisiones de seguridad y Lighthouse ≥ 95.
@@ -44,3 +60,5 @@ Detalle de cada fase en [`PLAN_CARTA_DIGITAL.md`](./documentacion-aidlc/diseno/P
 
 - ⚠️ El plan Hobby de Vercel es solo para uso no comercial: evaluar Pro antes del lanzamiento.
 - ⚠️ La carta se lanza sin precios («Consultar») si el dueño no los carga antes de imprimir el QR.
+- ⚠️ El horario del local está vacío en la semilla: la carta dice «Horario por confirmar» hasta que el dueño lo cargue en `/admin/local`.
+- ⚠️ La contraseña del panel (`npm run admin:hash`), `SESSION_SECRET`, `ISR_BYPASS_TOKEN` y el store de Blob deben cargarse en Vercel antes de usar el panel en producción.
