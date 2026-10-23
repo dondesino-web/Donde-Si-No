@@ -13,7 +13,7 @@ const es = {
 	'meta.lugar': 'Comida rápida en Chocalán, Melipilla',
 	saltar: 'Saltar a la carta',
 	'idioma.otro': 'English',
-	'idioma.otroEtiqueta': 'Ver la carta en inglés',
+	'idioma.otroEtiqueta': 'English: view the menu in English',
 
 	'estado.abierto': 'Abierto ahora',
 	'estado.cierra': 'cierra a las {hora}',
@@ -90,7 +90,7 @@ const en: Record<ClaveUI, string> = {
 	'meta.lugar': 'Fast food in Chocalán, Melipilla',
 	saltar: 'Skip to the menu',
 	'idioma.otro': 'Español',
-	'idioma.otroEtiqueta': 'Ver la carta en español',
+	'idioma.otroEtiqueta': 'Español: ver la carta en español',
 
 	'estado.abierto': 'Open now',
 	'estado.cierra': 'closes at {hora}',

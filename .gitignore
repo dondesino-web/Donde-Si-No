@@ -35,3 +35,7 @@ coverage/
 
 # jetbrains setting folder
 .idea/
+
+# resultados de Playwright
+test-results/
+playwright-report/
