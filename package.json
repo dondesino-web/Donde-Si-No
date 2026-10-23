@@ -2,13 +2,35 @@
   "name": "dondesino",
   "type": "module",
   "version": "0.0.1",
+  "engines": {
+    "node": ">=22.23.4"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "node --env-file-if-exists=.env scripts/sembrar.ts",
+    "marca:iconos": "node scripts/generar-iconos.ts"
   },
   "dependencies": {
-    "astro": "^5.13.10"
+    "@astrojs/vercel": "^11.0.16",
+    "@libsql/client": "^0.18.0",
+    "@vercel/blob": "^2.8.2",
+    "astro": "^7.4.2",
+    "drizzle-orm": "^0.45.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@vitest/coverage-v8": "^5.0.5",
+    "drizzle-kit": "^0.31.11",
+    "sharp": "^0.35.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
   }
 }

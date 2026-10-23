@@ -1,0 +1,71 @@
+/*
+ * Tokens de diseño de «Dónde Si No».
+ * Paleta tomada del logo (bandera cubana + amarillo de los afiches), en versión limpia.
+ * Contraste WCAG medido sobre --color-fondo (#FFFBF0), salvo que se indique otro fondo:
+ *   rojo 5.69 · azul 12.90 · tinta 16.83 · gris 6.77 · verde 5.20 · blanco/rojo 5.88
+ *   tinta/amarillo 11.91 · azul/amarillo 9.13 · borde-fuerte 3.72 (solo bordes de controles)
+ * ❌ No usar texto rojo sobre amarillo (4.03): en promociones, el texto va en tinta o azul.
+ */
+:root {
+	/* Marca */
+	--color-rojo: #c8102e;
+	--color-rojo-oscuro: #a00d25;
+	--color-azul: #0b2a6f;
+	--color-amarillo: #ffd100;
+
+	/* Superficies y texto */
+	--color-fondo: #fffbf0;
+	--color-superficie: #ffffff;
+	--color-tinta: #1a1a1a;
+	--color-texto-suave: #595959;
+	--color-borde: #ece4d2;
+	--color-borde-fuerte: #8a8170;
+
+	/* Semánticos */
+	--color-precio: var(--color-rojo);
+	--color-accion: var(--color-rojo);
+	--color-accion-hover: var(--color-rojo-oscuro);
+	--color-titulo: var(--color-azul);
+	--color-promo-fondo: var(--color-amarillo);
+	--color-ok: #1f7a3a;
+	--color-foco: var(--color-azul);
+
+	/* Tipografía: fuentes del sistema (cero descargas). La identidad la aporta el logo. */
+	--fuente-base: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	--texto-xs: 0.8125rem;
+	--texto-sm: 0.9375rem;
+	--texto-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+	--texto-lg: clamp(1.125rem, 1.05rem + 0.4vw, 1.25rem);
+	--texto-xl: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
+	--texto-2xl: clamp(1.75rem, 1.4rem + 1.8vw, 2.5rem);
+	--interlineado: 1.5;
+	--interlineado-titulo: 1.15;
+
+	/* Espaciado: escala no uniforme para dar ritmo */
+	--espacio-1: 0.25rem;
+	--espacio-2: 0.5rem;
+	--espacio-3: 0.75rem;
+	--espacio-4: 1rem;
+	--espacio-6: 1.5rem;
+	--espacio-8: 2rem;
+	--espacio-12: 3rem;
+	--espacio-seccion: clamp(2.5rem, 2rem + 3vw, 4rem);
+	--margen-lateral: 1rem;
+
+	/* Formas y profundidad */
+	--radio-sm: 0.5rem;
+	--radio-md: 0.875rem;
+	--radio-pill: 999px;
+	--sombra-tarjeta: 0 1px 2px rgb(26 26 26 / 0.06), 0 4px 12px rgb(26 26 26 / 0.06);
+	--sombra-flotante: 0 8px 24px rgb(11 42 111 / 0.14);
+
+	/* Layout y accesibilidad */
+	--ancho-contenido: 40rem;
+	--ancho-amplio: 64rem;
+	--objetivo-tactil: 2.75rem; /* 44 px */
+
+	/* Movimiento */
+	--duracion-rapida: 150ms;
+	--duracion-normal: 250ms;
+	--curva-salida: cubic-bezier(0.16, 1, 0.3, 1);
+}
