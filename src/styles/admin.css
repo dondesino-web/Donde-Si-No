@@ -11,10 +11,33 @@
 	color: #fff;
 }
 .admin-barra { flex-wrap: wrap; }
-.admin-barra__nav { display: flex; flex-wrap: wrap; column-gap: var(--espacio-4); }
+.admin-barra__nav { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--espacio-4); flex: 1 1 100%; }
 .admin-barra a { color: #fff; font-weight: 600; display: inline-flex; align-items: center; min-height: var(--objetivo-tactil); }
+.admin-barra a[aria-current='page'] { text-decoration-thickness: 3px; text-decoration-color: var(--color-amarillo); }
 .admin-barra :focus-visible { outline-color: var(--color-amarillo); }
 .admin-barra__salir { width: auto; }
+.admin-barra__seccion, .admin-barra__menu { display: none; }
+
+/* Celular: una sola línea (sección actual + «Menú»); el resto de secciones se despliega al tocar «Menú». */
+@media (max-width: 47.99rem) {
+	.admin-barra[data-js] .admin-barra__seccion { display: block; font-weight: 800; font-size: var(--texto-lg); }
+	.admin-barra[data-js] .admin-barra__menu {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--objetivo-tactil);
+		padding-inline: var(--espacio-4);
+		border: 2px solid #fff;
+		border-radius: var(--radio-pill);
+		background: transparent;
+		color: #fff;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.admin-barra[data-js]:not([data-abierto]) .admin-barra__nav { display: none; }
+	.admin-barra[data-js] .admin-barra__nav { flex-direction: column; align-items: stretch; padding-bottom: var(--espacio-2); }
+	.admin-barra[data-js] .admin-barra__nav a { border-top: 1px solid rgb(255 255 255 / 0.25); }
+	.admin-barra[data-js] .admin-barra__nav form { margin-top: var(--espacio-2); }
+}
 
 .admin-contenido {
 	width: min(100% - 2 * var(--margen-lateral), 36rem);
@@ -23,9 +46,11 @@
 .admin-contenido h1 { font-size: var(--texto-2xl); margin-bottom: var(--espacio-4); }
 
 .formulario { display: grid; gap: var(--espacio-4); }
-.campo { display: grid; gap: var(--espacio-1); }
+.campo { display: grid; gap: var(--espacio-1); min-width: 0; }
 .campo label { font-weight: 600; }
 .campo input, .campo select, .campo textarea {
+	width: 100%;
+	min-width: 0;
 	min-height: var(--objetivo-tactil);
 	padding: var(--espacio-2) var(--espacio-3);
 	border: 2px solid var(--color-borde-fuerte);
@@ -72,13 +97,14 @@ fieldset.campo legend { font-weight: 600; padding-inline: var(--espacio-2); }
 .admin-producto__info { display: grid; }
 .admin-producto__nombre { font-weight: 700; font-size: var(--texto-lg); color: var(--color-azul); }
 .admin-producto__estado { color: var(--color-texto-suave); font-size: var(--texto-sm); }
-.admin-producto__precio { display: flex; gap: var(--espacio-2); }
+.admin-producto__precio { display: flex; flex-wrap: wrap; gap: var(--espacio-2); }
+.admin-producto { min-width: 0; }
 .admin-producto__precio input { flex: 1; min-width: 0; min-height: var(--objetivo-tactil); padding: var(--espacio-2) var(--espacio-3); border: 2px solid var(--color-borde-fuerte); border-radius: var(--radio-sm); }
 .admin-producto__precio .boton { width: auto; white-space: nowrap; }
 
 .horario-dia { margin-top: var(--espacio-3); }
 .horario-dia legend { text-transform: capitalize; }
-.horario-tramo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-3); }
+.horario-tramo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--espacio-3); }
 .campo input[type='time'] { min-width: 0; }
 fieldset fieldset.campo { border-style: dashed; }
 
@@ -96,6 +122,9 @@ fieldset fieldset.campo { border-style: dashed; }
 .resumen__dato { background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio-md); padding: var(--espacio-3) var(--espacio-4); }
 .resumen dt { color: var(--color-texto-suave); font-size: var(--texto-sm); }
 .resumen dd { margin: 0; font-size: var(--texto-xl); font-weight: 800; color: var(--color-azul); }
+
+.resumen__unidad { font-size: var(--texto-sm); font-weight: 600; color: var(--color-texto-suave); }
+.resumen dd.resumen__semana { font-size: var(--texto-sm); font-weight: 600; color: var(--color-texto-suave); }
 
 .grafico { display: flex; align-items: flex-end; gap: 2px; height: 10rem; padding: var(--espacio-3); background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio-md); }
 .grafico__dia { flex: 1 1 0; min-width: 0; display: grid; grid-template-rows: 1fr auto; height: 100%; justify-items: center; gap: var(--espacio-1); }
@@ -146,3 +175,7 @@ fieldset fieldset.campo { border-style: dashed; }
 
 .admin-contenido h2 { margin-top: var(--espacio-8); margin-bottom: var(--espacio-3); font-size: var(--texto-xl); }
 .admin-contenido h2:first-child { margin-top: 0; }
+
+/* Un fieldset no se encoge por defecto (min-width: min-content): sin esto, el contenido ancho de un navegador a otro lo desborda. */
+.admin-contenido fieldset { min-width: 0; }
+.campo__ayuda, .campo label { overflow-wrap: anywhere; }

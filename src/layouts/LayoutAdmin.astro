@@ -9,6 +9,21 @@ interface Props {
 }
 
 const { titulo, sinNavegacion = false } = Astro.props;
+
+/** `prefijos` agrupa las pantallas internas (editar un producto cuenta como «Carta»). */
+const SECCIONES = [
+	{ href: '/admin', texto: 'Inicio', prefijos: [] },
+	{ href: '/admin/carta', texto: 'Carta', prefijos: ['/admin/producto'] },
+	{ href: '/admin/promociones', texto: 'Promos', prefijos: ['/admin/promocion'] },
+	{ href: '/admin/menu-del-dia', texto: 'Menú del día', prefijos: [] },
+	{ href: '/admin/fotos', texto: 'Fotos', prefijos: [] },
+	{ href: '/admin/estadisticas', texto: 'Estadísticas', prefijos: [] },
+	{ href: '/admin/qr', texto: 'QR', prefijos: [] },
+	{ href: '/admin/local', texto: 'Local', prefijos: [] },
+];
+const ruta = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const estaEn = (base: string) => ruta === base || ruta.startsWith(`${base}/`);
+const actual = SECCIONES.find((s) => (s.href === '/admin' ? ruta === '/admin' : [s.href, ...s.prefijos].some(estaEn)));
 ---
 
 <!doctype html>
@@ -19,26 +34,26 @@ const { titulo, sinNavegacion = false } = Astro.props;
 		<meta name="robots" content="noindex, nofollow" />
 		<title>{titulo} · Panel · Dónde Si No</title>
 		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="manifest" href="/panel.webmanifest" />
+		<meta name="theme-color" content="#0b2a6f" />
+		<link rel="apple-touch-icon" href="/marca/apple-touch-icon.png" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-title" content="Panel" />
 	</head>
 	<body class="admin">
 		<a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
 		{
 			!sinNavegacion && (
 				<header class="admin-barra no-imprimir">
-					<nav aria-label="Panel" class="admin-barra__nav">
-						<a href="/admin">Inicio</a>
-						<a href="/admin/carta">Carta</a>
-						<a href="/admin/promociones">Promos</a>
-						<a href="/admin/menu-del-dia">Menú del día</a>
-						<a href="/admin/fotos">Fotos</a>
-						<a href="/admin/estadisticas">Estadísticas</a>
-						<a href="/admin/qr">QR</a>
-						<a href="/admin/local">Local</a>
+					<span class="admin-barra__seccion">{actual?.texto ?? 'Panel'}</span>
+					<button type="button" class="admin-barra__menu" aria-expanded="false" aria-controls="menu-panel">Menú</button>
+					<nav aria-label="Panel" class="admin-barra__nav" id="menu-panel">
+						{SECCIONES.map((s) => <a href={s.href} aria-current={s === actual ? 'page' : undefined}>{s.texto}</a>)}
 						<a href="/" target="_blank" rel="noopener noreferrer">Ver carta</a>
+						<form method="post" action="/admin/salir">
+							<button type="submit" class="boton boton--secundario admin-barra__salir">Salir</button>
+						</form>
 					</nav>
-					<form method="post" action="/admin/salir">
-						<button type="submit" class="boton boton--secundario admin-barra__salir">Salir</button>
-					</form>
 				</header>
 			)
 		}
@@ -47,3 +62,21 @@ const { titulo, sinNavegacion = false } = Astro.props;
 		</main>
 	</body>
 </html>
+
+<script>
+	import '../scripts/panelInstalable.ts';
+</script>
+
+<script>
+	// Sin JavaScript el menú queda desplegado: el dueño nunca pierde la navegación.
+	const barra = document.querySelector<HTMLElement>('.admin-barra');
+	const boton = barra?.querySelector<HTMLButtonElement>('.admin-barra__menu');
+	if (barra && boton) {
+		barra.dataset.js = '';
+		boton.addEventListener('click', () => {
+			const abierto = boton.getAttribute('aria-expanded') !== 'true';
+			boton.setAttribute('aria-expanded', String(abierto));
+			barra.toggleAttribute('data-abierto', abierto);
+		});
+	}
+</script>

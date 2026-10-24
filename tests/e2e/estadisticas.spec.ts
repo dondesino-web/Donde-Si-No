@@ -229,7 +229,7 @@ test.describe('panel', () => {
 		await page.goto('/admin');
 
 		await expect(page.getByRole('heading', { name: 'Movimiento de la carta' })).toBeVisible();
-		await expect(page.getByRole('row', { name: /Escaneos del QR/ })).toBeVisible();
+		await expect(page.locator('.resumen__dato', { hasText: 'Escaneos del QR' })).toContainText('hoy');
 		await expect(page.getByRole('link', { name: 'Código QR y tarjeta para mesas' })).toBeVisible();
 	});
 
