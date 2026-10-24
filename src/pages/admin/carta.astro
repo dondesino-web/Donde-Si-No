@@ -2,7 +2,7 @@
 import { actions } from 'astro:actions';
 import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
 import { obtenerBd } from '../../lib/db/index.ts';
-import { formatearPrecio } from '../../lib/dominio/formato.ts';
+import { estadosDe, resumenDeCarta, textoBuscable } from '../../lib/dominio/filtroCarta.ts';
 import { listarCartaAdmin } from '../../lib/repositorios/adminCartaRepo.ts';
 
 const AVISOS: Record<string, string> = { creado: 'Producto creado.', guardado: 'Cambios guardados.', eliminado: 'Producto eliminado.' };
@@ -28,126 +28,171 @@ const errores = resultado?.data && !resultado.data.ok ? resultado.data.errores :
 const errorGeneral = resultado?.error ? resultado.error.message : undefined;
 
 const categorias = await listarCartaAdmin(obtenerBd());
+const resumen = resumenDeCarta(categorias.flatMap((c) => c.productos));
+const cuenta = (n: number, uno: string, varios: string): string => `${n} ${n === 1 ? uno : varios}`;
 ---
 
-<LayoutAdmin titulo="Carta">
-	<h1>Carta</h1>
+<LayoutAdmin titulo="Carta" ancho>
+	<header class="carta-cabecera">
+		<div>
+			<h1>Carta</h1>
+			<p>{cuenta(resumen.total, 'producto', 'productos')} en {cuenta(categorias.length, 'categoría', 'categorías')}</p>
+		</div>
+		<div class="carta-acciones">
+			<a class="boton" href="/admin/producto/nuevo">+ Producto</a>
+			<a class="boton boton--secundario" href="/admin/carga-rapida">Carga rápida</a>
+		</div>
+	</header>
 
 	<div aria-live="polite" class="avisos">
 		{aviso && <p class="aviso aviso--ok" role="status">{aviso}</p>}
 		{(errores || errorGeneral) && <p class="aviso aviso--error" role="alert">{Object.values(errores ?? {}).join(' ') || errorGeneral}</p>}
 	</div>
 
-	{
-		categorias.map((categoria, indice) => (
-			<section class="admin-categoria" aria-labelledby={`cat-${categoria.id}`}>
-				<header class="admin-categoria__cabecera">
-					<h2 id={`cat-${categoria.id}`}>
-						{categoria.nombreEs}
-						{!categoria.visible && <span class="insignia insignia--agotado">Oculta</span>}
-					</h2>
-					<div class="mover">
-						<form method="POST" action={actions.moverCategoria}>
-							<input type="hidden" name="id" value={categoria.id} />
-							<input type="hidden" name="direccion" value="arriba" />
-							<button type="submit" class="boton boton--icono boton--secundario" disabled={indice === 0} aria-label={`Subir la categoría ${categoria.nombreEs}`}>↑</button>
-						</form>
-						<form method="POST" action={actions.moverCategoria}>
-							<input type="hidden" name="id" value={categoria.id} />
-							<input type="hidden" name="direccion" value="abajo" />
-							<button type="submit" class="boton boton--icono boton--secundario" disabled={indice === categorias.length - 1} aria-label={`Bajar la categoría ${categoria.nombreEs}`}>↓</button>
-						</form>
-					</div>
-				</header>
+	<div data-carta>
+		<div class="carta-herramientas" role="search">
+			<label class="solo-lectores" for="buscar-producto">Buscar producto</label>
+			<input class="carta-buscar" id="buscar-producto" type="search" placeholder="Buscar producto…" autocomplete="off" />
+			<div class="carta-filtros carta-herramientas__js" role="group" aria-label="Mostrar">
+				<button type="button" class="filtro" data-filtro="todos" aria-pressed="true">Todos <span class="filtro__numero">{resumen.total}</span></button>
+				<button type="button" class="filtro" data-filtro="sin-precio" aria-pressed="false">Sin precio <span class="filtro__numero">{resumen.sinPrecio}</span></button>
+				<button type="button" class="filtro" data-filtro="agotados" aria-pressed="false">Agotados <span class="filtro__numero">{resumen.agotados}</span></button>
+				<button type="button" class="filtro" data-filtro="ocultos" aria-pressed="false">Ocultos <span class="filtro__numero">{resumen.ocultos}</span></button>
+				<button type="button" class="filtro filtro--ordenar" data-ordenar aria-pressed="false">Ordenar</button>
+			</div>
+			<p class="carta-estado" aria-live="polite" data-estado-filtro></p>
+		</div>
 
-				<ul class="admin-productos">
-					{categoria.productos.map((p, i) => (
-						<li class:list={['admin-producto', { 'admin-producto--agotado': !p.disponible || !p.visible }]}>
-							<div class="admin-producto__info">
-								<a class="admin-producto__nombre" href={`/admin/producto/${p.id}`}>{p.nombreEs}</a>
-								<span class="admin-producto__estado">
-									{!p.visible && 'Oculto · '}
-									{!p.disponible && 'Agotado · '}
-									{formatearPrecio(p.precio, 'es') ?? 'Consultar'}
-								</span>
-							</div>
+		<p class="carta-vacia" data-sin-resultados hidden>Ningún producto coincide. Prueba con otra búsqueda o con «Todos».</p>
 
-							<form method="POST" action={actions.cambiarPrecio} class="admin-producto__precio">
-								<input type="hidden" name="id" value={p.id} />
-								<label class="solo-lectores" for={`precio-${p.id}`}>Precio de {p.nombreEs}</label>
-								<input id={`precio-${p.id}`} name="precio" inputmode="numeric" autocomplete="off" placeholder="Consultar" value={p.precio ?? ''} />
-								<button type="submit" class="boton boton--secundario">Guardar precio</button>
-							</form>
+		{
+			categorias.map((categoria, indice) => (
+				<details class="carta-categoria" open data-categoria>
+					<summary>
+						<h2 class="carta-categoria__titulo" id={`cat-${categoria.id}`}>{categoria.nombreEs}</h2>
+						<span class="carta-categoria__cuenta">{categoria.productos.length}</span>
+						{!categoria.visible && <span class="etiqueta">Oculta</span>}
+					</summary>
 
-							<form method="POST" action={actions.establecerDisponible}>
-								<input type="hidden" name="id" value={p.id} />
-								<input type="hidden" name="disponible" value={String(!p.disponible)} />
-								<button type="submit" class:list={['boton', p.disponible ? 'boton--secundario' : 'boton--ok']}>
-									{p.disponible ? 'Marcar agotado' : 'Volver a disponible'}
-									<span class="solo-lectores"> {p.nombreEs}</span>
-								</button>
-							</form>
-
-							<div class="mover">
-								<form method="POST" action={actions.moverProducto}>
-									<input type="hidden" name="id" value={p.id} />
+					<div class="carta-categoria__cuerpo">
+						<div class="carta-categoria__barra">
+							<a class="boton boton--secundario" href={`/admin/producto/nuevo?categoria=${categoria.id}`} aria-label={`Agregar producto a ${categoria.nombreEs}`}>+ Agregar producto</a>
+							<div class="mover controles-orden">
+								<form method="POST" action={actions.moverCategoria}>
+									<input type="hidden" name="id" value={categoria.id} />
 									<input type="hidden" name="direccion" value="arriba" />
-									<button type="submit" class="boton boton--icono boton--secundario" disabled={i === 0} aria-label={`Subir ${p.nombreEs}`}>↑</button>
+									<button type="submit" class="boton boton--icono boton--secundario" disabled={indice === 0} aria-label={`Subir la categoría ${categoria.nombreEs}`}>↑</button>
 								</form>
-								<form method="POST" action={actions.moverProducto}>
-									<input type="hidden" name="id" value={p.id} />
+								<form method="POST" action={actions.moverCategoria}>
+									<input type="hidden" name="id" value={categoria.id} />
 									<input type="hidden" name="direccion" value="abajo" />
-									<button type="submit" class="boton boton--icono boton--secundario" disabled={i === categoria.productos.length - 1} aria-label={`Bajar ${p.nombreEs}`}>↓</button>
+									<button type="submit" class="boton boton--icono boton--secundario" disabled={indice === categorias.length - 1} aria-label={`Bajar la categoría ${categoria.nombreEs}`}>↓</button>
 								</form>
 							</div>
-						</li>
-					))}
-				</ul>
-
-				<div class="admin-categoria__pie">
-					<a class="boton boton--secundario" href={`/admin/producto/nuevo?categoria=${categoria.id}`}>Agregar producto a {categoria.nombreEs}</a>
-				</div>
-
-				<details class="admin-categoria__editar">
-					<summary>Editar categoría</summary>
-					<form method="POST" action={actions.guardarCategoria} class="formulario">
-						<input type="hidden" name="id" value={categoria.id} />
-						<div class="campo">
-							<label for={`cat-es-${categoria.id}`}>Nombre</label>
-							<input id={`cat-es-${categoria.id}`} name="nombreEs" required maxlength="60" value={categoria.nombreEs} />
 						</div>
-						<div class="campo">
-							<label for={`cat-en-${categoria.id}`}>Nombre en inglés</label>
-							<input id={`cat-en-${categoria.id}`} name="nombreEn" maxlength="60" value={categoria.nombreEn ?? ''} />
-						</div>
-						<label class="casilla"><input type="checkbox" name="visible" checked={categoria.visible} /> Visible en la carta</label>
-						<button type="submit" class="boton">Guardar categoría</button>
-					</form>
-					<form method="POST" action={actions.eliminarCategoria}>
-						<input type="hidden" name="id" value={categoria.id} />
-						<button type="submit" class="boton boton--peligro" data-confirmar={`¿Eliminar la categoría ${categoria.nombreEs}?`}>Eliminar categoría</button>
-					</form>
+
+						{categoria.productos.length === 0 && <p class="carta-vacia">Esta categoría aún no tiene productos.</p>}
+						<ul class="fila-lista">
+							{categoria.productos.map((p, i) => (
+								<li
+									class:list={['fila-carta', { 'fila-carta--apagada': !p.disponible || !p.visible }]}
+									data-producto
+									data-texto={textoBuscable(p)}
+									data-estados={estadosDe(p).join(' ')}
+								>
+									<div class="fila-carta__info">
+										<a class="fila-carta__nombre" href={`/admin/producto/${p.id}`}>{p.nombreEs}</a>
+										<p class="fila-carta__detalle">
+											{p.precio === null && <span class="etiqueta etiqueta--aviso">Sin precio</span>}
+											{!p.visible && <span class="etiqueta">Oculto</span>}
+											{!p.disponible && <span class="etiqueta">Agotado</span>}
+											{p.descripcionEs && <span class="fila-carta__descripcion">{p.descripcionEs}</span>}
+										</p>
+									</div>
+
+									<form method="POST" action={actions.cambiarPrecio} class="fila-carta__precio">
+										<input type="hidden" name="id" value={p.id} />
+										<label class="solo-lectores" for={`precio-${p.id}`}>Precio de {p.nombreEs}</label>
+										<span class="entrada-precio">
+											<span class="entrada-precio__signo" aria-hidden="true">$</span>
+											<input id={`precio-${p.id}`} name="precio" inputmode="numeric" autocomplete="off" placeholder="Consultar" value={p.precio ?? ''} data-original={p.precio ?? ''} />
+										</span>
+										<button type="submit" class="boton">Guardar precio</button>
+									</form>
+
+									<form method="POST" action={actions.establecerDisponible} class="fila-carta__estado">
+										<input type="hidden" name="id" value={p.id} />
+										<input type="hidden" name="disponible" value={String(!p.disponible)} />
+										<button type="submit" class="interruptor" role="switch" aria-checked={p.disponible ? 'true' : 'false'} aria-label={`Disponible: ${p.nombreEs}`}>
+											<span class="interruptor__pista" aria-hidden="true"><span class="interruptor__pomo"></span></span>
+											<span class="interruptor__texto" aria-hidden="true">{p.disponible ? 'Disponible' : 'Agotado'}</span>
+										</button>
+									</form>
+
+									<div class="mover fila-carta__orden controles-orden">
+										<form method="POST" action={actions.moverProducto}>
+											<input type="hidden" name="id" value={p.id} />
+											<input type="hidden" name="direccion" value="arriba" />
+											<button type="submit" class="boton boton--icono boton--secundario" disabled={i === 0} aria-label={`Subir ${p.nombreEs}`}>↑</button>
+										</form>
+										<form method="POST" action={actions.moverProducto}>
+											<input type="hidden" name="id" value={p.id} />
+											<input type="hidden" name="direccion" value="abajo" />
+											<button type="submit" class="boton boton--icono boton--secundario" disabled={i === categoria.productos.length - 1} aria-label={`Bajar ${p.nombreEs}`}>↓</button>
+										</form>
+									</div>
+								</li>
+							))}
+						</ul>
+
+						<details class="carta-categoria__editar">
+							<summary>Editar categoría</summary>
+							<form method="POST" action={actions.guardarCategoria} class="formulario">
+								<input type="hidden" name="id" value={categoria.id} />
+								<div class="campo">
+									<label for={`cat-es-${categoria.id}`}>Nombre</label>
+									<input id={`cat-es-${categoria.id}`} name="nombreEs" required maxlength="60" value={categoria.nombreEs} />
+								</div>
+								<div class="campo">
+									<label for={`cat-en-${categoria.id}`}>Nombre en inglés</label>
+									<input id={`cat-en-${categoria.id}`} name="nombreEn" maxlength="60" value={categoria.nombreEn ?? ''} />
+								</div>
+								<label class="casilla"><input type="checkbox" name="visible" checked={categoria.visible} /> Visible en la carta</label>
+								<button type="submit" class="boton">Guardar categoría</button>
+							</form>
+							<form method="POST" action={actions.eliminarCategoria}>
+								<input type="hidden" name="id" value={categoria.id} />
+								<button type="submit" class="boton boton--peligro" data-confirmar={`¿Eliminar la categoría ${categoria.nombreEs}?`}>Eliminar categoría</button>
+							</form>
+						</details>
+					</div>
 				</details>
-			</section>
-		))
-	}
+			))
+		}
 
-	<section class="admin-categoria" aria-labelledby="nueva-categoria">
-		<h2 id="nueva-categoria">Nueva categoría</h2>
-		<form method="POST" action={actions.guardarCategoria} class="formulario">
-			<div class="campo">
-				<label for="nueva-es">Nombre</label>
-				<input id="nueva-es" name="nombreEs" required maxlength="60" />
+		<details class="carta-categoria carta-nueva" id="nueva-categoria">
+			<summary><h2 class="carta-categoria__titulo">Nueva categoría</h2></summary>
+			<div class="carta-categoria__cuerpo">
+				<form method="POST" action={actions.guardarCategoria} class="formulario">
+					<div class="campo">
+						<label for="nueva-es">Nombre</label>
+						<input id="nueva-es" name="nombreEs" required maxlength="60" />
+					</div>
+					<div class="campo">
+						<label for="nueva-en">Nombre en inglés <span class="campo__ayuda">(opcional)</span></label>
+						<input id="nueva-en" name="nombreEn" maxlength="60" />
+					</div>
+					<label class="casilla"><input type="checkbox" name="visible" checked /> Visible en la carta</label>
+					<button type="submit" class="boton">Crear categoría</button>
+				</form>
 			</div>
-			<div class="campo">
-				<label for="nueva-en">Nombre en inglés <span class="campo__ayuda">(opcional)</span></label>
-				<input id="nueva-en" name="nombreEn" maxlength="60" />
-			</div>
-			<label class="casilla"><input type="checkbox" name="visible" checked /> Visible en la carta</label>
-			<button type="submit" class="boton">Crear categoría</button>
-		</form>
-	</section>
+		</details>
+	</div>
 </LayoutAdmin>
+
+<script>
+	import '../../scripts/panelCarta.ts';
+</script>
 
 <script>
 	// Confirma las acciones destructivas sin depender de JavaScript para el resto del panel.
