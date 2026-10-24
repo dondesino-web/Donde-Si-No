@@ -24,30 +24,33 @@ const filas = [
 
 	<section aria-labelledby="movimiento">
 		<h2 id="movimiento">Movimiento de la carta</h2>
-		<div class="tabla-desplazable">
-			<table class="tabla">
-				<caption class="solo-lectores">Resumen de hoy y de los últimos 7 días</caption>
-				<thead>
-					<tr>
-						<th scope="col">Qué se cuenta</th>
-						<th scope="col">Hoy</th>
-						<th scope="col">Últimos 7 días</th>
-					</tr>
-				</thead>
-				<tbody>
-					{
-						filas.map((fila) => (
-							<tr>
-								<th scope="row">{fila.nombre}</th>
-								<td>{fila.hoy}</td>
-								<td>{fila.semana}</td>
-							</tr>
-						))
-					}
-				</tbody>
-			</table>
-		</div>
+		<dl class="resumen">
+			{
+				filas.map((fila) => (
+					<div class="resumen__dato">
+						<dt>{fila.nombre}</dt>
+						<dd>{fila.hoy} <span class="resumen__unidad">hoy</span></dd>
+						<dd class="resumen__semana">{fila.semana} en los últimos 7 días</dd>
+					</div>
+				))
+			}
+		</dl>
 		<p><a href="/admin/estadisticas">Ver todas las estadísticas</a></p>
+	</section>
+
+	<section id="instalar-app" aria-labelledby="instalar-titulo" hidden>
+		<h2 id="instalar-titulo">Instala el panel en tu teléfono</h2>
+		<p>Queda como una app más: se abre con un toque, sin escribir la dirección y sin barra del navegador.</p>
+		<button type="button" id="instalar-boton" class="boton" hidden>Instalar app</button>
+		<div id="instalar-iphone" hidden>
+			<p>En iPhone se instala desde Safari:</p>
+			<ol>
+				<li>Toca el botón <strong>Compartir</strong> (el cuadrado con una flecha hacia arriba).</li>
+				<li>Elige <strong>Agregar a inicio</strong>.</li>
+				<li>Toca <strong>Agregar</strong>.</li>
+			</ol>
+		</div>
+		<p id="instalar-estado" role="status"></p>
 	</section>
 
 	<h2>Accesos rápidos</h2>

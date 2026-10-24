@@ -8,6 +8,22 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-24 · Panel responsivo y app instalable (PWA)
+
+### Añadido
+- **App instalable del panel:** manifiesto (`/panel.webmanifest`, alcance `/admin`), íconos de 192 y 512 px y uno «maskable», service worker (`/panel-sw.js`) y botón «Instalar app» en el Inicio del panel, con pasos para iPhone. El manifiesto y el service worker viven en la raíz porque `/admin` exige sesión. El service worker solo muestra una página «Sin conexión» (`/panel-sin-conexion.html`): no guarda páginas ni datos del panel. La carta pública no cambia.
+- Pruebas: 8 unitarias del manifiesto y del service worker, y 12 E2E (sin scroll horizontal en 10 pantallas del panel a 320, 375 y 768 px, menú del celular, y la instalación).
+
+### Modificado
+- **Navegación del panel en el celular:** una sola línea (sección actual y botón «Menú»); el resto se despliega al tocarlo y marca la sección con `aria-current`. Sin JavaScript queda desplegada. En pantallas anchas se ve completa, como antes.
+- El resumen del Inicio pasa de tabla a tarjetas, para que quepa a 320 px.
+
+### Corregido
+- A 320 y 375 px, las pantallas de fotos, nuevo producto y nueva promoción se salían de lado, y el precio de cada producto en la lista de la carta desbordaba la tarjeta.
+- Las clases con `display` (como `.boton`) anulaban el atributo `hidden`.
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-24 · Lanzamiento: la carta se publica en www.donde-sino.com
 
 ### Añadido

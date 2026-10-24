@@ -50,6 +50,21 @@ await (await logo(320)).webp({ quality: 82 }).toFile(`${DESTINO}/logo-320.webp`)
 await (await logo(512)).flatten({ background: FONDO_CREMA }).jpeg({ quality: 82, mozjpeg: true }).toFile(`${DESTINO}/logo-512.jpg`);
 // iOS muestra fondo negro en íconos transparentes: se aplana sobre el crema de la marca.
 await (await logo(180)).flatten({ background: FONDO_CREMA }).png({ palette: true, quality: 85 }).toFile(`${DESTINO}/apple-touch-icon.png`);
+// App instalable del panel. «any» muestra el logo sobre el crema de la marca; «maskable» lo deja en el 70 % central sobre azul
+// de borde a borde, porque Android recorta el ícono con la forma que elija el teléfono.
+const FONDO_AZUL = '#0b2a6f';
+for (const lado of [192, 512]) {
+	const centrado = await (await logo(Math.round(lado * 0.86))).png().toBuffer();
+	await sharp({ create: { width: lado, height: lado, channels: 4, background: FONDO_CREMA } })
+		.composite([{ input: centrado, gravity: 'centre' }])
+		.png({ palette: true, quality: 85 })
+		.toFile(`${DESTINO}/panel-${lado}.png`);
+}
+const interior = await (await logo(Math.round(512 * 0.7))).png().toBuffer();
+await sharp({ create: { width: 512, height: 512, channels: 4, background: FONDO_AZUL } })
+	.composite([{ input: interior, gravity: 'centre' }])
+	.png({ palette: true, quality: 85 })
+	.toFile(`${DESTINO}/panel-maskable-512.png`);
 await writeFile('public/favicon.ico', pngAIco(await (await logo(32)).png().toBuffer(), 32));
 
 console.info('Íconos generados en public/marca/ y public/favicon.ico');
