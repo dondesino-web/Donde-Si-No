@@ -99,6 +99,7 @@ Mientras el dominio no está conectado a ningún proyecto, responde `DEPLOYMENT_
 
 ### Paso 9 · Después del lanzamiento
 - Cargar en `/admin`: **precios, fotos, horario y redes** (sin precios la carta dice «Consultar»).
+- Para cargar de una vez la carta y los combos leídos de los carteles: `npm run db:carta` (solo muestra) y luego `npm run db:carta -- --aplicar`, con `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN` cargados en esa terminal. Revisa antes en `src/lib/db/datosCarta.ts` qué quedó en «Consultar».
 - Regla de **Firewall → Rate Limit** en Vercel para `/qr` y `/api/evento` (por ejemplo 30 por minuto por IP).
 - Probar el QR impreso en el tamaño final con varios celulares y recién ahí imprimir las tarjetas de mesa.
 - En la ficha de Google: agregar `https://www.donde-sino.com` como sitio web y como enlace de menú.

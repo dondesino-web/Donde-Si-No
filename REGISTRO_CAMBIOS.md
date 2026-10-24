@@ -8,6 +8,16 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-24 · Carta y promociones leídas de los carteles
+
+### Añadido
+- **`npm run db:carta`**: carga en la base la carta y los combos leídos de las fotos de los carteles del local (72 productos nuevos, 1 categoría nueva, 7 promociones y la 2x1 de la semilla completada). Sin opciones solo muestra lo que haría; con `-- --aplicar` escribe. Es seguro de repetir: nunca pisa un precio ni una descripción que ya tengan valor y solo borra los 8 productos genéricos de la semilla (sin precio, foto ni descripción) que las variantes reemplazan.
+- Lo que no se leyó con claridad queda en «Consultar»: churrasco, fajita de pollo, bistec, chorrillana mixta grande, hamburguesa vegana y los productos con el recuadro en blanco en el cartel.
+- Categoría nueva **Almuerzos**. Los combos y los 2x1 se cargan como **promociones activas**.
+- 12 pruebas de integración de la carga.
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-24 · Panel responsivo y app instalable (PWA)
 
 ### Añadido
