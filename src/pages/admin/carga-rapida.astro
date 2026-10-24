@@ -1,0 +1,91 @@
+---
+import { actions } from 'astro:actions';
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { listarCartaAdmin } from '../../lib/repositorios/adminCartaRepo.ts';
+
+const resultado = Astro.getActionResult(actions.cargarProductosRapido);
+const aviso = resultado?.data?.ok ? resultado.data.mensaje : undefined;
+const errores = resultado?.data && !resultado.data.ok ? resultado.data.errores : undefined;
+const errorGeneral = resultado?.error ? resultado.error.message : undefined;
+const erroresDeLineas = errores?.lineas?.split('\n') ?? [];
+
+const categorias = await listarCartaAdmin(obtenerBd());
+const categoriaInicial = Number(Astro.url.searchParams.get('categoria')) || undefined;
+---
+
+<LayoutAdmin titulo="Carga rápida">
+	<h1>Carga rápida</h1>
+	<p>
+		Crea varios productos de una vez. Después puedes cambiar cualquier dato, uno por uno, en <a href="/admin/carta">Carta</a>.
+	</p>
+
+	<div aria-live="polite" class="avisos">
+		{aviso && <p class="aviso aviso--ok" role="status">{aviso} <a href="/admin/carta">Ver la carta</a></p>}
+		{errorGeneral && <p class="aviso aviso--error" role="alert">{errorGeneral}</p>}
+		{
+			errores && !errores.lineas && (
+				<p class="aviso aviso--error" role="alert">{Object.values(errores).join(' ')}</p>
+			)
+		}
+	</div>
+
+	<form method="POST" action={actions.cargarProductosRapido} class="formulario" data-carga-rapida data-con-error={errores ? 'true' : undefined} data-ok={aviso ? 'true' : undefined}>
+		<div class="campo">
+			<label for="categoriaId">Categoría</label>
+			<select id="categoriaId" name="categoriaId" aria-invalid={errores?.categoriaId ? 'true' : undefined}>
+				<option value="">Elige una categoría…</option>
+				{categorias.map((c) => <option value={c.id} selected={c.id === categoriaInicial}>{c.nombreEs}</option>)}
+			</select>
+			{errores?.categoriaId && <p class="campo__error">{errores.categoriaId}</p>}
+		</div>
+
+		<div class="campo">
+			<label for="categoriaNueva">O escribe una categoría nueva <span class="campo__ayuda">(si la escribes, se usa esta)</span></label>
+			<input id="categoriaNueva" name="categoriaNueva" maxlength="60" autocomplete="off" aria-invalid={errores?.categoriaNueva ? 'true' : undefined} />
+			{errores?.categoriaNueva && <p class="campo__error">{errores.categoriaNueva}</p>}
+		</div>
+
+		<div class="campo">
+			<label for="lineas">Productos <span class="campo__ayuda">(uno por línea)</span></label>
+			<textarea id="lineas" name="lineas" rows="12" spellcheck="false" aria-invalid={erroresDeLineas.length > 0 ? 'true' : undefined} aria-describedby="ayuda-lineas" required></textarea>
+			<p id="ayuda-lineas" class="campo__ayuda">
+				Escribe <strong>nombre; precio; descripción</strong>. El precio y la descripción son opcionales: sin precio, el producto queda en
+				«Consultar». También puedes copiar y pegar columnas desde una planilla.
+			</p>
+			<pre class="campo__ayuda ejemplo" aria-label="Ejemplo">Costillar; 8000; Con puré o arroz
+Pastel de choclo; 7.500
+Lasagna</pre>
+		</div>
+
+		{
+			erroresDeLineas.length > 0 && (
+				<div class="aviso aviso--error" role="alert">
+					<p>Revisa estas líneas. No se creó nada:</p>
+					<ul>{erroresDeLineas.map((e) => <li>{e}</li>)}</ul>
+				</div>
+			)
+		}
+
+		<p class="campo__ayuda">Si un producto ya existe en esa categoría, se deja como está: no se duplica ni se cambia su precio.</p>
+		<div class="formulario__acciones">
+			<button type="submit" class="boton">Crear productos</button>
+		</div>
+	</form>
+</LayoutAdmin>
+
+<script>
+	// Si hay un error, la página se recarga: se guarda lo escrito para no perderlo (puede ser una lista larga).
+	const formulario = document.querySelector<HTMLFormElement>('[data-carga-rapida]');
+	const lineas = formulario?.querySelector<HTMLTextAreaElement>('#lineas');
+	const CLAVE = 'carga-rapida-lineas';
+	if (formulario && lineas) {
+		try {
+			if (formulario.dataset.ok === 'true') sessionStorage.removeItem(CLAVE);
+			else if (formulario.dataset.conError === 'true') lineas.value = sessionStorage.getItem(CLAVE) ?? '';
+			lineas.addEventListener('input', () => sessionStorage.setItem(CLAVE, lineas.value));
+		} catch {
+			/* Sin almacenamiento del navegador solo se pierde la comodidad de recuperar el texto. */
+		}
+	}
+</script>

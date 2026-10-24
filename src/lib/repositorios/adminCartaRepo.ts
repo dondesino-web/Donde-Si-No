@@ -4,6 +4,7 @@ import { categoria, producto } from '../db/esquema.ts';
 import { slugificar } from '../dominio/slug.ts';
 import type { Imagen } from '../dominio/tipos.ts';
 import type { DatosCategoriaFormulario, DatosProductoFormulario } from '../validacion/carta.ts';
+import { claveDeNombre, type ProductoRapido } from '../validacion/cargaRapida.ts';
 import type { Categoria, CategoriaConProductos, Producto } from './cartaRepo.ts';
 
 // Lo único que necesitan los actualizadores; sirve tanto para la conexión como para una transacción.
@@ -42,6 +43,40 @@ export async function crearProducto(bd: Bd, datos: DatosProducto): Promise<Produ
 	const orden = await siguienteOrdenProducto(bd, datos.categoriaId);
 	const [creado] = await bd.insert(producto).values({ ...datos, orden }).returning();
 	return creado;
+}
+
+export interface ResultadoLote {
+	creados: number;
+	/** Nombres (como se escribieron) que ya estaban en la categoría: no se tocan ni se duplican. */
+	yaExistian: string[];
+}
+
+/**
+ * Crea varios productos de una vez al final de una categoría, en una sola transacción. Un nombre que ya existe en esa
+ * categoría (sin distinguir mayúsculas, tildes ni espacios de más) se omite: nunca se pisa lo que ya editó el dueño.
+ * Devuelve `undefined` si la categoría no existe.
+ */
+export async function crearProductosEnLote(bd: Bd, categoriaId: number, nuevos: readonly ProductoRapido[]): Promise<ResultadoLote | undefined> {
+	return bd.transaction(async (tx) => {
+		const [existe] = await tx.select({ id: categoria.id }).from(categoria).where(eq(categoria.id, categoriaId));
+		if (!existe) return undefined;
+
+		const actuales = await tx.select({ nombreEs: producto.nombreEs, orden: producto.orden }).from(producto).where(eq(producto.categoriaId, categoriaId));
+		const nombres = new Set(actuales.map((p) => claveDeNombre(p.nombreEs)));
+		let orden = actuales.reduce((mayor, p) => Math.max(mayor, p.orden), -1) + 1;
+		const yaExistian: string[] = [];
+		const porCrear: (typeof producto.$inferInsert)[] = [];
+
+		for (const datos of nuevos) {
+			if (nombres.has(claveDeNombre(datos.nombreEs))) {
+				yaExistian.push(datos.nombreEs);
+				continue;
+			}
+			porCrear.push({ categoriaId, nombreEs: datos.nombreEs, descripcionEs: datos.descripcionEs, precio: datos.precio, orden: orden++ });
+		}
+		if (porCrear.length > 0) await tx.insert(producto).values(porCrear);
+		return { creados: porCrear.length, yaExistian };
+	});
 }
 
 export async function actualizarProducto(bd: Bd, id: number, datos: DatosProducto): Promise<boolean> {
