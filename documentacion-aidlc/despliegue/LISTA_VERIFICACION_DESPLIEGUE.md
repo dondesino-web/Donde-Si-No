@@ -100,6 +100,7 @@ Mientras el dominio no está conectado a ningún proyecto, responde `DEPLOYMENT_
 ### Paso 9 · Después del lanzamiento
 - Cargar en `/admin`: **precios, fotos, horario y redes** (sin precios la carta dice «Consultar»).
 - Para crear muchos productos de una vez usa **Carga rápida** (`/admin/carga-rapida`): una línea por producto, `nombre; precio; descripción`.
+- Para actualizar la carta con Excel: en **Carga rápida → Con Excel**, descarga la planilla, modifícala y súbela; el panel muestra un resumen antes de guardar. Nunca borra productos.
 - Regla de **Firewall → Rate Limit** en Vercel para `/qr` y `/api/evento` (por ejemplo 30 por minuto por IP).
 - Probar el QR impreso en el tamaño final con varios celulares y recién ahí imprimir las tarjetas de mesa.
 - En la ficha de Google: agregar `https://www.donde-sino.com` como sitio web y como enlace de menú.
