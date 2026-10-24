@@ -23,7 +23,7 @@
 > ⚠️ **Primero la base de datos y las variables; después, la fusión a `main`.** En producción la app se niega a arrancar con una base local (a propósito). Si se fusiona antes de configurar Turso y las variables, el sitio responderá con error hasta que estén.
 
 ### Paso 1 · Decidir el plan de Vercel
-El plan Hobby es solo para uso no comercial. Para la web de un negocio corresponde Pro. Lo decide el responsable. (El cron diario funciona en ambos.)
+**Decisión del responsable (2026-10-24): usar el plan Hobby.** Sus términos lo limitan a uso personal y no comercial, y la web de un negocio cae fuera de eso: Vercel puede limitar o suspender el proyecto, y la web podría caer sin aviso previo. El riesgo está asumido; si Vercel lo pide, o cuando el negocio dependa de la carta, se pasa a Pro (US$20 al mes) sin tocar el código. La app funciona igual en Hobby; el cron diario también (en Hobby corre una vez al día, en una ventana de una hora).
 
 ### Paso 2 · Crear la base de datos en Turso
 - Desde Vercel → *Storage* / *Marketplace* → **Turso** (crea la base y carga `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN` en el proyecto), o bien desde turso.tech con su CLI.
@@ -88,7 +88,7 @@ Con el CI en verde y el preview revisado. Vercel despliega solo. Si algo falla: 
 - [x] **Plan de reversión:** Instant Rollback de Vercel.
 
 ### Por hacer en el lanzamiento (ver sección 2)
-- [ ] **Plan de Vercel** adecuado para uso comercial (Pro).
+- [x] **Plan de Vercel:** el responsable eligió **Hobby** conociendo que sus términos excluyen el uso comercial. Revisar al lanzar y si Vercel lo pide.
 - [ ] **Turso:** base creada, migraciones aplicadas y semilla cargada.
 - [ ] **Vercel Blob:** store creado y `BLOB_READ_WRITE_TOKEN` configurado.
 - [ ] **Secretos:** `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`, `ISR_BYPASS_TOKEN` (≥ 32 caracteres) y `CRON_SECRET` (≥ 16), todos distintos; `npm run entorno:verificar` en verde.

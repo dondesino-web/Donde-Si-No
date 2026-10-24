@@ -44,7 +44,7 @@ Detalle de cada fase en [`PLAN_CARTA_DIGITAL.md`](./documentacion-aidlc/diseno/P
 
 - [ ] **Fase 4 · Calidad y lanzamiento** (la parte de código está lista; falta lanzar):
   - **Hecho (2026-10-24):** cobertura de `src/lib` al 98 %, CI en GitHub Actions (aún sin ejecutar: el código no está subido), revisión final de seguridad y de calidad de código aplicadas, Lighthouse 100/100/100/100 en un build empaquetado local, presupuesto de bytes medido (HTML ≈ 6 KB, CSS ≈ 1,7 KB y JS ≈ 1,1 KB gzip), cron diario de limpieza de fotos y `npm run entorno:verificar`.
-  - **Falta (lo hace el responsable, ver [la guía](./documentacion-aidlc/despliegue/LISTA_VERIFICACION_DESPLIEGUE.md)):** decidir el plan de Vercel, crear Turso y Blob, cargar las variables, subir la rama, revisar el *preview* y fusionar a `main`.
+  - **Falta (lo hace el responsable, ver [la guía](./documentacion-aidlc/despliegue/LISTA_VERIFICACION_DESPLIEGUE.md)):** crear Turso y Blob, cargar las variables, subir la rama, revisar el *preview* y fusionar a `main`.
   - **Tareas del dueño:** cargar precios, fotos, horario y redes; enlazar la carta en su ficha de Google; imprimir los QR para las mesas.
 - [ ] **Cierre pendiente de las Fases 1 a 3** (se hace con el despliegue):
   - **Límite de tasa** en Vercel Firewall sobre `/qr` y `/api/evento` (por ejemplo 30 por minuto por IP): sin cookies ni IPs en la aplicación, es la única defensa real contra quien infle las cifras o gaste escrituras de Turso.
@@ -66,7 +66,7 @@ Detalle de cada fase en [`PLAN_CARTA_DIGITAL.md`](./documentacion-aidlc/diseno/P
 
 ## Riesgos
 
-- ⚠️ El plan Hobby de Vercel es solo para uso no comercial: evaluar Pro antes del lanzamiento.
+- ⚠️ El responsable eligió el plan Hobby de Vercel (2026-10-24), cuyos términos excluyen el uso comercial: Vercel podría limitar o suspender el proyecto. Pasar a Pro si lo pide o cuando el negocio dependa de la carta.
 - ⚠️ La carta se lanza sin precios («Consultar») si el dueño no los carga antes de imprimir el QR.
 - ⚠️ El horario del local está vacío en la semilla: la carta dice «Horario por confirmar» hasta que el dueño lo cargue en `/admin/local`.
 - ⚠️ La contraseña del panel (`npm run admin:hash`), `SESSION_SECRET`, `ISR_BYPASS_TOKEN` y el store de Blob deben cargarse en Vercel antes de usar el panel en producción.

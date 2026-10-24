@@ -216,7 +216,7 @@ Cada fase termina con `npx astro check`, `npm run build` y tests en verde, y con
 
 ## 8. Riesgos y notas
 
-- **Plan Hobby de Vercel:** sus términos lo limitan a uso no comercial. Para un negocio corresponde Pro (US$20/mes). Lo decide el responsable antes del lanzamiento.
+- **Plan Hobby de Vercel:** sus términos lo limitan a uso no comercial. Para un negocio corresponde Pro (US$20/mes). **El responsable eligió Hobby (2026-10-24)** asumiendo el riesgo; se pasa a Pro si Vercel lo pide.
 - **Carta sin precios:** hasta que el dueño los cargue, los productos muestran «Consultar». Conviene cargar los precios antes de imprimir el QR.
 - **Inglés:** si nadie traduce, la versión `/en/` muestra el contenido en español con la interfaz en inglés. Es aceptable, pero se pierde valor.
 - **Estadísticas aproximadas:** son contadores propios sin cookies, no analítica de precisión. Las métricas por plato («qué platos miran más») quedan para una fase posterior.

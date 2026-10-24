@@ -17,7 +17,7 @@
 | Base de datos | Turso (libSQL) | ⏳ Por crear (Fase 4) |
 | Fotos | Vercel Blob (store público) | ⏳ Por crear (Fase 4) |
 
-> ⚠️ **Plan de Vercel:** el plan Hobby es solo para uso no comercial. Para la web de un negocio corresponde Pro (US$20/mes). Lo decide el responsable antes del lanzamiento.
+> ⚠️ **Plan de Vercel:** el plan Hobby es solo para uso no comercial. Para la web de un negocio corresponde Pro (US$20/mes). **El responsable eligió Hobby (2026-10-24)** asumiendo ese riesgo: Vercel podría limitar o suspender el proyecto.
 
 ---
 
