@@ -15,8 +15,8 @@
 - **Propietario / Mantenedor:** `jhonabruzzi278`
 - **URL de Producción:** [https://www.donde-sino.com/](https://www.donde-sino.com/)
 - **Proveedor de Hosting:** Vercel (CI/CD automático desde GitHub)
-- **Fase AI-DLC:** Construcción · Fase 0 del plan terminada
-- **Repositorio:** `https://github.com/jhonabruzzi278/Donde-Si-No.git`
+- **Fase AI-DLC:** Operaciones · carta publicada el 2026-10-24 (Fases 0 a 4 del plan terminadas)
+- **Repositorio:** `https://github.com/dondesino-web/Donde-Si-No.git`
 - **Stack:** Astro 7 (`output: 'server'`, ISR) · `@astrojs/vercel` 11 · Turso + Drizzle · Vercel Blob · Vitest
 - **Runtime:** Node.js ≥ 22.23.4
 - **Última Actualización:** 2026-10-23

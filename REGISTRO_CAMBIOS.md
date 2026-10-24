@@ -8,6 +8,19 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-24 · Lanzamiento: la carta se publica en www.donde-sino.com
+
+### Añadido
+- **Publicación** en `https://www.donde-sino.com` al fusionar el PR #1 a `main`, con el CI en verde. `donde-sino.com` redirige a `www`.
+- Base de Turso `dondesino-rosalia` con migraciones y semilla, store de Vercel Blob y todas las variables de producción cargadas en Vercel.
+
+### Modificado
+- El repositorio pasó a la cuenta de GitHub del negocio: `dondesino-web/Donde-Si-No`. Se actualizaron las direcciones en `CONTRIBUIR.md`, `MANIFIESTO_PROYECTO.md`, `SEGURIDAD.md` y los metadatos.
+- El proyecto de Vercel quedó en el equipo `donde-sino`, y el dominio se trasladó ahí con «Move Domain» (el claim por TXT falló).
+- La guía de despliegue ahora documenta cómo quedó todo: qué variables lleva cada entorno, el token de Blob marcado como *sensitive* y cómo trasladar el dominio entre cuentas de Vercel.
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-24 · Fase 4 de la carta digital: calidad y preparación del lanzamiento
 
 ### Añadido

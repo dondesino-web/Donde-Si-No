@@ -20,7 +20,7 @@
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/jhonabruzzi278/Donde-Si-No.git
+git clone https://github.com/dondesino-web/Donde-Si-No.git
 cd Donde-Si-No
 
 # 2. Instalar dependencias

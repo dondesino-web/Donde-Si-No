@@ -40,16 +40,19 @@ Detalle de cada fase en [`PLAN_CARTA_DIGITAL.md`](./documentacion-aidlc/diseno/P
   - Panel: resumen de hoy y de la semana en el inicio, `/admin/estadisticas` (7, 14 o 30 días, gráfico accesible y tabla) y `/admin/qr` con descarga en SVG y PNG y tarjeta de mesa imprimible (1 o 4 por hoja, en español e inglés).
   - 446 tests unitarios y de integración, y 108 E2E.
 
+- [x] **Fase 4 · Calidad y lanzamiento** (2026-10-24):
+  - Cobertura de `src/lib` al 98 %, CI en GitHub Actions (en verde en el PR #1), revisión final de seguridad y de calidad de código, Lighthouse 100/100/100/100 en un build empaquetado local, presupuesto de bytes medido (HTML ≈ 6 KB, CSS ≈ 1,7 KB y JS ≈ 1,1 KB gzip), cron diario de limpieza de fotos y `npm run entorno:verificar`.
+  - **Publicada en `https://www.donde-sino.com`:** Turso y Vercel Blob creados, variables cargadas y verificadas, PR #1 fusionado a `main`. El repositorio pasó a la cuenta del negocio (`dondesino-web`), el proyecto de Vercel quedó en el equipo `donde-sino` y el dominio se trasladó a ese equipo. Detalle en [la guía de despliegue](./documentacion-aidlc/despliegue/LISTA_VERIFICACION_DESPLIEGUE.md).
+
 ## 2. Siguiente
 
-- [ ] **Fase 4 · Calidad y lanzamiento** (la parte de código está lista; falta lanzar):
-  - **Hecho (2026-10-24):** cobertura de `src/lib` al 98 %, CI en GitHub Actions (aún sin ejecutar: el código no está subido), revisión final de seguridad y de calidad de código aplicadas, Lighthouse 100/100/100/100 en un build empaquetado local, presupuesto de bytes medido (HTML ≈ 6 KB, CSS ≈ 1,7 KB y JS ≈ 1,1 KB gzip), cron diario de limpieza de fotos y `npm run entorno:verificar`.
-  - **Falta (lo hace el responsable, ver [la guía](./documentacion-aidlc/despliegue/LISTA_VERIFICACION_DESPLIEGUE.md)):** crear Turso y Blob, cargar las variables, subir la rama, revisar el *preview* y fusionar a `main`.
-  - **Tareas del dueño:** cargar precios, fotos, horario y redes; enlazar la carta en su ficha de Google; imprimir los QR para las mesas.
-- [ ] **Cierre pendiente de las Fases 1 a 3** (se hace con el despliegue):
+- [ ] **Tareas del dueño:** cargar precios, fotos, horario y redes; enlazar la carta en su ficha de Google; imprimir los QR para las mesas.
+- [ ] **Cierre pendiente de las Fases 1 a 4** (en producción):
   - **Límite de tasa** en Vercel Firewall sobre `/qr` y `/api/evento` (por ejemplo 30 por minuto por IP): sin cookies ni IPs en la aplicación, es la única defensa real contra quien infle las cifras o gaste escrituras de Turso.
   - Probar el QR impreso en el tamaño final con varios celulares.
-  - Probar contra Vercel real la revalidación ISR, Vercel Blob y el login detrás del proxy (`x-forwarded-for`).
+  - Probar en producción la revalidación ISR, Vercel Blob y el login detrás del proxy (`x-forwarded-for`), y ver el cron en *Settings → Cron Jobs*.
+  - Lighthouse en producción con fotos reales.
+  - Darle a Preview una base de Turso y un store de Blob propios (hoy comparte los de producción).
   - Validar el JSON-LD con el Rich Results Test (necesita la URL pública).
   - CSP completa que restrinja scripts e imágenes (hoy es una CSP acotada): probarla en modo solo-reporte en el *preview*.
   - Regla de límite de tasa en Vercel Firewall también para `/admin/login`.
@@ -69,4 +72,5 @@ Detalle de cada fase en [`PLAN_CARTA_DIGITAL.md`](./documentacion-aidlc/diseno/P
 - ⚠️ El responsable eligió el plan Hobby de Vercel (2026-10-24), cuyos términos excluyen el uso comercial: Vercel podría limitar o suspender el proyecto. Pasar a Pro si lo pide o cuando el negocio dependa de la carta.
 - ⚠️ La carta se lanza sin precios («Consultar») si el dueño no los carga antes de imprimir el QR.
 - ⚠️ El horario del local está vacío en la semilla: la carta dice «Horario por confirmar» hasta que el dueño lo cargue en `/admin/local`.
-- ⚠️ La contraseña del panel (`npm run admin:hash`), `SESSION_SECRET`, `ISR_BYPASS_TOKEN` y el store de Blob deben cargarse en Vercel antes de usar el panel en producción.
+- ⚠️ Los *previews* de Vercel usan la misma base y el mismo store que producción: lo que se edite en un *preview* cambia la carta publicada.
+- ⚠️ El dominio se renueva en AWS (Amazon Registrar), no en Vercel, y vence el 2027-03-10.
