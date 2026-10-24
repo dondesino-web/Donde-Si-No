@@ -129,7 +129,7 @@ export async function moverProducto(bd: Bd, id: number, direccion: Direccion): P
 	return moverEnGrupo(bd, hermanos, id, direccion, (ejecutor, idFila, orden) => ejecutor.update(producto).set({ orden }).where(eq(producto.id, idFila)));
 }
 
-async function slugDisponible(bd: Bd, nombre: string): Promise<string> {
+async function slugDisponible(bd: Pick<Bd, 'select'>, nombre: string): Promise<string> {
 	const base = slugificar(nombre);
 	const usados = new Set((await bd.select({ slug: categoria.slug }).from(categoria).where(like(categoria.slug, `${base}%`))).map((f) => f.slug));
 	if (!usados.has(base)) return base;
@@ -139,7 +139,8 @@ async function slugDisponible(bd: Bd, nombre: string): Promise<string> {
 	}
 }
 
-export async function crearCategoria(bd: Bd, datos: DatosCategoria): Promise<Categoria> {
+/** Acepta la conexión o una transacción. */
+export async function crearCategoria(bd: Pick<Bd, 'select' | 'insert'>, datos: DatosCategoria): Promise<Categoria> {
 	const [fila] = await bd.select({ ultimo: max(categoria.orden) }).from(categoria);
 	const [creada] = await bd
 		.insert(categoria)
