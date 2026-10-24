@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DURACION_SESION_MS, crearTokenSesion, verificarTokenSesion } from '../../src/lib/auth/sesion.ts';
+import { DURACION_SESION_MS, crearTokenSesion, nombreCookieSesion, verificarTokenSesion } from '../../src/lib/auth/sesion.ts';
 
 const SECRETO = 'a'.repeat(32);
 const AHORA = new Date('2026-10-23T12:00:00Z');
@@ -44,5 +44,15 @@ describe('token de sesión', () => {
 	it('exige un secreto de al menos 32 caracteres', () => {
 		expect(() => crearTokenSesion('corto', AHORA)).toThrow(/32/);
 		expect(verificarTokenSesion('corto', 'x.y', AHORA)).toBe(false);
+	});
+});
+
+describe('nombreCookieSesion', () => {
+	it('en producción usa el prefijo __Host-: el navegador solo la acepta con Secure, en el sitio exacto y sin Domain', () => {
+		expect(nombreCookieSesion(true)).toBe('__Host-sesion');
+	});
+
+	it('en desarrollo (http local) usa un nombre simple, porque __Host- exige https', () => {
+		expect(nombreCookieSesion(false)).toBe('sesion');
 	});
 });

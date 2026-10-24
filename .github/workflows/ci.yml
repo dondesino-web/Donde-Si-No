@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Una ejecución nueva cancela la anterior de la misma rama: ahorra minutos y evita resultados viejos.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  calidad:
+    name: Tipos, tests y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tipos (astro check)
+        run: npm run check
+
+      - name: El esquema y las migraciones están sincronizados
+        run: |
+          npx drizzle-kit generate
+          git diff --exit-code drizzle/ || (echo "Hay cambios de esquema sin migración: ejecuta npm run db:generate y súbela." && exit 1)
+
+      - name: Tests unitarios y de integración, con cobertura mínima del 80 %
+        run: npm run test:coverage
+
+      - name: Build de producción
+        run: npm run build
+
+      - name: Auditoría de dependencias (solo producción; bloquea ante severidad crítica. Los avisos altos aceptados están en documentacion-aidlc/generacion-codigo/NOTAS_REVISION_CODIGO.md)
+        run: npm audit --omit=dev --audit-level=critical
+
+  e2e:
+    name: E2E (Playwright + axe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: calidad
+    env:
+      # Base local de la ejecución: el servidor de pruebas de Playwright la usa y nada sale de la máquina.
+      TURSO_DATABASE_URL: file:local.db
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Base de datos de pruebas (migraciones y semilla)
+        run: |
+          npm run db:migrate
+          npm run db:seed
+
+      # Las pruebas usan el Chrome instalado (`channel: 'chrome'`), que ya viene en los runners de Ubuntu.
+      - name: E2E
+        run: npm run test:e2e
+
+      - name: Guardar capturas e informes si algo falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-e2e
+          path: test-results/
+          retention-days: 7

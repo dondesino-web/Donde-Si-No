@@ -45,7 +45,10 @@ Plantilla en [`.env.example`](../../.env.example). En Vercel se cargan en *Proje
 | `BLOB_READ_WRITE_TOKEN` | Store de Vercel Blob (lo crea la integración de Vercel) | Sí (sin él, la subida de fotos falla en lugar de escribir en disco) |
 | `ISR_BYPASS_TOKEN` | Secreto de 32 o más caracteres para invalidar la caché al guardar | Sí, desde la Fase 2 (hoy el build solo advierte si falta) |
 | `ADMIN_PASSWORD_HASH` | Hash scrypt de la contraseña del panel | Sí, desde la Fase 2 |
-| `SESSION_SECRET` | Firma de la cookie de sesión y HMAC de IPs | Sí, desde la Fase 2 |
+| `SESSION_SECRET` | Firma de la cookie de sesión, de las subidas de fotos y HMAC de IPs | Sí, desde la Fase 2 |
+| `CRON_SECRET` | Secreto (16 o más caracteres) con el que el cron diario de Vercel limpia las fotos huérfanas; sin él, esa ruta responde 503 | Sí, desde la Fase 4 |
+
+Los cuatro secretos deben ser distintos entre sí. `node --env-file=<archivo> scripts/verificar-entorno.ts` (o `npm run entorno:verificar`) revisa que estén completos y bien formados sin mostrar sus valores.
 
 ---
 
@@ -63,7 +66,18 @@ TURSO_DATABASE_URL=… TURSO_AUTH_TOKEN=… npm run db:seed           # solo la 
 
 ---
 
-## 5. Estado de la Infraestructura
+## 5. Archivos de configuración
 
-- **Producción:** activa con la portada provisional.
+| Archivo | Para qué |
+|---|---|
+| `vercel.json` | Cron diario `/api/cron/limpiar-fotos` (07:17 UTC) y cabeceras de seguridad para todos los archivos |
+| `.github/workflows/ci.yml` | CI: tipos, esquema y migraciones sincronizados, cobertura, build, auditoría y E2E |
+| `astro.config.mjs` | Adaptador de Vercel con ISR (solo la carta pública), i18n y `astro:env` |
+| `playwright.config.ts` | E2E con su propio servidor en el puerto 4399 y secretos efímeros |
+
+---
+
+## 6. Estado de la Infraestructura
+
+- **Producción:** el dominio `www.donde-sino.com` está verificado en Vercel, pero el único despliegue es el commit inicial de la plantilla de Astro.
 - **Fase 0:** el proyecto ya compila con el adaptador de Vercel y el ISR configurado. Faltan los recursos de Turso y Blob, y las variables de entorno.

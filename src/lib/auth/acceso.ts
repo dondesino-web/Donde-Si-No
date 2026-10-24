@@ -48,7 +48,8 @@ export function esRutaPanel(rutaOriginal: string): boolean {
 export function decidirAcceso(rutaOriginal: string, haySesion: boolean): DecisionAcceso {
 	const ruta = normalizar(rutaOriginal);
 
-	if (esRutaDe(ruta, '/api/admin')) return haySesion ? 'permitir' : 'no-autorizado';
+	// Ninguna acción es pública: sin sesión se corta aquí, aunque una acción nueva olvide su propia guardia (`exigirSesion`).
+	if (esRutaDe(ruta, '/api/admin') || esRutaDe(ruta, '/_actions')) return haySesion ? 'permitir' : 'no-autorizado';
 	if (!esRutaDe(ruta, '/admin')) return 'permitir';
 	if (ruta === RUTA_LOGIN) return haySesion ? 'panel' : 'permitir';
 	return haySesion ? 'permitir' : 'login';

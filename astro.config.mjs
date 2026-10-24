@@ -20,8 +20,8 @@ export default defineConfig({
 			bypassToken: ISR_BYPASS_TOKEN || undefined,
 			// Red de seguridad: el «menú del día» depende de la fecha aunque nadie edite.
 			expiration: 60 * 60,
-			// Rutas que nunca se cachean: panel, API, acciones y el contador del QR.
-			exclude: [/^\/admin(\/|$)/, /^\/api\//, /^\/_actions\//, '/qr'],
+			// Rutas que nunca se cachean: panel, API, acciones, el contador del QR y las fotos del almacén local (solo desarrollo).
+			exclude: [/^\/admin(\/|$)/, /^\/api\//, /^\/_actions\//, /^\/uploads\//, '/qr'],
 		},
 	}),
 	// La barra flotante de desarrollo tapa botones al pie de la página y estorba a las pruebas E2E.
@@ -42,6 +42,8 @@ export default defineConfig({
 			ADMIN_PASSWORD_HASH: envField.string({ context: 'server', access: 'secret', optional: true }),
 			// El mismo token que usa el adaptador de Vercel: sin él, guardar en el panel no refresca la caché pública.
 			ISR_BYPASS_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
+			// Secreto con el que el cron diario de Vercel limpia las fotos huérfanas; sin él, esa ruta responde 503.
+			CRON_SECRET: envField.string({ context: 'server', access: 'secret', optional: true, min: 16 }),
 			SESSION_SECRET: envField.string({ context: 'server', access: 'secret', optional: true, min: 32 }),
 		},
 	},

@@ -1,6 +1,15 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
+/** Nombre en desarrollo (http local). En producción se usa {@link nombreCookieSesion}. */
 export const NOMBRE_COOKIE_SESION = 'sesion';
+
+/**
+ * En producción la cookie lleva el prefijo `__Host-`: el navegador solo la acepta si es `Secure`, de ruta `/` y sin
+ * `Domain`, lo que impide que un subdominio o una conexión sin cifrar la pise o la fije. En desarrollo (http) ese prefijo
+ * no se puede usar.
+ */
+export const nombreCookieSesion = (esProduccion: boolean): string => (esProduccion ? `__Host-${NOMBRE_COOKIE_SESION}` : NOMBRE_COOKIE_SESION);
+
 export const DURACION_SESION_MS = 7 * 24 * 60 * 60 * 1000;
 const LARGO_MINIMO_SECRETO = 32;
 

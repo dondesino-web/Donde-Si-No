@@ -4,7 +4,7 @@
  * generados se versionan en `public/marca/` y `public/favicon.ico`.
  */
 import { mkdir, writeFile } from 'node:fs/promises';
-import sharp from 'sharp';
+import sharp, { type Sharp } from 'sharp';
 
 const ORIGEN = 'src/assets/marca/logo-donde-si-no.png';
 const DESTINO = 'public/marca';
@@ -14,7 +14,7 @@ const mascaraCircular = (lado: number): Buffer =>
 	Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${lado}" height="${lado}"><circle cx="${lado / 2}" cy="${lado / 2}" r="${lado / 2}"/></svg>`);
 
 /** El logo original trae esquinas blancas opacas: se recorta en círculo para que funcione sobre cualquier fondo. */
-async function logo(lado: number): Promise<sharp.Sharp> {
+async function logo(lado: number): Promise<Sharp> {
 	const recortado = await sharp(ORIGEN)
 		.resize(lado, lado, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
 		.composite([{ input: mascaraCircular(lado), blend: 'dest-in' }])

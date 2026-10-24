@@ -42,24 +42,25 @@ Detalle de cada fase en [`PLAN_CARTA_DIGITAL.md`](./documentacion-aidlc/diseno/P
 
 ## 2. Siguiente
 
-- [ ] **Cierre pendiente de las Fases 1 a 3** (se hará con el despliegue de la Fase 4):
+- [ ] **Fase 4 · Calidad y lanzamiento** (la parte de código está lista; falta lanzar):
+  - **Hecho (2026-10-24):** cobertura de `src/lib` al 98 %, CI en GitHub Actions (aún sin ejecutar: el código no está subido), revisión final de seguridad y de calidad de código aplicadas, Lighthouse 100/100/100/100 en un build empaquetado local, presupuesto de bytes medido (HTML ≈ 6 KB, CSS ≈ 1,7 KB y JS ≈ 1,1 KB gzip), cron diario de limpieza de fotos y `npm run entorno:verificar`.
+  - **Falta (lo hace el responsable, ver [la guía](./documentacion-aidlc/despliegue/LISTA_VERIFICACION_DESPLIEGUE.md)):** decidir el plan de Vercel, crear Turso y Blob, cargar las variables, subir la rama, revisar el *preview* y fusionar a `main`.
+  - **Tareas del dueño:** cargar precios, fotos, horario y redes; enlazar la carta en su ficha de Google; imprimir los QR para las mesas.
+- [ ] **Cierre pendiente de las Fases 1 a 3** (se hace con el despliegue):
   - **Límite de tasa** en Vercel Firewall sobre `/qr` y `/api/evento` (por ejemplo 30 por minuto por IP): sin cookies ni IPs en la aplicación, es la única defensa real contra quien infle las cifras o gaste escrituras de Turso.
   - Probar el QR impreso en el tamaño final con varios celulares.
   - Probar contra Vercel real la revalidación ISR, Vercel Blob y el login detrás del proxy (`x-forwarded-for`).
-  - Medir el presupuesto de bytes y validar el JSON-LD con el Rich Results Test.
-  - CSP completa que restrinja scripts e imágenes (hoy es una CSP acotada).
-  - Limpieza periódica de fotos subidas y nunca guardadas.
+  - Validar el JSON-LD con el Rich Results Test (necesita la URL pública).
+  - CSP completa que restrinja scripts e imágenes (hoy es una CSP acotada): probarla en modo solo-reporte en el *preview*.
+  - Regla de límite de tasa en Vercel Firewall también para `/admin/login`.
   - Probar la subida de fotos en Safari de iPhone (puede no escribir WebP).
-- [ ] **Fase 4 · Calidad y lanzamiento:**
-  - Cobertura ≥ 80 %, revisiones de seguridad y Lighthouse ≥ 95.
-  - CI en GitHub Actions.
-  - Turso y Blob en producción.
 
 ## 3. Más adelante (fuera del MVP)
 
 - [ ] Estadísticas por plato («qué platos se miran más»).
 - [ ] Pedido por WhatsApp (descartado para el MVP por el responsable).
 - [ ] Más de una cuenta de administrador.
+- [ ] Extraer componentes del panel (avisos, botones ↑/↓, confirmación) y unificar las acciones «mover»: ver la deuda técnica en [NOTAS_REVISION_CODIGO.md](./documentacion-aidlc/generacion-codigo/NOTAS_REVISION_CODIGO.md).
 
 ---
 

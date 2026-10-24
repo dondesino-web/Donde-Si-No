@@ -40,6 +40,7 @@ test.beforeEach(async ({ context }) => iniciarSesion(context));
 test('guarda horario, contacto, redes y servicios, y todo se ve en la carta pública', async ({ page }) => {
 	await page.goto('/admin/local');
 	await page.getByLabel('Teléfono').fill('9 8886-0939');
+	await page.getByLabel(/^WhatsApp/).fill('+56 9 1234 5678');
 	await page.getByLabel('Instagram').fill('https://www.instagram.com/dondesino_e2e');
 	await page.getByLabel('Wi-Fi').uncheck();
 	// Abierto las 24 horas (de lunes a domingo) para que el estado «Abierto ahora» no dependa de la hora de la prueba.
@@ -56,6 +57,7 @@ test('guarda horario, contacto, redes y servicios, y todo se ve en la carta púb
 	await expect(pie).toContainText('00:00–23:59');
 	await expect(pie.getByRole('link', { name: 'Instagram' })).toHaveAttribute('href', 'https://www.instagram.com/dondesino_e2e');
 	await expect(pie.getByRole('link', { name: '+56 9 8886 0939' })).toHaveAttribute('href', 'tel:+56988860939');
+	await expect(page.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', 'https://wa.me/56912345678');
 	await expect(pie.getByText('Wi-Fi', { exact: true })).toHaveCount(0);
 	await expect(pie.getByText('Para llevar')).toBeVisible();
 	// El estado lo calcula el navegador con la hora de Chile.

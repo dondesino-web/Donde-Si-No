@@ -2,33 +2,14 @@ import { asc, eq, max } from 'drizzle-orm';
 import type { Bd } from '../db/cliente.ts';
 import { menuDia, promocion } from '../db/esquema.ts';
 import type { Imagen } from '../dominio/tipos.ts';
+import type { DatosMenuDiaFormulario, DatosPromocionFormulario } from '../validacion/promociones.ts';
 import { moverEnGrupo, type Direccion } from './adminCartaRepo.ts';
 import type { MenuDia, Promocion } from './cartaRepo.ts';
 
-export interface DatosPromocion {
-	tituloEs: string;
-	tituloEn: string | null;
-	descripcionEs: string;
-	descripcionEn: string | null;
-	precio: number | null;
-	activa: boolean;
-	/** `YYYY-MM-DD` en hora de Chile; `null` = sin límite. */
-	desde: string | null;
-	hasta: string | null;
-	/** `undefined` = conservar la foto actual; `null` = quitarla. */
-	imagen?: Imagen | null;
-}
+/** Lo que se guarda de una promoción: lo que valida el formulario, más la foto (`undefined` = conservar; `null` = quitarla). */
+export type DatosPromocion = DatosPromocionFormulario & { imagen?: Imagen | null };
 
-export interface DatosMenuDia {
-	tituloEs: string;
-	tituloEn: string | null;
-	descripcionEs: string;
-	descripcionEn: string | null;
-	precio: number | null;
-	/** `null` = se muestra cualquier día mientras esté activo. */
-	fecha: string | null;
-	activo: boolean;
-}
+export type DatosMenuDia = DatosMenuDiaFormulario;
 
 /** Todas las promociones, también las apagadas, vencidas o programadas: es lo que ve quien administra. */
 export function listarPromociones(bd: Bd): Promise<Promocion[]> {

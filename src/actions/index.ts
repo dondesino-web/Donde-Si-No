@@ -12,7 +12,6 @@ import {
 	obtenerProducto,
 	moverCategoria,
 	moverProducto,
-	type Direccion,
 } from '../lib/repositorios/adminCartaRepo.ts';
 import {
 	CAMPOS_CATEGORIA,
@@ -112,7 +111,7 @@ export const server = {
 			const direccion = formulario.get('direccion');
 			if (id === undefined || (direccion !== 'arriba' && direccion !== 'abajo')) return noEncontrado('El producto');
 
-			const movido = await moverProducto(obtenerBd(), id, direccion as Direccion);
+			const movido = await moverProducto(obtenerBd(), id, direccion);
 			return movido ? publicar(contexto, 'Orden actualizado.') : { ok: true, mensaje: 'Ya está en el extremo de la lista.' };
 		},
 	}),
@@ -157,7 +156,7 @@ export const server = {
 			const direccion = formulario.get('direccion');
 			if (id === undefined || (direccion !== 'arriba' && direccion !== 'abajo')) return noEncontrado('La categoría');
 
-			const movida = await moverCategoria(obtenerBd(), id, direccion as Direccion);
+			const movida = await moverCategoria(obtenerBd(), id, direccion);
 			return movida ? publicar(contexto, 'Orden actualizado.') : { ok: true, mensaje: 'Ya está en el extremo de la lista.' };
 		},
 	}),

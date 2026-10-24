@@ -3,7 +3,7 @@ import { ADMIN_PASSWORD_HASH, SESSION_SECRET } from 'astro:env/server';
 import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
 import { hashearIp, limpiarIntentos, reservarIntento } from '../../lib/auth/limiteIntentos.ts';
 import { verificarPassword } from '../../lib/auth/password.ts';
-import { DURACION_SESION_MS, NOMBRE_COOKIE_SESION, crearTokenSesion } from '../../lib/auth/sesion.ts';
+import { DURACION_SESION_MS, crearTokenSesion, nombreCookieSesion } from '../../lib/auth/sesion.ts';
 import { obtenerBd } from '../../lib/db/index.ts';
 
 const configurado = Boolean(ADMIN_PASSWORD_HASH && SESSION_SECRET);
@@ -25,7 +25,7 @@ if (configurado && Astro.request.method === 'POST') {
 
 		if (correcta) {
 			await limpiarIntentos(bd, ipHash);
-			Astro.cookies.set(NOMBRE_COOKIE_SESION, crearTokenSesion(SESSION_SECRET!, ahora), {
+			Astro.cookies.set(nombreCookieSesion(import.meta.env.PROD), crearTokenSesion(SESSION_SECRET!, ahora), {
 				httpOnly: true,
 				secure: import.meta.env.PROD,
 				sameSite: 'strict',

@@ -1,7 +1,7 @@
 import { SESSION_SECRET } from 'astro:env/server';
 import { defineMiddleware } from 'astro:middleware';
 import { decidirAcceso, esRutaPanel } from './lib/auth/acceso.ts';
-import { NOMBRE_COOKIE_SESION, verificarTokenSesion } from './lib/auth/sesion.ts';
+import { nombreCookieSesion, verificarTokenSesion } from './lib/auth/sesion.ts';
 
 const SIN_CACHE = { 'Cache-Control': 'no-store' };
 
@@ -25,7 +25,7 @@ function conCabeceras(respuesta: Response): Response {
 export const onRequest = defineMiddleware(async (contexto, siguiente) => {
 	// `decidirAcceso` es el único juez: no hay prefiltro que pueda quedar desfasado respecto de Astro.
 	const { pathname } = contexto.url;
-	const token = contexto.cookies.get(NOMBRE_COOKIE_SESION)?.value;
+	const token = contexto.cookies.get(nombreCookieSesion(import.meta.env.PROD))?.value;
 	const haySesion = SESSION_SECRET ? verificarTokenSesion(SESSION_SECRET, token, new Date()) : false;
 	contexto.locals.haySesion = haySesion;
 

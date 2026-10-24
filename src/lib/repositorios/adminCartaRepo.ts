@@ -1,8 +1,9 @@
-import { and, asc, count, eq, like, max } from 'drizzle-orm';
+import { asc, count, eq, like, max } from 'drizzle-orm';
 import type { Bd } from '../db/cliente.ts';
 import { categoria, producto } from '../db/esquema.ts';
 import { slugificar } from '../dominio/slug.ts';
-import type { Alergeno, Etiqueta, Imagen } from '../dominio/tipos.ts';
+import type { Imagen } from '../dominio/tipos.ts';
+import type { DatosCategoriaFormulario, DatosProductoFormulario } from '../validacion/carta.ts';
 import type { Categoria, CategoriaConProductos, Producto } from './cartaRepo.ts';
 
 // Lo único que necesitan los actualizadores; sirve tanto para la conexión como para una transacción.
@@ -10,27 +11,10 @@ type Ejecutor = Pick<Bd, 'update'>;
 
 export type Direccion = 'arriba' | 'abajo';
 
-export interface DatosProducto {
-	categoriaId: number;
-	nombreEs: string;
-	nombreEn: string | null;
-	descripcionEs: string;
-	descripcionEn: string | null;
-	precio: number | null;
-	alergenos: Alergeno[];
-	etiquetas: Etiqueta[];
-	disponible: boolean;
-	destacado: boolean;
-	visible: boolean;
-	/** `undefined` = conservar la foto actual; `null` = quitarla. */
-	imagen?: Imagen | null;
-}
+/** Lo que se guarda de un producto: lo que valida el formulario, más la foto (`undefined` = conservar; `null` = quitarla). */
+export type DatosProducto = DatosProductoFormulario & { imagen?: Imagen | null };
 
-export interface DatosCategoria {
-	nombreEs: string;
-	nombreEn: string | null;
-	visible: boolean;
-}
+export type DatosCategoria = DatosCategoriaFormulario;
 
 export type ResultadoEliminarCategoria = { ok: true } | { ok: false; motivo: 'tiene-productos' | 'no-existe' };
 
@@ -144,6 +128,6 @@ export async function eliminarCategoria(bd: Bd, id: number): Promise<ResultadoEl
 	const [{ total }] = await bd.select({ total: count() }).from(producto).where(eq(producto.categoriaId, id));
 	if (total > 0) return { ok: false, motivo: 'tiene-productos' };
 
-	const filas = await bd.delete(categoria).where(and(eq(categoria.id, id))).returning({ id: categoria.id });
+	const filas = await bd.delete(categoria).where(eq(categoria.id, id)).returning({ id: categoria.id });
 	return filas.length > 0 ? { ok: true } : { ok: false, motivo: 'no-existe' };
 }

@@ -1,7 +1,13 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { del, put } from '@vercel/blob';
+import { del, list, put } from '@vercel/blob';
+
+export interface ArchivoAlmacenado {
+	url: string;
+	/** Cuándo se subió: la limpieza solo toca archivos con más de un día. */
+	subidoEn: Date;
+}
 
 export interface ImagenSubida {
 	clave: string;
@@ -20,6 +26,8 @@ export interface AlmacenImagenes {
 	 * Escribir en `public/` haría que Vite recargue todas las páginas abiertas en desarrollo.
 	 */
 	leer?(clave: string): Promise<Uint8Array<ArrayBuffer> | undefined>;
+	/** Todas las fotos de la carta que hay en el almacén (para limpiar las que ningún registro usa). */
+	listar?(): Promise<ArchivoAlmacenado[]>;
 }
 
 export interface ConfigAlmacenLocal {
@@ -47,6 +55,18 @@ export function crearAlmacenLocal({ directorio, urlBase }: ConfigAlmacenLocal): 
 	return {
 		tipo: 'local',
 		reconoce: (url) => CLAVE_VALIDA.test(claveDe(url)),
+		async listar() {
+			let nombres: string[];
+			try {
+				nombres = await readdir(directorio);
+			} catch (error) {
+				if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
+				throw error;
+			}
+			// Solo las claves que generó `subir`: cualquier otro archivo de la carpeta no es nuestro.
+			const propias = nombres.filter((nombre) => CLAVE_VALIDA.test(nombre));
+			return Promise.all(propias.map(async (nombre) => ({ url: `${prefijo}${nombre}`, subidoEn: (await stat(join(directorio, nombre))).mtime })));
+		},
 		async leer(clave) {
 			if (!CLAVE_VALIDA.test(clave)) return undefined;
 			try {
@@ -90,6 +110,19 @@ export function crearAlmacenBlob({ token }: { token: string }): AlmacenImagenes 
 	return {
 		tipo: 'blob',
 		reconoce: (url) => esFotoDeLaCarta(url, token),
+		async listar() {
+			const archivos: ArchivoAlmacenado[] = [];
+			let cursor: string | undefined;
+			do {
+				const pagina = await list({ prefix: `${CARPETA_BLOB}/`, token, cursor });
+				for (const blob of pagina.blobs) {
+					// Solo las fotos con el nombre que genera `subir`: nunca otros archivos del store.
+					if (RUTA_BLOB_VALIDA.test(`/${blob.pathname}`)) archivos.push({ url: blob.url, subidoEn: blob.uploadedAt });
+				}
+				cursor = pagina.hasMore ? pagina.cursor : undefined;
+			} while (cursor);
+			return archivos;
+		},
 		async subir(datos) {
 			const resultado = await put(`${CARPETA_BLOB}/${nuevaClave()}`, Buffer.from(datos), {
 				access: 'public',

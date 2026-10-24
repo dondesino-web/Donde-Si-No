@@ -16,7 +16,9 @@ const enlaces = [
 	negocio.mapsUrl && { href: negocio.mapsUrl, texto: t('accion.mapa'), principal: true, evento: 'clic_mapa' },
 	negocio.ubereatsUrl && { href: negocio.ubereatsUrl, texto: t('accion.ubereats'), principal: false, evento: 'clic_ubereats' },
 	negocio.resenaUrl && { href: negocio.resenaUrl, texto: t('accion.resena'), principal: false, evento: 'clic_resena' },
-].filter((e): e is { href: string; texto: string; principal: boolean; evento: string } => !!e);
+	// Solo dígitos: `wa.me/<número con código de país>`. La validación del panel ya guarda el número en formato internacional.
+	negocio.whatsapp && { href: `https://wa.me/${negocio.whatsapp.replace(/\D/g, '')}`, texto: t('accion.whatsapp'), principal: false, evento: undefined },
+].filter((e): e is { href: string; texto: string; principal: boolean; evento: string | undefined } => !!e);
 const externo = (href: string) => (href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {});
 ---
 

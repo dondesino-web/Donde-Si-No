@@ -8,6 +8,31 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-24 · Fase 4 de la carta digital: calidad y preparación del lanzamiento
+
+### Añadido
+- **CI** (`.github/workflows/ci.yml`): tipos, esquema y migraciones sincronizados, cobertura mínima del 80 %, build, auditoría de dependencias (bloquea ante severidad crítica) y E2E con Playwright y axe. Aún no se ha ejecutado en GitHub.
+- **Limpieza diaria de fotos huérfanas** (`/api/cron/limpiar-fotos`, cron de `vercel.json`, protegido por `CRON_SECRET`): borra del almacén las fotos que ningún producto, promoción ni galería usa. Frenos: solo archivos de más de un día, 100 por ejecución y se detiene si en un lote de 5 o más todos parecen huérfanos. También purga las filas vencidas del límite de login.
+- **`npm run entorno:verificar`**: comprueba que las variables de producción estén completas y bien formadas (Turso, Blob, hash de la contraseña, secretos distintos y de largo suficiente) sin mostrar sus valores.
+- **Guía de lanzamiento** paso a paso en `documentacion-aidlc/despliegue/LISTA_VERIFICACION_DESPLIEGUE.md`.
+- Botón de **WhatsApp** en la carta (el campo del panel se guardaba y no se usaba).
+- 498 tests unitarios y de integración y 113 E2E.
+
+### Modificado
+- Las acciones exigen sesión también en el middleware (`/_actions/*`), la cookie de sesión usa el prefijo `__Host-` en producción y el límite de login cuenta las direcciones IPv6 por red /64.
+- La comprobación de fotos en uso hace tres consultas en total en lugar de una por foto; los tipos de datos del repositorio reutilizan los de validación.
+- `/uploads/*` queda fuera de la caché ISR y `vercel.json` repite las cabeceras de seguridad para los archivos estáticos.
+- Se corrigió el único error de `astro check` (`scripts/generar-iconos.ts`): el chequeo de tipos queda sin errores, avisos ni sugerencias.
+
+### Seguridad
+- Revisión final de seguridad y de calidad de código sin hallazgos críticos ni altos; detalle y deuda técnica en [NOTAS_REVISION_CODIGO.md](./documentacion-aidlc/generacion-codigo/NOTAS_REVISION_CODIGO.md). Avisos de `npm audit` aceptados (`path-to-regexp` en build y `zod` anidado fijado por Vercel) documentados allí.
+
+### Medido
+- Lighthouse en un build empaquetado local (móvil, red lenta simulada): 100 / 100 / 100 / 100 en `/`, `/en/` y `/imprimir`; LCP 1,2 s, CLS 0, TBT 0 ms. Sin fotos de platos y sin la red de Vercel: se repite en el *preview*.
+- Presupuesto de bytes (gzip): HTML ≈ 6 KB, CSS ≈ 1,7 KB, JS ≈ 1,1 KB.
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-23 · Fase 3 de la carta digital: QR y estadísticas
 
 ### Añadido

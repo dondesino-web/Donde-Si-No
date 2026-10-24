@@ -1,25 +1,27 @@
-import { sql } from 'drizzle-orm';
+import { isNotNull } from 'drizzle-orm';
 import type { Bd } from '../db/cliente.ts';
+import { fotoDestacada, producto, promocion } from '../db/esquema.ts';
 
 /**
  * De las URLs dadas, devuelve las que ya no usa ningún producto, promoción ni foto de la galería.
  * Se consulta antes de borrar archivos: una foto puede seguir en uso por otro registro (o por una pestaña
  * con el formulario abierto desde antes), y borrarla dejaría una imagen rota en la carta pública.
- * Las URLs se comparan como texto literal (`instr`), no como patrón: `%` y `_` no son comodines.
+ * Son solo tres consultas en total (no una por foto) y la comparación es por igualdad exacta de texto.
  */
 export async function urlsSinUso(bd: Bd, urls: string[]): Promise<string[]> {
-	const sinUso: string[] = [];
-	for (const url of urls) {
-		// Las URLs se guardan dentro de un JSON: se busca la cadena entre comillas para no confundir prefijos.
-		const comillada = JSON.stringify(url);
-		const filas = await bd.all<{ usos: number }>(sql`
-			select (
-				(select count(*) from producto where instr(imagen, ${comillada}) > 0) +
-				(select count(*) from promocion where instr(imagen, ${comillada}) > 0) +
-				(select count(*) from foto_destacada where instr(imagen, ${comillada}) > 0)
-			) as usos
-		`);
-		if (filas[0].usos === 0) sinUso.push(url);
+	if (urls.length === 0) return [];
+
+	const [deProductos, dePromociones, deGaleria] = await Promise.all([
+		bd.select({ imagen: producto.imagen }).from(producto).where(isNotNull(producto.imagen)),
+		bd.select({ imagen: promocion.imagen }).from(promocion).where(isNotNull(promocion.imagen)),
+		bd.select({ imagen: fotoDestacada.imagen }).from(fotoDestacada),
+	]);
+
+	const enUso = new Set<string>();
+	for (const { imagen } of [...deProductos, ...dePromociones, ...deGaleria]) {
+		if (!imagen) continue;
+		enUso.add(imagen.sm);
+		enUso.add(imagen.lg);
 	}
-	return sinUso;
+	return urls.filter((url) => !enUso.has(url));
 }

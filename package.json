@@ -18,7 +18,8 @@
     "db:seed": "node --env-file-if-exists=.env scripts/sembrar.ts",
     "marca:iconos": "node scripts/generar-iconos.ts",
     "test:e2e": "playwright test",
-    "admin:hash": "node scripts/generar-hash.ts"
+    "admin:hash": "node scripts/generar-hash.ts",
+    "entorno:verificar": "node scripts/verificar-entorno.ts"
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.16",

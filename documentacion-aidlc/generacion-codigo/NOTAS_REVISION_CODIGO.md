@@ -63,3 +63,30 @@
 - **`path-to-regexp`** (vía `@astrojs/vercel` → `@vercel/routing-utils`): se ejecuta solo en build, con patrones propios. El arreglo forzado bajaría el adaptador a una versión incompatible con Astro 7. **Aceptado**; se revisa al actualizar el adaptador.
 - **`esbuild` ≤ 0.24** (vía `drizzle-kit` → `@esbuild-kit`): solo afecta al servidor de desarrollo de esbuild, que el proyecto no usa. **Aceptado**; se revisa al actualizar `drizzle-kit`.
 - **`sharp`:** corregido con `npm audit fix` (0.35.5).
+- **`zod` 4.1.11 anidado** (vía `@vercel/blob` y `@vercel/functions` → `@vercel/oidc` → `@vercel/cli-config`, que lo fija en esa versión exacta): avisa de consumo de memoria al validar colecciones enormes. Solo se usa para leer la configuración y el token OIDC de Vercel, sin entrada de usuarios; el `zod` que valida los formularios es el de Astro (4.6.7, ya corregido). **Aceptado**; la última versión de cada paquete ya está instalada. Se reaudita al actualizar `@astrojs/vercel` o `@vercel/blob`.
+- **CI:** `npm audit --omit=dev --audit-level=critical` bloquea solo ante severidad crítica; los avisos altos de arriba están aceptados aquí.
+
+## Revisión final previa al lanzamiento (2026-10-24)
+
+Dos revisiones independientes de todo el repositorio (seguridad y calidad de código), sin hallazgos críticos ni altos.
+
+**Aplicado**
+- Las acciones (`/_actions/*`) exigen sesión también en el middleware, no solo en cada acción: una acción nueva sin guardia propia ya no queda abierta.
+- Cookie de sesión `__Host-sesion` en producción (solo `Secure`, ruta `/`, sin `Domain`).
+- Límite de intentos de login: las direcciones IPv6 se cuentan por red /64 y las filas vencidas se purgan en el cron diario.
+- Limpieza de fotos huérfanas más prudente: se detiene si en un lote de 5 o más archivos antiguos todos parecen huérfanos.
+- `/uploads/*` fuera de la caché ISR; cabeceras de seguridad también para los archivos estáticos (`vercel.json`).
+- El campo «WhatsApp» del panel ya llega a la carta (botón `wa.me`); antes se guardaba y no se usaba.
+- La comprobación de fotos en uso hace tres consultas en total, no una por foto.
+- Los tipos de datos del repositorio reutilizan los de validación (una sola definición); el CI verifica que el esquema y las migraciones estén sincronizados.
+
+**Decidido no aplicar**
+- *Tope global de intentos de login:* convertiría un intento de fuerza bruta en un bloqueo del dueño. La defensa adecuada es el límite de tasa de Vercel Firewall sobre `/admin/login`.
+- *CSP completa:* Astro solo la genera en `build` y el adaptador de Vercel no se puede ejecutar en local; se prueba primero en modo solo-reporte en el preview.
+- *Sesiones revocables:* el token es sin estado a propósito (un solo administrador); rotar `SESSION_SECRET` cierra todas.
+
+**Deuda técnica conocida (sin urgencia)**
+- Bloques repetidos en las páginas del panel (avisos, botones ↑/↓, script de confirmación): conviene extraer componentes.
+- Cuatro acciones «mover» y tres «establecer estado» casi idénticas.
+- `aMinutos`/`cruzaMedianoche` y la validación de fechas ISO están duplicadas entre `dominio/` y `validacion/`.
+- Funciones por encima de 50 líneas: `validarEntorno`, `iniciar` de `campoFoto.ts` y el encabezado de `admin/local.astro`.

@@ -22,6 +22,14 @@ describe('decidirAcceso', () => {
 		expect(decidirAcceso('/api/admin/upload', true)).toBe('permitir');
 	});
 
+	it.each(['/_actions/guardarProducto/', '/_actions/cualquierAccionNueva', '/_ACTIONS/x', '/%5factions/x', '/_actions'])(
+		'las acciones (%s) exigen sesión por defecto: una acción nueva sin guardia propia no queda abierta',
+		(ruta) => {
+			expect(decidirAcceso(ruta, false)).toBe('no-autorizado');
+			expect(decidirAcceso(ruta, true)).toBe('permitir');
+		},
+	);
+
 	it('deja entrar al login sin sesión y manda al panel si ya hay sesión', () => {
 		expect(decidirAcceso('/admin/login', false)).toBe('permitir');
 		expect(decidirAcceso('/admin/login', true)).toBe('panel');
