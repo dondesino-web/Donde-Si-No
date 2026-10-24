@@ -53,13 +53,13 @@ test.describe('carga rápida', () => {
 			await expect(page.getByRole('status')).toContainText('Se crearon 1 producto.');
 
 			await page.goto('/admin/carta');
-			const tarjeta = page.locator('.admin-producto', { hasText: 'Plato editable' });
+			const tarjeta = page.locator('.fila-carta', { hasText: 'Plato editable' });
 			await tarjeta.getByRole('link', { name: 'Plato editable' }).click();
 			await page.getByLabel('Nombre', { exact: true }).fill('Plato renombrado');
 			await page.getByLabel('Precio en pesos').fill('6500');
 			await page.getByRole('button', { name: /Guardar/ }).first().click();
 
-			await expect(page.locator('.admin-producto', { hasText: 'Plato renombrado' })).toBeVisible();
+			await expect(page.locator('.fila-carta', { hasText: 'Plato renombrado' })).toBeVisible();
 		} finally {
 			await borrarCategoria(categoria);
 		}
@@ -105,8 +105,8 @@ test.describe('carga rápida', () => {
 			await expect(estado).toContainText('Se crearon 1 producto.');
 			await expect(estado).toContainText('Ya existían y no se tocaron: CAFÉ REPETIDO.');
 			await page.goto('/admin/carta');
-			await expect(page.locator('.admin-producto', { hasText: 'Café repetido' })).toHaveCount(1);
-			await expect(page.locator('.admin-producto', { hasText: 'Café repetido' }).locator('input[name="precio"]')).toHaveValue('1500');
+			await expect(page.locator('.fila-carta', { hasText: 'Café repetido' })).toHaveCount(1);
+			await expect(page.locator('.fila-carta', { hasText: 'Café repetido' }).locator('input[name="precio"]')).toHaveValue('1500');
 		} finally {
 			await borrarCategoria(categoria);
 		}

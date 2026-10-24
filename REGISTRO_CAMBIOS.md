@@ -8,6 +8,30 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-24 · Rediseño de la pantalla Carta del panel
+
+Basado en cómo resuelven lo mismo Owner, Toast y Square: el estado de cada producto a la vista, «agotado» como interruptor aparte de borrar, ordenar como un modo propio, y búsqueda y filtros.
+
+### Modificado
+- **Lista compacta:** cada producto es una fila con su nombre, descripción, etiquetas de estado («Sin precio», «Agotado», «Oculto»), precio editable con `# Registro de Cambios (CHANGELOG.md)
+
+## Definición del documento
+
+- **Para qué sirve:** lleva el registro histórico ordenado y verificable de modificaciones, adiciones, correcciones y versiones del proyecto.
+- **Cuándo se crea o actualiza:** en cada release, hito o entrega de valor funcional o estructural.
+- **Qué debe contener:** versiones, fechas, categorías estándar (Añadido, Modificado, Corregido, Seguridad) y enlaces a decisiones o PRs.
+
+ y un **interruptor** Disponible/Agotado. El estado siempre va en texto, no solo en color.
+- **Categorías plegables**, con la cantidad de productos, y «+ Agregar producto» dentro de cada una.
+- **Buscar y filtrar:** buscador (sin distinguir mayúsculas ni tildes, también en la descripción) y filtros **Todos / Sin precio / Agotados / Ocultos**, con su cantidad. Con un filtro activo solo se muestran las categorías con resultados.
+- **Modo «Ordenar»:** las flechas ↑↓ aparecen solo al activarlo, para no recargar la pantalla.
+- «Guardar precio» aparece solo cuando el precio cambió; Escape lo deshace.
+- Barra de herramientas fija arriba al desplazarse; ancho mayor en pantallas grandes; botones «+ Producto» y «Carga rápida» en el encabezado; «Nueva categoría» queda plegada al final.
+- Sin JavaScript la lista completa sigue funcionando: solo faltan buscador, filtros y modo Ordenar.
+- 11 pruebas unitarias del filtro y 9 E2E de la lista.
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-24 · Carga rápida de productos en el panel
 
 ### Añadido

@@ -49,14 +49,14 @@ test('cambia el precio desde la lista y se ve en la carta pública', async ({ pa
 
 test('marca agotado y vuelve a disponible con un toque', async ({ page }) => {
 	await page.goto('/admin/carta');
-	await fila(page).getByRole('button', { name: /Marcar agotado/ }).click();
+	await fila(page).getByRole('switch', { name: `Disponible: ${NOMBRE}` }).click();
 	await expect(page.getByRole('status')).toHaveText('Marcado como agotado.');
 
 	await page.goto('/');
 	await expect(tarjetaPublica(page)).toContainText('Agotado');
 
 	await page.goto('/admin/carta');
-	await fila(page).getByRole('button', { name: /Volver a disponible/ }).click();
+	await fila(page).getByRole('switch', { name: `Disponible: ${NOMBRE}` }).click();
 	await expect(page.getByRole('status')).toHaveText('Marcado como disponible.');
 
 	await page.goto('/');
@@ -73,6 +73,7 @@ test('sube el producto una posición con el botón ↑', async ({ page }) => {
 	expect(antes).toBeGreaterThan(0);
 
 	await page.goto('/admin/carta');
+	await page.getByRole('button', { name: 'Ordenar' }).click();
 	await fila(page).getByRole('button', { name: `Subir ${NOMBRE}` }).click();
 
 	expect(await posicion()).toBe(antes - 1);

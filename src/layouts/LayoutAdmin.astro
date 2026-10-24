@@ -6,9 +6,11 @@ interface Props {
 	titulo: string;
 	/** Oculta la barra de navegación (pantalla de login). */
 	sinNavegacion?: boolean;
+	/** Contenido más ancho en pantallas grandes (listas con varias columnas). */
+	ancho?: boolean;
 }
 
-const { titulo, sinNavegacion = false } = Astro.props;
+const { titulo, sinNavegacion = false, ancho = false } = Astro.props;
 
 /** `prefijos` agrupa las pantallas internas (editar un producto cuenta como «Carta»). */
 const SECCIONES = [
@@ -58,7 +60,7 @@ const actual = SECCIONES.find((s) => (s.href === '/admin' ? ruta === '/admin' : 
 				</header>
 			)
 		}
-		<main id="contenido" class="admin-contenido">
+		<main id="contenido" class:list={['admin-contenido', { 'admin-contenido--ancho': ancho }]}>
 			<slot />
 		</main>
 	</body>
