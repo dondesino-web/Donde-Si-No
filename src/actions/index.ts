@@ -27,6 +27,7 @@ import {
 	valoresDe,
 	type RespuestaAccion,
 } from './ayudas.ts';
+import { cargaRapida } from './cargaRapida.ts';
 import { datosDeFotos } from './fotos.ts';
 import { datosDelLocal } from './local.ts';
 import { promocionesYMenu } from './promociones.ts';
@@ -39,6 +40,7 @@ export const server = {
 	...promocionesYMenu,
 	...datosDelLocal,
 	...datosDeFotos,
+	...cargaRapida,
 
 	guardarProducto: defineAction({
 		accept: 'form',

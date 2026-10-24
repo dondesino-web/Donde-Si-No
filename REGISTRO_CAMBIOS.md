@@ -8,6 +8,16 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-24 · Carga rápida de productos en el panel
+
+### Añadido
+- **Carga rápida** (`/admin/carga-rapida`): crea varios productos de una vez escribiendo o pegando una línea por producto, `nombre; precio; descripción` (también acepta columnas copiadas de una planilla). Se elige una categoría existente o se escribe una nueva. Sin precio, el producto queda en «Consultar». No hay datos de la carta escritos en el código: el dueño decide qué cargar y después edita todo, uno por uno, en Carta.
+- Si una línea tiene un error, se indica el número de línea y no se crea nada (todo o nada); lo escrito se conserva. Un producto que ya existe en esa categoría (sin distinguir mayúsculas ni tildes) se deja como está y se avisa: nunca se pisa lo que ya editó el dueño. Hasta 150 líneas por vez.
+- Acceso desde el menú y desde el Inicio del panel.
+- 12 pruebas unitarias, 5 de integración y 6 E2E.
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-24 · Panel responsivo y app instalable (PWA)
 
 ### Añadido

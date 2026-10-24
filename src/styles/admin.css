@@ -66,6 +66,8 @@
 .campo__error { color: var(--color-rojo-oscuro); font-weight: 600; }
 .campo__ayuda { font-weight: 400; color: var(--color-texto-suave); }
 .campo textarea { resize: vertical; }
+.ejemplo { margin: 0; padding: var(--espacio-3); background: var(--color-superficie); border: 1px dashed var(--color-borde-fuerte); border-radius: var(--radio-sm); white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, Consolas, monospace; }
+.aviso ul { margin: var(--espacio-2) 0 0; padding-inline-start: var(--espacio-6); font-weight: 400; }
 fieldset.campo { border: 1px solid var(--color-borde-fuerte); border-radius: var(--radio-sm); padding: var(--espacio-3); }
 fieldset.campo legend { font-weight: 600; padding-inline: var(--espacio-2); }
 .casillas { display: grid; gap: var(--espacio-1); }

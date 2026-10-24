@@ -5,6 +5,7 @@ import { abrirBd, iniciarSesion } from './ayudantes.ts';
 const RUTAS = [
 	'/admin',
 	'/admin/carta',
+	'/admin/carga-rapida',
 	'/admin/promociones',
 	'/admin/menu-del-dia',
 	'/admin/fotos',
