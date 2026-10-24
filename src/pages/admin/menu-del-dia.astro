@@ -1,0 +1,89 @@
+---
+import { actions } from 'astro:actions';
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { fechaLocalISO } from '../../lib/dominio/horario.ts';
+import { estadoMenuDia } from '../../lib/dominio/vigencia.ts';
+import { obtenerMenuDiaAdmin } from '../../lib/repositorios/adminPromosRepo.ts';
+
+const resultado = Astro.getActionResult(actions.guardarMenuDia);
+const aviso = resultado?.data?.ok ? resultado.data.mensaje : undefined;
+const fallo = resultado?.data && !resultado.data.ok ? resultado.data : undefined;
+const errores = fallo?.errores ?? {};
+const valores = fallo?.valores;
+
+const hoy = fechaLocalISO(new Date());
+const menu = await obtenerMenuDiaAdmin(obtenerBd());
+const formatearFecha = (iso: string) => iso.split('-').reverse().join('-');
+
+const texto = (campo: string, respaldo: string): string => valores?.[campo]?.[0] ?? respaldo;
+const activo = valores ? 'activo' in valores : (menu?.activo ?? true);
+const describedby = (campo: string) => (errores[campo] ? `error-${campo}` : undefined);
+
+const estado = menu ? estadoMenuDia(menu, hoy) : undefined;
+const explicacion = {
+	vigente: 'Se muestra hoy en la carta.',
+	programado: menu?.fecha ? `Se mostrará el ${formatearFecha(menu.fecha)}.` : '',
+	vencido: 'La fecha ya pasó, así que no se muestra. Cambia la fecha o déjala vacía para mostrarlo cualquier día.',
+	inactivo: 'Está apagado: no se muestra.',
+};
+---
+
+<LayoutAdmin titulo="Menú del día">
+	<h1>Menú del día</h1>
+
+	<div aria-live="polite" class="avisos">
+		{aviso && <p class="aviso aviso--ok" role="status">{aviso}</p>}
+		{errores.formulario && <p class="aviso aviso--error" role="alert">{errores.formulario}</p>}
+	</div>
+
+	{
+		estado
+			? <p class="aviso" data-estado={estado}><strong>Estado:</strong> {explicacion[estado]}</p>
+			: <p class="aviso">Todavía no has creado el menú del día.</p>
+	}
+
+	<form method="POST" action={actions.guardarMenuDia} class="formulario">
+		<div class="campo">
+			<label for="tituloEs">Título</label>
+			<input id="tituloEs" name="tituloEs" required maxlength="80" value={texto('tituloEs', menu?.tituloEs ?? '')} aria-invalid={errores.tituloEs ? 'true' : undefined} aria-describedby={describedby('tituloEs')} />
+			{errores.tituloEs && <p class="campo__error" id="error-tituloEs">{errores.tituloEs}</p>}
+		</div>
+
+		<div class="campo">
+			<label for="tituloEn">Título en inglés <span class="campo__ayuda">(opcional)</span></label>
+			<input id="tituloEn" name="tituloEn" maxlength="80" value={texto('tituloEn', menu?.tituloEn ?? '')} aria-describedby={describedby('tituloEn')} />
+			{errores.tituloEn && <p class="campo__error" id="error-tituloEn">{errores.tituloEn}</p>}
+		</div>
+
+		<div class="campo">
+			<label for="descripcionEs">Detalle <span class="campo__ayuda">(entrada, plato de fondo, postre…)</span></label>
+			<textarea id="descripcionEs" name="descripcionEs" rows="4" maxlength="600" aria-describedby={describedby('descripcionEs')}>{texto('descripcionEs', menu?.descripcionEs ?? '')}</textarea>
+			{errores.descripcionEs && <p class="campo__error" id="error-descripcionEs">{errores.descripcionEs}</p>}
+		</div>
+
+		<div class="campo">
+			<label for="descripcionEn">Detalle en inglés <span class="campo__ayuda">(opcional)</span></label>
+			<textarea id="descripcionEn" name="descripcionEn" rows="4" maxlength="600" aria-describedby={describedby('descripcionEn')}>{texto('descripcionEn', menu?.descripcionEn ?? '')}</textarea>
+			{errores.descripcionEn && <p class="campo__error" id="error-descripcionEn">{errores.descripcionEn}</p>}
+		</div>
+
+		<div class="campo">
+			<label for="precio">Precio en pesos <span class="campo__ayuda">(opcional)</span></label>
+			<input id="precio" name="precio" inputmode="numeric" autocomplete="off" value={texto('precio', menu?.precio != null ? String(menu.precio) : '')} aria-invalid={errores.precio ? 'true' : undefined} aria-describedby={describedby('precio')} />
+			{errores.precio && <p class="campo__error" id="error-precio">{errores.precio}</p>}
+		</div>
+
+		<div class="campo">
+			<label for="fecha">Día en que se muestra <span class="campo__ayuda">(vacío = cualquier día)</span></label>
+			<input id="fecha" name="fecha" type="date" value={texto('fecha', menu?.fecha ?? '')} aria-invalid={errores.fecha ? 'true' : undefined} aria-describedby={describedby('fecha')} />
+			{errores.fecha && <p class="campo__error" id="error-fecha">{errores.fecha}</p>}
+		</div>
+
+		<label class="casilla"><input type="checkbox" name="activo" checked={activo} /> Mostrar en la carta</label>
+
+		<div class="formulario__acciones">
+			<button type="submit" class="boton">Guardar menú del día</button>
+		</div>
+	</form>
+</LayoutAdmin>

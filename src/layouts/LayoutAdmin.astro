@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+import '../styles/admin.css';
+
+interface Props {
+	titulo: string;
+	/** Oculta la barra de navegación (pantalla de login). */
+	sinNavegacion?: boolean;
+}
+
+const { titulo, sinNavegacion = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es-CL">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex, nofollow" />
+		<title>{titulo} · Panel · Dónde Si No</title>
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+	</head>
+	<body class="admin">
+		<a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
+		{
+			!sinNavegacion && (
+				<header class="admin-barra no-imprimir">
+					<nav aria-label="Panel" class="admin-barra__nav">
+						<a href="/admin">Inicio</a>
+						<a href="/admin/carta">Carta</a>
+						<a href="/admin/promociones">Promos</a>
+						<a href="/admin/menu-del-dia">Menú del día</a>
+						<a href="/admin/fotos">Fotos</a>
+						<a href="/admin/estadisticas">Estadísticas</a>
+						<a href="/admin/qr">QR</a>
+						<a href="/admin/local">Local</a>
+						<a href="/" target="_blank" rel="noopener noreferrer">Ver carta</a>
+					</nav>
+					<form method="post" action="/admin/salir">
+						<button type="submit" class="boton boton--secundario admin-barra__salir">Salir</button>
+					</form>
+				</header>
+			)
+		}
+		<main id="contenido" class="admin-contenido">
+			<slot />
+		</main>
+	</body>
+</html>

@@ -1,0 +1,75 @@
+---
+import { actions } from 'astro:actions';
+import type { Promocion } from '../../lib/repositorios/cartaRepo.ts';
+import CampoFoto from './CampoFoto.astro';
+
+interface Props {
+	promocion?: Promocion;
+	valores?: Record<string, string[]>;
+	errores?: Record<string, string>;
+}
+
+const { promocion, valores, errores = {} } = Astro.props;
+
+const texto = (campo: string, respaldo: string): string => valores?.[campo]?.[0] ?? respaldo;
+const marcada = valores ? 'activa' in valores : (promocion?.activa ?? true);
+const describedby = (campo: string) => (errores[campo] ? `error-${campo}` : undefined);
+---
+
+<form method="POST" action={actions.guardarPromocion} class="formulario">
+	{promocion && <input type="hidden" name="id" value={promocion.id} />}
+	{errores.formulario && <p class="aviso aviso--error" role="alert">{errores.formulario}</p>}
+
+	<div class="campo">
+		<label for="tituloEs">Título</label>
+		<input id="tituloEs" name="tituloEs" required maxlength="80" value={texto('tituloEs', promocion?.tituloEs ?? '')} aria-invalid={errores.tituloEs ? 'true' : undefined} aria-describedby={describedby('tituloEs')} />
+		{errores.tituloEs && <p class="campo__error" id="error-tituloEs">{errores.tituloEs}</p>}
+	</div>
+
+	<div class="campo">
+		<label for="tituloEn">Título en inglés <span class="campo__ayuda">(opcional)</span></label>
+		<input id="tituloEn" name="tituloEn" maxlength="80" value={texto('tituloEn', promocion?.tituloEn ?? '')} aria-describedby={describedby('tituloEn')} />
+		{errores.tituloEn && <p class="campo__error" id="error-tituloEn">{errores.tituloEn}</p>}
+	</div>
+
+	<div class="campo">
+		<label for="descripcionEs">Condiciones o detalle <span class="campo__ayuda">(opcional)</span></label>
+		<textarea id="descripcionEs" name="descripcionEs" rows="3" maxlength="300" aria-describedby={describedby('descripcionEs')}>{texto('descripcionEs', promocion?.descripcionEs ?? '')}</textarea>
+		{errores.descripcionEs && <p class="campo__error" id="error-descripcionEs">{errores.descripcionEs}</p>}
+	</div>
+
+	<div class="campo">
+		<label for="descripcionEn">Detalle en inglés <span class="campo__ayuda">(opcional)</span></label>
+		<textarea id="descripcionEn" name="descripcionEn" rows="3" maxlength="300" aria-describedby={describedby('descripcionEn')}>{texto('descripcionEn', promocion?.descripcionEn ?? '')}</textarea>
+		{errores.descripcionEn && <p class="campo__error" id="error-descripcionEn">{errores.descripcionEn}</p>}
+	</div>
+
+	<div class="campo">
+		<label for="precio">Precio en pesos <span class="campo__ayuda">(opcional)</span></label>
+		<input id="precio" name="precio" inputmode="numeric" autocomplete="off" value={texto('precio', promocion?.precio != null ? String(promocion.precio) : '')} aria-invalid={errores.precio ? 'true' : undefined} aria-describedby={describedby('precio')} />
+		{errores.precio && <p class="campo__error" id="error-precio">{errores.precio}</p>}
+	</div>
+
+	<fieldset class="campo">
+		<legend>Vigencia <span class="campo__ayuda">(vacío = sin límite)</span></legend>
+		<div class="campo">
+			<label for="desde">Desde</label>
+			<input id="desde" name="desde" type="date" value={texto('desde', promocion?.desde ?? '')} aria-invalid={errores.desde ? 'true' : undefined} aria-describedby={describedby('desde')} />
+			{errores.desde && <p class="campo__error" id="error-desde">{errores.desde}</p>}
+		</div>
+		<div class="campo">
+			<label for="hasta">Hasta (inclusive)</label>
+			<input id="hasta" name="hasta" type="date" value={texto('hasta', promocion?.hasta ?? '')} aria-invalid={errores.hasta ? 'true' : undefined} aria-describedby={describedby('hasta')} />
+			{errores.hasta && <p class="campo__error" id="error-hasta">{errores.hasta}</p>}
+		</div>
+	</fieldset>
+
+	<CampoFoto imagen={promocion?.imagen} altOrigen="#tituloEs" etiqueta="Foto de la promoción" valores={valores} errores={errores} />
+
+	<label class="casilla"><input type="checkbox" name="activa" checked={marcada} /> Activa (se muestra en la carta si está vigente)</label>
+
+	<div class="formulario__acciones">
+		<button type="submit" class="boton">{promocion ? 'Guardar cambios' : 'Crear promoción'}</button>
+		<a class="boton boton--secundario" href="/admin/promociones">Cancelar</a>
+	</div>
+</form>

@@ -1,0 +1,57 @@
+---
+import '../styles/global.css';
+import '../styles/carta.css';
+import { LOCALE, LOCALE_OPEN_GRAPH, IDIOMAS, type Idioma } from '../i18n/ui.ts';
+import { otroIdioma, rutaPagina, traductor, type Pagina } from '../i18n/utils.ts';
+import { serializarJsonLd } from '../lib/seo/jsonld.ts';
+
+interface Props {
+	idioma: Idioma;
+	pagina: Pagina;
+	titulo: string;
+	descripcion: string;
+	jsonLd?: Record<string, unknown>;
+	clase?: string;
+}
+
+const { idioma, pagina, titulo, descripcion, jsonLd, clase } = Astro.props;
+const t = traductor(idioma);
+const sitio = Astro.site!;
+const urlDe = (i: Idioma) => new URL(rutaPagina(i, pagina), sitio).href;
+const imagenOg = new URL('/marca/logo-512.jpg', sitio).href;
+---
+
+<!doctype html>
+<html lang={LOCALE[idioma]}>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#0b2a6f" />
+		<title>{titulo}</title>
+		<meta name="description" content={descripcion} />
+		<link rel="canonical" href={urlDe(idioma)} />
+		{IDIOMAS.map((i) => <link rel="alternate" hreflang={LOCALE[i]} href={urlDe(i)} />)}
+		<link rel="alternate" hreflang="x-default" href={urlDe('es')} />
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="apple-touch-icon" href="/marca/apple-touch-icon.png" />
+		<meta property="og:type" content="restaurant.menu" />
+		<meta property="og:site_name" content="Dónde Si No" />
+		<meta property="og:title" content={titulo} />
+		<meta property="og:description" content={descripcion} />
+		<meta property="og:url" content={urlDe(idioma)} />
+		<meta property="og:image" content={imagenOg} />
+		<meta property="og:locale" content={LOCALE_OPEN_GRAPH[idioma]} />
+		<meta property="og:locale:alternate" content={LOCALE_OPEN_GRAPH[otroIdioma(idioma)]} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="generator" content={Astro.generator} />
+		{jsonLd && <script is:inline type="application/ld+json" set:html={serializarJsonLd(jsonLd)} />}
+	</head>
+	<body class={clase} data-estadisticas={pagina === 'carta' ? 'true' : undefined}>
+		<a class="saltar-contenido" href="#contenido">{t('saltar')}</a>
+		<slot />
+	</body>
+</html>
+
+<script>
+	import '../scripts/estadisticas.ts';
+</script>

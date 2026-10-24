@@ -1,0 +1,111 @@
+---
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { rangoDeDias } from '../../lib/dominio/fechas.ts';
+import { fechaLocalISO } from '../../lib/dominio/horario.ts';
+import { EVENTOS_ESTADISTICA } from '../../lib/dominio/tipos.ts';
+import { ETIQUETA_EVENTO } from '../../lib/estadisticas/eventos.ts';
+import { conteosPorDia, totales } from '../../lib/repositorios/estadisticasRepo.ts';
+
+const PERIODOS = [7, 14, 30] as const;
+const pedido = Number(Astro.url.searchParams.get('dias'));
+// Solo los periodos de la lista: nada que venga de la URL llega a la consulta.
+const dias = PERIODOS.find((p) => p === pedido) ?? PERIODOS[0];
+
+const hoy = fechaLocalISO(new Date());
+const filas = await conteosPorDia(obtenerBd(), rangoDeDias(hoy, dias));
+const suma = totales(filas);
+const maximo = Math.max(1, ...filas.map((f) => Math.max(f.conteos.visita, f.conteos.qr_escaneo)));
+const formatearFecha = (iso: string) => iso.split('-').reverse().slice(0, 2).join('-');
+// Con muchos días no caben todas las fechas bajo las barras: se muestra una de cada `paso`.
+const paso = dias <= 7 ? 1 : dias <= 14 ? 2 : 5;
+const hayDatos = EVENTOS_ESTADISTICA.some((e) => suma[e] > 0);
+---
+
+<LayoutAdmin titulo="Estadísticas">
+	<h1>Estadísticas</h1>
+
+	<nav aria-label="Periodo" class="periodos">
+		{
+			PERIODOS.map((p) => (
+				<a class:list={['boton', { 'boton--secundario': p !== dias }]} href={`/admin/estadisticas?dias=${p}`} aria-current={p === dias ? 'page' : undefined}>
+					Últimos {p} días
+				</a>
+			))
+		}
+	</nav>
+
+	<p class="campo__ayuda">
+		Son contadores aproximados, sin cookies y sin guardar datos de las personas. No cuentan robots ni tus propias visitas con la sesión iniciada. Los días se
+		cuentan en hora de Chile.
+	</p>
+
+	{!hayDatos && <p class="aviso">Todavía no hay datos en este periodo. Aparecerán cuando alguien abra la carta o escanee el QR.</p>}
+
+	<section aria-labelledby="resumen">
+		<h2 id="resumen">Resumen de los últimos {dias} días</h2>
+		<dl class="resumen">
+			{
+				EVENTOS_ESTADISTICA.map((evento) => (
+					<div class="resumen__dato">
+						<dt>{ETIQUETA_EVENTO[evento]}</dt>
+						<dd>{suma[evento].toLocaleString('es-CL')}</dd>
+					</div>
+				))
+			}
+		</dl>
+	</section>
+
+	<section aria-labelledby="grafico">
+		<h2 id="grafico">Visitas y escaneos por día</h2>
+		<p class="campo__ayuda">El detalle con los números está en la tabla de abajo.</p>
+		<div role="img" aria-label={`Gráfico de visitas y escaneos del QR en los últimos ${dias} días. Los números están en la tabla.`} class="grafico">
+			{
+				filas.map((f, i) => (
+					<div class="grafico__dia">
+						<div class="grafico__barras">
+							<span class="grafico__barra grafico__barra--visitas" style={`height: ${(f.conteos.visita / maximo) * 100}%`}></span>
+							<span class="grafico__barra grafico__barra--qr" style={`height: ${(f.conteos.qr_escaneo / maximo) * 100}%`}></span>
+						</div>
+						<span class="grafico__fecha">{(filas.length - 1 - i) % paso === 0 ? formatearFecha(f.fecha) : ''}</span>
+					</div>
+				))
+			}
+		</div>
+		<p class="grafico__leyenda" aria-hidden="true">
+			<span class="grafico__muestra grafico__muestra--visitas"></span> Visitas
+			<span class="grafico__muestra grafico__muestra--qr"></span> Escaneos del QR
+		</p>
+	</section>
+
+	<section aria-labelledby="tabla">
+		<h2 id="tabla">Detalle por día</h2>
+		<div class="tabla-desplazable" tabindex="0" role="region" aria-labelledby="tabla">
+			<table class="tabla">
+				<caption class="solo-lectores">Contadores por día de los últimos {dias} días</caption>
+				<thead>
+					<tr>
+						<th scope="col">Día</th>
+						{EVENTOS_ESTADISTICA.map((evento) => <th scope="col">{ETIQUETA_EVENTO[evento]}</th>)}
+					</tr>
+				</thead>
+				<tbody>
+					{
+						[...filas].reverse().map((f) => (
+							<tr>
+								<th scope="row">{f.fecha.split('-').reverse().join('-')}</th>
+								{EVENTOS_ESTADISTICA.map((evento) => <td>{f.conteos[evento]}</td>)}
+							</tr>
+						))
+					}
+				</tbody>
+				<tfoot>
+					<tr>
+						<th scope="row">Total</th>
+						{EVENTOS_ESTADISTICA.map((evento) => <td>{suma[evento]}</td>)}
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	</section>
+</LayoutAdmin>

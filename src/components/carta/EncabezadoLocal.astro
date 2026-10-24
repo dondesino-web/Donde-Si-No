@@ -1,0 +1,61 @@
+---
+import type { Idioma } from '../../i18n/ui.ts';
+import { otroIdioma, rutaPagina, textoLocal, traductor } from '../../i18n/utils.ts';
+import { tieneHorario } from '../../lib/dominio/horario.ts';
+import type { Negocio } from '../../lib/repositorios/cartaRepo.ts';
+
+interface Props {
+	negocio: Negocio;
+	idioma: Idioma;
+}
+
+const { negocio, idioma } = Astro.props;
+const t = traductor(idioma);
+const otro = otroIdioma(idioma);
+const eslogan = textoLocal(idioma, negocio.esloganEs, negocio.esloganEn).texto;
+// El estado «abierto/cerrado» depende de la hora de quien mira y la página se cachea: lo calcula el navegador.
+const datosEstado = tieneHorario(negocio.horario)
+	? JSON.stringify({ horario: negocio.horario, abierto: t('estado.abierto'), cerrado: t('estado.cerrado'), cierra: t('estado.cierra') })
+	: undefined;
+---
+
+<header class="encabezado">
+	<div class="envoltorio">
+		<div class="encabezado__idioma no-imprimir">
+			<a href={rutaPagina(otro, 'carta')} hreflang={otro} lang={otro} aria-label={t('idioma.otroEtiqueta')} data-evento={otro === 'en' ? 'idioma_en' : undefined}>
+				{t('idioma.otro')}
+			</a>
+		</div>
+		<img
+			class="encabezado__logo"
+			src="/marca/logo-160.webp"
+			srcset="/marca/logo-160.webp 1x, /marca/logo-320.webp 2x"
+			width="160"
+			height="160"
+			alt=""
+			fetchpriority="high"
+		/>
+		<h1>{negocio.nombre}</h1>
+		{eslogan && <p class="encabezado__eslogan">{eslogan}</p>}
+		<p class="encabezado__lugar">{t('meta.lugar')}</p>
+		{datosEstado && <p class="estado" id="estado-apertura" data-estado={datosEstado} hidden />}
+	</div>
+</header>
+
+<script>
+	import { estadoApertura } from '../../lib/dominio/horario.ts';
+
+	const el = document.getElementById('estado-apertura');
+	if (el?.dataset.estado) {
+		const { horario, abierto, cerrado, cierra } = JSON.parse(el.dataset.estado);
+		const estado = estadoApertura(horario, new Date());
+		if (estado.tipo === 'abierto') {
+			el.textContent = `${abierto} · ${cierra.replace('{hora}', estado.cierra)}`;
+			el.classList.add('estado--abierto');
+			el.hidden = false;
+		} else if (estado.tipo === 'cerrado') {
+			el.textContent = cerrado;
+			el.hidden = false;
+		}
+	}
+</script>

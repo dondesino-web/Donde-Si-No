@@ -1,0 +1,44 @@
+---
+import LayoutAdmin from '../../../layouts/LayoutAdmin.astro';
+import { urlDelQr } from '../../../lib/qr.ts';
+
+const destino = urlDelQr(Astro.site!);
+---
+
+<LayoutAdmin titulo="Código QR">
+	<h1>Código QR de la carta</h1>
+
+	<div class="qr-vista">
+		<img src="/admin/qr/codigo.svg" width="330" height="330" alt={`Código QR que lleva a la carta: ${destino}`} />
+	</div>
+
+	<p>
+		Este QR lleva a <code>{destino}</code>. Esa dirección cuenta el escaneo y te manda a la carta, así que <strong>puedes imprimirlo con tranquilidad</strong>:
+		si algún día cambia la carta de lugar, el QR ya impreso sigue funcionando.
+	</p>
+
+	<h2>Descargar</h2>
+	<ul class="accesos">
+		<li><a class="boton" href="/admin/qr/codigo.svg?descargar=1" download="qr-donde-si-no.svg">Descargar en SVG (para imprenta)</a></li>
+		<li><button type="button" class="boton boton--secundario" id="descargar-png">Descargar en PNG</button></li>
+	</ul>
+	<p id="estado-png" role="status" class="campo__ayuda"></p>
+
+	<h2>Tarjeta para las mesas</h2>
+	<p>Una hoja lista para imprimir con el QR, el nombre del local y un texto en español e inglés.</p>
+	<ul class="accesos">
+		<li><a class="boton boton--secundario" href="/admin/qr/tarjeta?por=1">Una tarjeta grande por hoja</a></li>
+		<li><a class="boton boton--secundario" href="/admin/qr/tarjeta?por=4">Cuatro tarjetas por hoja (para recortar)</a></li>
+	</ul>
+
+	<h2>Antes de imprimir</h2>
+	<ul>
+		<li>Carga los precios y las fotos de la carta: si no, los clientes verán «Consultar».</li>
+		<li>Prueba el QR con tu celular, impreso en el tamaño final, antes de mandar a hacer muchas copias.</li>
+		<li>Déjalo con el borde blanco y en negro sobre blanco; no cambies los colores.</li>
+	</ul>
+</LayoutAdmin>
+
+<script>
+	import '../../../scripts/descargarQr.ts';
+</script>

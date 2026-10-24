@@ -1,0 +1,42 @@
+---
+import LayoutAdmin from '../../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../../lib/db/index.ts';
+import { obtenerNegocioAdmin } from '../../../lib/repositorios/adminLocalRepo.ts';
+import { urlDelQr } from '../../../lib/qr.ts';
+
+// Solo 1 o 4 tarjetas por hoja: lo demás de la URL se ignora.
+const POR_HOJA = [1, 4] as const;
+const por = POR_HOJA.find((n) => n === Number(Astro.url.searchParams.get('por'))) ?? 1;
+
+const negocio = await obtenerNegocioAdmin(obtenerBd());
+const destino = urlDelQr(Astro.site!);
+const tarjetas = Array.from({ length: por });
+---
+
+<LayoutAdmin titulo="Tarjeta para mesas">
+	<div class="no-imprimir tarjeta-barra">
+		<h1>Tarjeta para las mesas</h1>
+		<p>Imprime en tamaño real (sin «ajustar a la página») y, si puedes, en papel grueso o con funda plástica.</p>
+		<button type="button" class="boton" id="imprimir-tarjeta">Imprimir</button>
+		<a class="boton boton--secundario" href="/admin/qr">Volver</a>
+	</div>
+
+	<div class:list={['hoja', `hoja--${por}`]}>
+		{
+			tarjetas.map(() => (
+				<article class="tarjeta">
+					<img class="tarjeta__logo" src="/marca/logo-160.webp" width="96" height="96" alt="" />
+					<h2 class="tarjeta__nombre">{negocio?.nombre ?? 'Dónde Si No'}</h2>
+					<p class="tarjeta__texto">Escanea y mira nuestra carta</p>
+					<p class="tarjeta__texto tarjeta__texto--en" lang="en">Scan to see our menu</p>
+					<img class="tarjeta__qr" src="/admin/qr/codigo.svg" width="330" height="330" alt={`Código QR: ${destino}`} />
+					<p class="tarjeta__url">{destino.replace('https://', '')}</p>
+				</article>
+			))
+		}
+	</div>
+</LayoutAdmin>
+
+<script>
+	document.getElementById('imprimir-tarjeta')?.addEventListener('click', () => window.print());
+</script>

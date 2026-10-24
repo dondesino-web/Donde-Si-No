@@ -1,0 +1,35 @@
+---
+import { actions } from 'astro:actions';
+import FormularioPromocion from '../../../components/admin/FormularioPromocion.astro';
+import LayoutAdmin from '../../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../../lib/db/index.ts';
+import { obtenerPromocion } from '../../../lib/repositorios/adminPromosRepo.ts';
+
+// Primero los resultados que redirigen: tras eliminar, la promoción ya no existe y no debe responder 404.
+if (Astro.getActionResult(actions.eliminarPromocion)?.data?.ok) return Astro.redirect('/admin/promociones?aviso=eliminada', 303);
+const resultado = Astro.getActionResult(actions.guardarPromocion);
+if (resultado?.data?.ok) return Astro.redirect('/admin/promociones?aviso=guardada', 303);
+
+const id = Number(Astro.params.id);
+const promocion = Number.isInteger(id) && id > 0 ? await obtenerPromocion(obtenerBd(), id) : undefined;
+if (!promocion) return new Response('Promoción no encontrada', { status: 404 });
+
+const fallo = resultado?.data && !resultado.data.ok ? resultado.data : undefined;
+---
+
+<LayoutAdmin titulo={`Editar ${promocion.tituloEs}`}>
+	<h1>Editar promoción</h1>
+	<FormularioPromocion promocion={promocion} errores={fallo?.errores} valores={fallo?.valores} />
+
+	<form method="POST" action={actions.eliminarPromocion} class="formulario">
+		<input type="hidden" name="id" value={promocion.id} />
+		<button type="submit" class="boton boton--peligro" data-confirmar={`¿Eliminar la promoción ${promocion.tituloEs}? No se puede deshacer.`}>Eliminar promoción</button>
+	</form>
+</LayoutAdmin>
+
+<script>
+	document.addEventListener('submit', (evento) => {
+		const mensaje = ((evento as SubmitEvent).submitter as HTMLElement | null)?.dataset.confirmar;
+		if (mensaje && !confirm(mensaje)) evento.preventDefault();
+	});
+</script>

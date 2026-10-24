@@ -1,0 +1,71 @@
+---
+import type { Idioma } from '../../i18n/ui.ts';
+import { traductor } from '../../i18n/utils.ts';
+import type { Negocio } from '../../lib/repositorios/cartaRepo.ts';
+
+interface Props {
+	negocio: Negocio;
+	idioma: Idioma;
+}
+
+const { negocio, idioma } = Astro.props;
+const t = traductor(idioma);
+
+const enlaces = [
+	negocio.telefono && { href: `tel:${negocio.telefono}`, texto: t('accion.llamar'), principal: true, evento: 'clic_llamar' },
+	negocio.mapsUrl && { href: negocio.mapsUrl, texto: t('accion.mapa'), principal: true, evento: 'clic_mapa' },
+	negocio.ubereatsUrl && { href: negocio.ubereatsUrl, texto: t('accion.ubereats'), principal: false, evento: 'clic_ubereats' },
+	negocio.resenaUrl && { href: negocio.resenaUrl, texto: t('accion.resena'), principal: false, evento: 'clic_resena' },
+	// Solo dígitos: `wa.me/<número con código de país>`. La validación del panel ya guarda el número en formato internacional.
+	negocio.whatsapp && { href: `https://wa.me/${negocio.whatsapp.replace(/\D/g, '')}`, texto: t('accion.whatsapp'), principal: false, evento: undefined },
+].filter((e): e is { href: string; texto: string; principal: boolean; evento: string | undefined } => !!e);
+const externo = (href: string) => (href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {});
+---
+
+<nav class="envoltorio no-imprimir" aria-label={t('acciones.etiqueta')}>
+	<ul class="acciones">
+		{
+			enlaces.map((e) => (
+				<li>
+					<a class:list={['boton', { 'boton--secundario': !e.principal }]} href={e.href} data-evento={e.evento} {...externo(e.href)}>
+						{e.texto}
+					</a>
+				</li>
+			))
+		}
+		<li>
+			<button
+				type="button"
+				class="boton boton--secundario"
+				id="compartir"
+				data-evento="clic_compartir"
+				data-titulo={negocio.nombre}
+				data-texto={t('compartir.texto', { nombre: negocio.nombre })}
+				data-copiado={t('compartir.copiado')}
+			>
+				{t('accion.compartir')}
+			</button>
+			<span class="solo-lectores" role="status" id="compartir-aviso"></span>
+		</li>
+	</ul>
+</nav>
+
+<script>
+	const boton = document.getElementById('compartir');
+	const aviso = document.getElementById('compartir-aviso');
+	boton?.addEventListener('click', async () => {
+		const { titulo, texto, copiado } = boton.dataset;
+		const url = location.href.split('#')[0];
+		try {
+			if (navigator.share) {
+				await navigator.share({ title: titulo, text: texto, url });
+			} else {
+				await navigator.clipboard.writeText(url);
+				if (aviso) aviso.textContent = copiado ?? '';
+				boton.textContent = copiado ?? '';
+			}
+		} catch {
+			// El usuario canceló el menú de compartir: no es un error.
+		}
+	});
+</script>

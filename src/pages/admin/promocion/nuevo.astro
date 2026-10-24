@@ -1,0 +1,15 @@
+---
+import { actions } from 'astro:actions';
+import FormularioPromocion from '../../../components/admin/FormularioPromocion.astro';
+import LayoutAdmin from '../../../layouts/LayoutAdmin.astro';
+
+const resultado = Astro.getActionResult(actions.guardarPromocion);
+if (resultado?.data?.ok) return Astro.redirect('/admin/promociones?aviso=creada', 303);
+
+const fallo = resultado?.data && !resultado.data.ok ? resultado.data : undefined;
+---
+
+<LayoutAdmin titulo="Nueva promoción">
+	<h1>Nueva promoción</h1>
+	<FormularioPromocion errores={fallo?.errores} valores={fallo?.valores} />
+</LayoutAdmin>

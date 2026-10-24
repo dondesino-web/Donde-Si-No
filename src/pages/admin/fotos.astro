@@ -1,0 +1,82 @@
+---
+import { actions } from 'astro:actions';
+import CampoFoto from '../../components/admin/CampoFoto.astro';
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { MAX_FOTOS, listarFotos } from '../../lib/repositorios/adminFotosRepo.ts';
+
+const resultado = [actions.agregarFoto, actions.eliminarFoto, actions.moverFoto]
+	.map((accion) => Astro.getActionResult(accion))
+	.find((r) => r !== undefined);
+
+const aviso = resultado?.data?.ok ? resultado.data.mensaje : undefined;
+const fallo = resultado?.data && !resultado.data.ok ? resultado.data : undefined;
+const errores = fallo?.errores ?? {};
+const errorGeneral = resultado?.error ? resultado.error.message : undefined;
+
+const fotos = await listarFotos(obtenerBd());
+const hayLugar = fotos.length < MAX_FOTOS;
+---
+
+<LayoutAdmin titulo="Fotos destacadas">
+	<h1>Fotos destacadas</h1>
+	<p>Aparecen como un carrusel al inicio de la carta. Puedes tener hasta {MAX_FOTOS}; ahora hay {fotos.length}.</p>
+
+	<div aria-live="polite" class="avisos">
+		{aviso && <p class="aviso aviso--ok" role="status">{aviso}</p>}
+		{errores.formulario && <p class="aviso aviso--error" role="alert">{errores.formulario}</p>}
+		{errorGeneral && <p class="aviso aviso--error" role="alert">{errorGeneral}</p>}
+	</div>
+
+	{fotos.length === 0 && <p class="vacia">Todavía no hay fotos destacadas.</p>}
+
+	<ul class="admin-fotos">
+		{
+			fotos.map((foto, i) => (
+				<li class="admin-foto">
+					<img src={foto.imagen.sm} width={foto.imagen.ancho} height={foto.imagen.alto} alt={foto.imagen.altEs} loading="lazy" />
+					<p>{foto.imagen.altEs}</p>
+					<div class="mover">
+						<form method="POST" action={actions.moverFoto}>
+							<input type="hidden" name="id" value={foto.id} />
+							<input type="hidden" name="direccion" value="arriba" />
+							<button type="submit" class="boton boton--icono boton--secundario" disabled={i === 0} aria-label={`Subir la foto ${foto.imagen.altEs}`}>↑</button>
+						</form>
+						<form method="POST" action={actions.moverFoto}>
+							<input type="hidden" name="id" value={foto.id} />
+							<input type="hidden" name="direccion" value="abajo" />
+							<button type="submit" class="boton boton--icono boton--secundario" disabled={i === fotos.length - 1} aria-label={`Bajar la foto ${foto.imagen.altEs}`}>↓</button>
+						</form>
+					</div>
+					<form method="POST" action={actions.eliminarFoto}>
+						<input type="hidden" name="id" value={foto.id} />
+						<button type="submit" class="boton boton--peligro" data-confirmar="¿Eliminar esta foto? No se puede deshacer.">
+							Eliminar <span class="solo-lectores">la foto {foto.imagen.altEs}</span>
+						</button>
+					</form>
+				</li>
+			))
+		}
+	</ul>
+
+	{
+		hayLugar ? (
+			<section aria-labelledby="agregar">
+				<h2 id="agregar">Agregar una foto</h2>
+				<form method="POST" action={actions.agregarFoto} class="formulario">
+					<CampoFoto etiqueta="Nueva foto" permiteQuitar={false} valores={fallo?.valores} errores={errores} />
+					<button type="submit" class="boton">Agregar foto</button>
+				</form>
+			</section>
+		) : (
+			<p class="aviso">Ya tienes {MAX_FOTOS} fotos. Elimina una para agregar otra.</p>
+		)
+	}
+</LayoutAdmin>
+
+<script>
+	document.addEventListener('submit', (evento) => {
+		const mensaje = ((evento as SubmitEvent).submitter as HTMLElement | null)?.dataset.confirmar;
+		if (mensaje && !confirm(mensaje)) evento.preventDefault();
+	});
+</script>

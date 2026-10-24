@@ -1,0 +1,180 @@
+---
+import { actions } from 'astro:actions';
+import { traductor } from '../../i18n/utils.ts';
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { DIAS_SEMANA } from '../../lib/dominio/tipos.ts';
+import { obtenerNegocioAdmin } from '../../lib/repositorios/adminLocalRepo.ts';
+import { campoHorario } from '../../lib/validacion/horarioFormulario.ts';
+import { SERVICIOS } from '../../lib/validacion/local.ts';
+
+const t = traductor('es');
+const negocio = await obtenerNegocioAdmin(obtenerBd());
+if (!negocio) return new Response('Faltan los datos del local: ejecuta la semilla (npm run db:seed).', { status: 500 });
+
+const resultado = Astro.getActionResult(actions.guardarLocal);
+const aviso = resultado?.data?.ok ? resultado.data.mensaje : undefined;
+const fallo = resultado?.data && !resultado.data.ok ? resultado.data : undefined;
+const errores = fallo?.errores ?? {};
+const valores = fallo?.valores;
+
+const valor = (campo: string, respaldo: string): string => valores?.[campo]?.[0] ?? respaldo;
+const numero = (n: number | null): string => (n === null ? '' : String(n));
+const describedby = (campo: string) => (errores[campo] ? `error-${campo}` : undefined);
+const servicioMarcado = (s: (typeof SERVICIOS)[number]): boolean => (valores ? (valores.servicios ?? []).includes(s) : negocio.servicios[s]);
+const horaGuardada = (dia: (typeof DIAS_SEMANA)[number], tramo: 0 | 1, momento: 'abre' | 'cierra'): string => negocio.horario[dia]?.[tramo]?.[momento] ?? '';
+
+interface CampoTexto {
+	nombre: string;
+	etiqueta: string;
+	respaldo: string;
+	ayuda?: string;
+	tipo?: 'text' | 'tel' | 'url';
+	modo?: 'tel' | 'numeric' | 'decimal';
+	max?: number;
+	requerido?: boolean;
+}
+
+const contacto: CampoTexto[] = [
+	{ nombre: 'telefono', etiqueta: 'Teléfono', respaldo: negocio.telefono ?? '', ayuda: 'Por ejemplo +56 9 8886 0939', tipo: 'tel', modo: 'tel' },
+	{ nombre: 'whatsapp', etiqueta: 'WhatsApp', respaldo: negocio.whatsapp ?? '', ayuda: 'Opcional', tipo: 'tel', modo: 'tel' },
+	{ nombre: 'direccion', etiqueta: 'Dirección', respaldo: negocio.direccion, max: 120, requerido: true },
+	{ nombre: 'comuna', etiqueta: 'Comuna', respaldo: negocio.comuna, max: 60, requerido: true },
+	{ nombre: 'region', etiqueta: 'Región', respaldo: negocio.region, max: 60, requerido: true },
+	{ nombre: 'codigoPostal', etiqueta: 'Código postal', respaldo: negocio.codigoPostal ?? '', ayuda: 'Opcional: 7 números', modo: 'numeric' },
+	{ nombre: 'latitud', etiqueta: 'Latitud', respaldo: numero(negocio.latitud), ayuda: 'Opcional, por ejemplo -33.7. Ayuda a Google a ubicar el local.', modo: 'decimal' },
+	{ nombre: 'longitud', etiqueta: 'Longitud', respaldo: numero(negocio.longitud), ayuda: 'Opcional, por ejemplo -71.2', modo: 'decimal' },
+];
+
+const enlaces: CampoTexto[] = [
+	{ nombre: 'mapsUrl', etiqueta: 'Enlace de «Cómo llegar» (Google Maps)', respaldo: negocio.mapsUrl ?? '', tipo: 'url' },
+	{ nombre: 'resenaUrl', etiqueta: 'Enlace para dejar una reseña en Google', respaldo: negocio.resenaUrl ?? '', tipo: 'url' },
+	{ nombre: 'instagramUrl', etiqueta: 'Instagram', respaldo: negocio.instagramUrl ?? '', tipo: 'url', ayuda: 'https://www.instagram.com/tu_usuario' },
+	{ nombre: 'facebookUrl', etiqueta: 'Facebook', respaldo: negocio.facebookUrl ?? '', tipo: 'url' },
+	{ nombre: 'ubereatsUrl', etiqueta: 'Uber Eats', respaldo: negocio.ubereatsUrl ?? '', tipo: 'url' },
+];
+---
+
+<LayoutAdmin titulo="Datos del local">
+	<h1>Datos del local</h1>
+
+	<div aria-live="polite" class="avisos">
+		{aviso && <p class="aviso aviso--ok" role="status">{aviso}</p>}
+		{errores.formulario && <p class="aviso aviso--error" role="alert">{errores.formulario}</p>}
+		{fallo && !errores.formulario && <p class="aviso aviso--error" role="alert">Revisa los campos marcados: no se guardó nada.</p>}
+	</div>
+
+	<form method="POST" action={actions.guardarLocal} class="formulario">
+		<fieldset class="campo">
+			<legend>Presentación</legend>
+			<div class="campo">
+				<label for="esloganEs">Eslogan</label>
+				<input id="esloganEs" name="esloganEs" maxlength="80" value={valor('esloganEs', negocio.esloganEs)} aria-describedby={describedby('esloganEs')} />
+				{errores.esloganEs && <p class="campo__error" id="error-esloganEs">{errores.esloganEs}</p>}
+			</div>
+			<div class="campo">
+				<label for="esloganEn">Eslogan en inglés <span class="campo__ayuda">(opcional)</span></label>
+				<input id="esloganEn" name="esloganEn" maxlength="80" value={valor('esloganEn', negocio.esloganEn ?? '')} aria-describedby={describedby('esloganEn')} />
+				{errores.esloganEn && <p class="campo__error" id="error-esloganEn">{errores.esloganEn}</p>}
+			</div>
+			<div class="campo">
+				<label for="descripcionEs">Descripción <span class="campo__ayuda">(la leen Google y quien comparte el enlace)</span></label>
+				<textarea id="descripcionEs" name="descripcionEs" rows="4" maxlength="600" aria-describedby={describedby('descripcionEs')}>{valor('descripcionEs', negocio.descripcionEs)}</textarea>
+				{errores.descripcionEs && <p class="campo__error" id="error-descripcionEs">{errores.descripcionEs}</p>}
+			</div>
+			<div class="campo">
+				<label for="descripcionEn">Descripción en inglés <span class="campo__ayuda">(opcional)</span></label>
+				<textarea id="descripcionEn" name="descripcionEn" rows="4" maxlength="600" aria-describedby={describedby('descripcionEn')}>{valor('descripcionEn', negocio.descripcionEn ?? '')}</textarea>
+				{errores.descripcionEn && <p class="campo__error" id="error-descripcionEn">{errores.descripcionEn}</p>}
+			</div>
+			<div class="campo">
+				<label for="rangoPrecio">Rango de precios <span class="campo__ayuda">(opcional, por ejemplo $5.000–10.000)</span></label>
+				<input id="rangoPrecio" name="rangoPrecio" maxlength="40" value={valor('rangoPrecio', negocio.rangoPrecio ?? '')} aria-describedby={describedby('rangoPrecio')} />
+				{errores.rangoPrecio && <p class="campo__error" id="error-rangoPrecio">{errores.rangoPrecio}</p>}
+			</div>
+		</fieldset>
+
+		<fieldset class="campo">
+			<legend>Contacto y ubicación</legend>
+			{
+				contacto.map((c) => (
+					<div class="campo">
+						<label for={c.nombre}>{c.etiqueta} {c.ayuda && <span class="campo__ayuda">({c.ayuda})</span>}</label>
+						<input id={c.nombre} name={c.nombre} type={c.tipo ?? 'text'} inputmode={c.modo} maxlength={c.max} required={c.requerido} value={valor(c.nombre, c.respaldo)} aria-invalid={errores[c.nombre] ? 'true' : undefined} aria-describedby={describedby(c.nombre)} />
+						{errores[c.nombre] && <p class="campo__error" id={`error-${c.nombre}`}>{errores[c.nombre]}</p>}
+					</div>
+				))
+			}
+		</fieldset>
+
+		<fieldset class="campo">
+			<legend>Enlaces y redes</legend>
+			{
+				enlaces.map((c) => (
+					<div class="campo">
+						<label for={c.nombre}>{c.etiqueta} {c.ayuda && <span class="campo__ayuda">({c.ayuda})</span>}</label>
+						<input id={c.nombre} name={c.nombre} type="url" maxlength="300" value={valor(c.nombre, c.respaldo)} aria-invalid={errores[c.nombre] ? 'true' : undefined} aria-describedby={describedby(c.nombre)} />
+						{errores[c.nombre] && <p class="campo__error" id={`error-${c.nombre}`}>{errores[c.nombre]}</p>}
+					</div>
+				))
+			}
+		</fieldset>
+
+		<fieldset class="campo">
+			<legend>Servicios</legend>
+			<div class="casillas">
+				{
+					SERVICIOS.map((s) => (
+						<label class="casilla">
+							<input type="checkbox" name="servicios" value={s} checked={servicioMarcado(s)} /> {t(`servicio.${s}`)}
+						</label>
+					))
+				}
+			</div>
+			{errores.servicios && <p class="campo__error">{errores.servicios}</p>}
+		</fieldset>
+
+		<fieldset class="campo" id="horario">
+			<legend>Horario de atención</legend>
+			<p class="campo__ayuda">Deja un día en blanco si está cerrado. Si no llenas ningún día, la carta dirá «Horario por confirmar». Para cerrar pasada la medianoche, pon la hora de cierre de la madrugada (por ejemplo 12:00 a 01:00).</p>
+			<button type="button" class="boton boton--secundario" id="copiar-lunes">Copiar el horario del lunes a todos los días</button>
+			{
+				DIAS_SEMANA.map((dia) => (
+					<fieldset class="campo horario-dia">
+						<legend>{t(`dia.${dia}`)}</legend>
+						{[1, 2].map((tramo) => (
+							<div class="horario-tramo">
+								<div class="campo">
+									<label for={campoHorario(dia, 'abre', tramo)}>{tramo === 1 ? 'Abre' : 'Segundo tramo: abre'}</label>
+									<input id={campoHorario(dia, 'abre', tramo)} name={campoHorario(dia, 'abre', tramo)} type="time" value={valor(campoHorario(dia, 'abre', tramo), valores ? '' : horaGuardada(dia, (tramo - 1) as 0 | 1, 'abre'))} aria-describedby={describedby(`horario_${dia}`)} />
+								</div>
+								<div class="campo">
+									<label for={campoHorario(dia, 'cierra', tramo)}>Cierra</label>
+									<input id={campoHorario(dia, 'cierra', tramo)} name={campoHorario(dia, 'cierra', tramo)} type="time" value={valor(campoHorario(dia, 'cierra', tramo), valores ? '' : horaGuardada(dia, (tramo - 1) as 0 | 1, 'cierra'))} aria-describedby={describedby(`horario_${dia}`)} />
+								</div>
+							</div>
+						))}
+						{errores[`horario_${dia}`] && <p class="campo__error" id={`error-horario_${dia}`}>{errores[`horario_${dia}`]}</p>}
+					</fieldset>
+				))
+			}
+		</fieldset>
+
+		<div class="formulario__acciones">
+			<button type="submit" class="boton">Guardar datos del local</button>
+		</div>
+	</form>
+</LayoutAdmin>
+
+<script>
+	// Mejora opcional: el formulario funciona igual sin JavaScript.
+	document.getElementById('copiar-lunes')?.addEventListener('click', () => {
+		for (const dia of ['mar', 'mie', 'jue', 'vie', 'sab', 'dom']) {
+			for (const campo of ['abre1', 'cierra1', 'abre2', 'cierra2']) {
+				const origen = document.getElementById(`horario_lun_${campo}`) as HTMLInputElement | null;
+				const destino = document.getElementById(`horario_${dia}_${campo}`) as HTMLInputElement | null;
+				if (origen && destino) destino.value = origen.value;
+			}
+		}
+	});
+</script>

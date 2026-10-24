@@ -1,0 +1,62 @@
+---
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { rangoDeDias } from '../../lib/dominio/fechas.ts';
+import { fechaLocalISO } from '../../lib/dominio/horario.ts';
+import { EVENTOS_DE_CLIC } from '../../lib/estadisticas/eventos.ts';
+import { conteosPorDia, totales, type ConteosDia } from '../../lib/repositorios/estadisticasRepo.ts';
+
+const hoy = fechaLocalISO(new Date());
+const semana = await conteosPorDia(obtenerBd(), rangoDeDias(hoy, 7));
+const deHoy = totales(semana.slice(-1));
+const deLaSemana = totales(semana);
+
+const clics = (conteos: ConteosDia): number => EVENTOS_DE_CLIC.reduce((suma, evento) => suma + conteos[evento], 0);
+const filas = [
+	{ nombre: 'Visitas a la carta', hoy: deHoy.visita, semana: deLaSemana.visita },
+	{ nombre: 'Escaneos del QR', hoy: deHoy.qr_escaneo, semana: deLaSemana.qr_escaneo },
+	{ nombre: 'Clics en llamar, mapa, reseña…', hoy: clics(deHoy), semana: clics(deLaSemana) },
+];
+---
+
+<LayoutAdmin titulo="Inicio">
+	<h1>Panel de la carta</h1>
+
+	<section aria-labelledby="movimiento">
+		<h2 id="movimiento">Movimiento de la carta</h2>
+		<div class="tabla-desplazable">
+			<table class="tabla">
+				<caption class="solo-lectores">Resumen de hoy y de los últimos 7 días</caption>
+				<thead>
+					<tr>
+						<th scope="col">Qué se cuenta</th>
+						<th scope="col">Hoy</th>
+						<th scope="col">Últimos 7 días</th>
+					</tr>
+				</thead>
+				<tbody>
+					{
+						filas.map((fila) => (
+							<tr>
+								<th scope="row">{fila.nombre}</th>
+								<td>{fila.hoy}</td>
+								<td>{fila.semana}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+		<p><a href="/admin/estadisticas">Ver todas las estadísticas</a></p>
+	</section>
+
+	<h2>Accesos rápidos</h2>
+	<ul class="accesos">
+		<li><a class="boton" href="/admin/carta">Editar la carta</a></li>
+		<li><a class="boton boton--secundario" href="/admin/promociones">Promociones</a></li>
+		<li><a class="boton boton--secundario" href="/admin/menu-del-dia">Menú del día</a></li>
+		<li><a class="boton boton--secundario" href="/admin/fotos">Fotos destacadas</a></li>
+		<li><a class="boton boton--secundario" href="/admin/local">Datos del local, horario y redes</a></li>
+		<li><a class="boton boton--secundario" href="/admin/qr">Código QR y tarjeta para mesas</a></li>
+	</ul>
+</LayoutAdmin>

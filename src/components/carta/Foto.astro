@@ -1,0 +1,24 @@
+---
+import type { Idioma } from '../../i18n/ui.ts';
+import type { Imagen } from '../../lib/dominio/tipos.ts';
+
+interface Props {
+	imagen: Imagen;
+	idioma: Idioma;
+	/** La primera imagen visible no debe cargarse en diferido. */
+	prioritaria?: boolean;
+}
+
+const { imagen, idioma, prioritaria = false } = Astro.props;
+const alt = idioma === 'en' && imagen.altEn ? imagen.altEn : imagen.altEs;
+---
+
+<img
+	src={imagen.sm}
+	srcset={`${imagen.sm} 1x, ${imagen.lg} 2x`}
+	width={imagen.ancho}
+	height={imagen.alto}
+	alt={alt}
+	loading={prioritaria ? 'eager' : 'lazy'}
+	decoding="async"
+/>

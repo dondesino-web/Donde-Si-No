@@ -1,0 +1,62 @@
+---
+import { ADMIN_PASSWORD_HASH, SESSION_SECRET } from 'astro:env/server';
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { hashearIp, limpiarIntentos, reservarIntento } from '../../lib/auth/limiteIntentos.ts';
+import { verificarPassword } from '../../lib/auth/password.ts';
+import { DURACION_SESION_MS, crearTokenSesion, nombreCookieSesion } from '../../lib/auth/sesion.ts';
+import { obtenerBd } from '../../lib/db/index.ts';
+
+const configurado = Boolean(ADMIN_PASSWORD_HASH && SESSION_SECRET);
+let error: string | undefined;
+
+if (configurado && Astro.request.method === 'POST') {
+	const bd = obtenerBd();
+	const ahora = new Date();
+	const ipHash = hashearIp(Astro.clientAddress, SESSION_SECRET!);
+
+	// El intento se reserva antes de verificar: así una ráfaga simultánea no evade el límite ni gasta CPU en scrypt.
+	if (!(await reservarIntento(bd, ipHash, ahora))) {
+		error = 'Demasiados intentos. Espera 15 minutos antes de volver a probar.';
+		Astro.response.status = 429;
+	} else {
+		const datos = await Astro.request.formData().catch(() => undefined);
+		const password = datos?.get('password');
+		const correcta = typeof password === 'string' && (await verificarPassword(password, ADMIN_PASSWORD_HASH!));
+
+		if (correcta) {
+			await limpiarIntentos(bd, ipHash);
+			Astro.cookies.set(nombreCookieSesion(import.meta.env.PROD), crearTokenSesion(SESSION_SECRET!, ahora), {
+				httpOnly: true,
+				secure: import.meta.env.PROD,
+				sameSite: 'strict',
+				path: '/',
+				maxAge: DURACION_SESION_MS / 1000,
+			});
+			return Astro.redirect('/admin', 303);
+		}
+
+		error = 'Contraseña incorrecta.';
+		Astro.response.status = 401;
+	}
+}
+---
+
+<LayoutAdmin titulo="Ingresar" sinNavegacion>
+	<h1>Panel de la carta</h1>
+	{
+		configurado ? (
+			<form method="post" class="formulario">
+				{error && <p class="aviso aviso--error" role="alert">{error}</p>}
+				<div class="campo">
+					<label for="password">Contraseña</label>
+					<input id="password" name="password" type="password" autocomplete="current-password" required autofocus />
+				</div>
+				<button type="submit" class="boton">Ingresar</button>
+			</form>
+		) : (
+			<p class="aviso aviso--error" role="alert">
+				El panel aún no está configurado: faltan las variables ADMIN_PASSWORD_HASH y SESSION_SECRET.
+			</p>
+		)
+	}
+</LayoutAdmin>

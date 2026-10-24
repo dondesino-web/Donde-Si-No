@@ -1,0 +1,39 @@
+---
+import type { Idioma } from '../../i18n/ui.ts';
+import { textoLocal, traductor } from '../../i18n/utils.ts';
+import LayoutCarta from '../../layouts/LayoutCarta.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { obtenerCartaPublica } from '../../lib/repositorios/cartaRepo.ts';
+import { construirJsonLd } from '../../lib/seo/jsonld.ts';
+import BarraAcciones from './BarraAcciones.astro';
+import Categorias from './Categorias.astro';
+import Destacados from './Destacados.astro';
+import EncabezadoLocal from './EncabezadoLocal.astro';
+import PieLocal from './PieLocal.astro';
+
+interface Props {
+	idioma: Idioma;
+}
+
+const { idioma } = Astro.props;
+const t = traductor(idioma);
+const carta = await obtenerCartaPublica(obtenerBd());
+const { negocio } = carta;
+const descripcion = textoLocal(idioma, negocio.descripcionEs, negocio.descripcionEn).texto;
+---
+
+<LayoutCarta
+	idioma={idioma}
+	pagina="carta"
+	titulo={`${negocio.nombre} · ${t('meta.tituloCarta')} · ${t('meta.lugar')}`}
+	descripcion={descripcion}
+	jsonLd={construirJsonLd(carta, idioma, Astro.site!.origin)}
+>
+	<EncabezadoLocal negocio={negocio} idioma={idioma} />
+	<main id="contenido">
+		<BarraAcciones negocio={negocio} idioma={idioma} />
+		<Destacados carta={carta} idioma={idioma} />
+		<Categorias categorias={carta.categorias} idioma={idioma} />
+	</main>
+	<PieLocal negocio={negocio} idioma={idioma} />
+</LayoutCarta>

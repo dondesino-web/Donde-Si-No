@@ -1,0 +1,19 @@
+---
+import { actions } from 'astro:actions';
+import FormularioProducto from '../../../components/admin/FormularioProducto.astro';
+import LayoutAdmin from '../../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../../lib/db/index.ts';
+import { listarCartaAdmin } from '../../../lib/repositorios/adminCartaRepo.ts';
+
+const resultado = Astro.getActionResult(actions.guardarProducto);
+if (resultado?.data?.ok) return Astro.redirect('/admin/carta?aviso=creado', 303);
+
+const categorias = await listarCartaAdmin(obtenerBd());
+const categoriaInicial = Number(Astro.url.searchParams.get('categoria')) || undefined;
+const fallo = resultado?.data && !resultado.data.ok ? resultado.data : undefined;
+---
+
+<LayoutAdmin titulo="Nuevo producto">
+	<h1>Nuevo producto</h1>
+	<FormularioProducto categorias={categorias} categoriaInicial={categoriaInicial} errores={fallo?.errores} valores={fallo?.valores} />
+</LayoutAdmin>
