@@ -12,10 +12,11 @@
 
 | Recurso | Proveedor | Estado |
 |---|---|---|
-| Hosting, CDN y caché ISR | Vercel, proyecto conectado a `jhonabruzzi278/Donde-Si-No` (rama `main`) | ✅ Activo en `https://www.donde-sino.com/` |
-| Dominio y SSL | Vercel (certificado automático) | ✅ Activo |
-| Base de datos | Turso (libSQL) | ⏳ Por crear (Fase 4) |
-| Fotos | Vercel Blob (store público) | ⏳ Por crear (Fase 4) |
+| Hosting, CDN y caché ISR | Vercel, equipo `donde-sino`, proyecto `donde-si-no`, conectado a `dondesino-web/Donde-Si-No` (rama `main`) | ✅ Activo en `https://www.donde-sino.com/` desde el 2026-10-24 |
+| Dominio | Registrado en Amazon Registrar (AWS Route 53), vence el 2027-03-10; DNS en Vercel (equipo `donde-sino`) | ✅ Activo |
+| SSL | Vercel (certificado automático de Let's Encrypt) | ✅ Activo |
+| Base de datos | Turso (libSQL), base `dondesino-rosalia` en AWS us-east-1 | ✅ Activa |
+| Fotos | Vercel Blob (store público) | ✅ Conectado |
 
 > ⚠️ **Plan de Vercel:** el plan Hobby es solo para uso no comercial. Para la web de un negocio corresponde Pro (US$20/mes). **El responsable eligió Hobby (2026-10-24)** asumiendo ese riesgo: Vercel podría limitar o suspender el proyecto.
 
@@ -36,7 +37,7 @@
 
 ## 3. Variables de Entorno
 
-Plantilla en [`.env.example`](../../.env.example). En Vercel se cargan en *Project Settings → Environment Variables*.
+Plantilla en [`.env.example`](../../.env.example). En Vercel se cargan en *Project Settings → Environment Variables*; qué entorno lleva cada una (Production y Preview) está en la sección 1 de la [lista de verificación de despliegue](./LISTA_VERIFICACION_DESPLIEGUE.md).
 
 | Variable | Uso | Requerida en producción |
 |---|---|---|
@@ -79,5 +80,6 @@ TURSO_DATABASE_URL=… TURSO_AUTH_TOKEN=… npm run db:seed           # solo la 
 
 ## 6. Estado de la Infraestructura
 
-- **Producción:** el dominio `www.donde-sino.com` está verificado en Vercel, pero el único despliegue es el commit inicial de la plantilla de Astro.
-- **Fase 0:** el proyecto ya compila con el adaptador de Vercel y el ISR configurado. Faltan los recursos de Turso y Blob, y las variables de entorno.
+- **Producción:** la carta está publicada en `https://www.donde-sino.com` desde el 2026-10-24 (fusión del PR #1, commit `b073561`). `donde-sino.com` redirige a `www`.
+- **Recursos:** Turso, Vercel Blob y las variables de entorno están configurados en el proyecto del equipo `donde-sino`.
+- **Preview:** comparte la base y el store con producción; ver la advertencia en la [lista de verificación de despliegue](./LISTA_VERIFICACION_DESPLIEGUE.md).

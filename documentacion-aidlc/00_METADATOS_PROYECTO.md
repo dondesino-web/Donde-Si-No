@@ -7,7 +7,7 @@
 - **Qué debe contener:** nombre, responsable, fechas, fase, completitud, enlaces y supuestos.
 
 **Nombre:** Donde-Si-No (`dondesino`): carta digital QR del local «Dónde Si No»
-**Responsable:** `jhonabruzzi278` (Repositorio: `https://github.com/jhonabruzzi278/Donde-Si-No.git`)
+**Responsable:** `jhonabruzzi278` (Repositorio: `https://github.com/dondesino-web/Donde-Si-No.git`)
 **URL de Producción:** [https://www.donde-sino.com/](https://www.donde-sino.com/)
 **Proveedor de Despliegue:** Vercel (confirmado por el usuario)
 **Analizado el:** 2026-08-26

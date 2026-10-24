@@ -21,7 +21,7 @@
 
 Si descubres una vulnerabilidad de seguridad en este repositorio, por favor **NO abras un issue público**. En su lugar:
 
-1. Abre un **Security Advisory** privado directamente en la pestaña de Seguridad del repositorio de GitHub: `https://github.com/jhonabruzzi278/Donde-Si-No/security/advisories`
+1. Abre un **Security Advisory** privado directamente en la pestaña de Seguridad del repositorio de GitHub: `https://github.com/dondesino-web/Donde-Si-No/security/advisories`
 2. O contacta directamente al responsable del repositorio (`jhonabruzzi278`) a través de los canales privados de GitHub.
 
 ---
