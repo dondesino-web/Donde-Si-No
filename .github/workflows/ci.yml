@@ -23,7 +23,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Astro exige Node >= 22.23.4 (campo `engines`): sin `check-latest` el runner usa la 22.x vieja de su caché.
+          node-version: '>=22.23.4 <23'
+          check-latest: true
           cache: npm
 
       - run: npm ci
@@ -58,7 +60,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '>=22.23.4 <23'
+          check-latest: true
           cache: npm
 
       - run: npm ci
