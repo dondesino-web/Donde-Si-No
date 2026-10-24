@@ -40,7 +40,13 @@ export default defineConfig({
 		reuseExistingServer: false,
 		timeout: 60_000,
 		env: {
-			ADMIN_PASSWORD_HASH: await hashearPassword(PASSWORD_PRUEBA),
+			// Las pruebas escriben datos: SIEMPRE contra la base local, aunque la terminal tenga cargadas las credenciales
+				// de Turso (por ejemplo, tras aplicar las migraciones de producción).
+				TURSO_DATABASE_URL: 'file:local.db',
+				TURSO_AUTH_TOKEN: '',
+				BLOB_READ_WRITE_TOKEN: '',
+				ISR_BYPASS_TOKEN: '',
+				ADMIN_PASSWORD_HASH: await hashearPassword(PASSWORD_PRUEBA),
 			SESSION_SECRET: SECRETO_SESION_PRUEBA,
 			CRON_SECRET: SECRETO_CRON_PRUEBA,
 		},
