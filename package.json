@@ -16,6 +16,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "node --env-file-if-exists=.env scripts/sembrar.ts",
+    "db:carta": "node --env-file-if-exists=.env scripts/cargar-carta.ts",
     "marca:iconos": "node scripts/generar-iconos.ts",
     "test:e2e": "playwright test",
     "admin:hash": "node scripts/generar-hash.ts",
