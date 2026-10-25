@@ -8,6 +8,14 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-24 · Se retira la carga con Excel
+
+### Eliminado
+- **Carga con Excel** (planilla descargable y subida desde Carga rápida), añadida horas antes en el PR #7: por decisión del responsable, la carta se gestiona solo desde el panel. Se quitan la descarga `/admin/carta.xlsx`, la lectura y el plan de cambios de la planilla, sus acciones, pruebas y las dependencias `write-excel-file` y `read-excel-file`.
+- Sigue disponible la **Carga rápida escribiendo una lista** (`nombre; precio; descripción`) y todo lo que se edita producto por producto en Carta.
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-24 · Rediseño de la pantalla Carta del panel
 
 Basado en cómo resuelven lo mismo Owner, Toast y Square: el estado de cada producto a la vista, «agotado» como interruptor aparte de borrar, ordenar como un modo propio, y búsqueda y filtros.
