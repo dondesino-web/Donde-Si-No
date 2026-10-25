@@ -29,6 +29,11 @@ export default defineConfig({
 	retries: 1,
 	expect: { timeout: 10_000 },
 	reporter: [['list']],
+	// Las pruebas de diseños cambian el diseño guardado de la carta pública, que todas las demás leen: corren al final y solas.
+	projects: [
+		{ name: 'principal', testIgnore: /temas.spec.ts/ },
+		{ name: 'temas', testMatch: /temas.spec.ts/, dependencies: ['principal'], fullyParallel: false },
+	],
 	use: {
 		baseURL: `http://localhost:${PUERTO}`,
 		// Usa el Chrome instalado: evita descargar navegadores de Playwright.

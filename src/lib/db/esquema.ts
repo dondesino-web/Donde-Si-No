@@ -52,6 +52,8 @@ export const negocio = sqliteTable(
 		rangoPrecio: text(),
 		servicios: text({ mode: 'json' }).$type<Servicios>().notNull(),
 		horario: text({ mode: 'json' }).$type<Horario>().notNull().default({}),
+		/** Diseño de la carta pública (ver `dominio/temas.ts`). Un valor desconocido se trata como el clásico. */
+		tema: text().notNull().default('clasico'),
 		actualizadoEn: actualizadoEn(),
 	},
 	(t) => [check('negocio_fila_unica', sql`${t.id} = 1`)],

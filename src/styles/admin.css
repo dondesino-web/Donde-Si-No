@@ -302,3 +302,35 @@ fieldset fieldset.campo { border-style: dashed; }
 
 .carta-nueva > summary h2 { font-size: var(--texto-xl); }
 .carta-nueva .carta-categoria__cuerpo { padding-top: var(--espacio-2); }
+
+/* ---------- Diseño de la carta: elegir tema ---------- */
+.temas { display: grid; gap: var(--espacio-3); border: 0; padding: 0; margin: 0; }
+.tema-tarjeta { display: grid; gap: var(--espacio-3); padding: var(--espacio-4); background: var(--color-superficie); border: 2px solid var(--color-borde); border-radius: var(--radio-md); box-shadow: var(--sombra-tarjeta); }
+.tema-tarjeta:has(input:checked) { border-color: var(--color-azul); }
+.tema-tarjeta__opcion { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: var(--espacio-3); align-items: start; cursor: pointer; }
+.tema-tarjeta__opcion input { width: 1.5rem; height: 1.5rem; margin-top: 0.1rem; accent-color: var(--color-azul); }
+.tema-tarjeta__texto { display: grid; gap: var(--espacio-1); }
+.tema-tarjeta .boton { width: auto; justify-self: start; }
+@media (min-width: 48rem) {
+	.tema-tarjeta { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+}
+
+/* Dibujo en miniatura de cada diseño */
+.tema-muestra { display: grid; align-content: start; gap: 0.25rem; width: 6rem; height: 4.5rem; padding: 0.25rem; border: 1px solid var(--color-borde-fuerte); border-radius: 0.375rem; overflow: hidden; }
+.tema-muestra i { display: block; border-radius: 2px; }
+.tema-muestra__barra { height: 0.9rem; }
+.tema-muestra__fila { height: 0.6rem; }
+.tema-muestra__fila--corta { width: 60%; }
+.tema-muestra--clasico { background: #fffbf0; }
+.tema-muestra--clasico .tema-muestra__barra { background: #0b2a6f; border-bottom: 3px solid #ffd100; }
+.tema-muestra--clasico .tema-muestra__fila { background: #fff; border: 1px solid #ece4d2; }
+.tema-muestra--bistro { background: #fbf5ea; }
+.tema-muestra--bistro .tema-muestra__barra { background: #7b1d2e; }
+.tema-muestra--bistro .tema-muestra__fila { background: transparent; border-bottom: 1px solid #7b1d2e; border-radius: 0; }
+.tema-muestra--noche { background: #14110f; }
+.tema-muestra--noche .tema-muestra__barra { background: #0c0a09; border-bottom: 3px solid #ffd100; }
+.tema-muestra--noche .tema-muestra__fila { background: #3a352f; }
+.tema-muestra--fotos { background: #fffbf0; grid-template-columns: 1fr 1fr; }
+.tema-muestra--fotos .tema-muestra__barra { grid-column: 1 / -1; background: #0b2a6f; }
+.tema-muestra--fotos .tema-muestra__fila { height: 1.35rem; background: #c8102e; opacity: 0.55; }
+.tema-muestra--fotos .tema-muestra__fila--corta { width: auto; }

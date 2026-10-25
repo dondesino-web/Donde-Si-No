@@ -32,6 +32,7 @@ export function negocioDePrueba(cambios: Partial<Negocio> = {}): Negocio {
 		rangoPrecio: '$5.000–10.000',
 		servicios: { wifi: true, petFriendly: true, banos: true, paraLlevar: true, consumoLocal: true },
 		horario: {},
+		tema: 'clasico',
 		actualizadoEn: FECHA,
 		...cambios,
 	};

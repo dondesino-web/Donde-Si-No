@@ -1,0 +1,54 @@
+/*
+ * Diseño «Bistró» de la carta pública: claro y elegante, con títulos con serifa (fuentes del sistema: cero descargas)
+ * y los productos como una lista limpia. Contraste: granate #7b1d2e sobre #fbf5ea = 9,6; blanco sobre granate = 11,1.
+ */
+body.tema-bistro {
+	--color-fondo: #fbf5ea;
+	--color-titulo: #7b1d2e;
+	--color-precio: #7b1d2e;
+	--color-borde: #e4d8c3;
+	--fuente-titulos: Georgia, 'Times New Roman', 'Noto Serif', serif;
+}
+
+.tema-bistro h1, .tema-bistro h2, .tema-bistro h3, .tema-bistro .producto__precio { font-family: var(--fuente-titulos); }
+
+/* Encabezado claro, con el logo más pequeño */
+.tema-bistro .encabezado { background: var(--color-fondo); color: var(--color-tinta); border-bottom: 1px solid var(--color-borde); }
+.tema-bistro .encabezado h1 { color: var(--color-titulo); font-weight: 600; }
+.tema-bistro .encabezado__logo { width: 6.5rem; height: auto; }
+.tema-bistro .encabezado__eslogan { color: var(--color-titulo); font-style: italic; font-weight: 400; }
+.tema-bistro .encabezado__lugar { color: var(--color-texto-suave); opacity: 1; }
+.tema-bistro .encabezado__idioma a { color: var(--color-titulo); border-color: var(--color-titulo); }
+.tema-bistro .encabezado__idioma a:hover { background: var(--color-titulo); color: #fff; }
+.tema-bistro .encabezado :focus-visible { outline-color: var(--color-foco); }
+.tema-bistro .estado { border: 1px solid var(--color-borde); }
+
+.tema-bistro .boton { border-radius: 0.375rem; }
+
+/* Barra de categorías granate con letras en mayúsculas, como una carta de papel */
+.tema-bistro .nav-categorias { background: var(--color-titulo); border-bottom: 0; }
+.tema-bistro .nav-categorias a { border: 0; border-bottom: 3px solid transparent; border-radius: 0; color: #fff; text-transform: uppercase; letter-spacing: 0.06em; font-size: var(--texto-sm); }
+.tema-bistro .nav-categorias a:hover { background: transparent; color: #fff; border-bottom-color: var(--color-amarillo); }
+.tema-bistro .nav-categorias :focus-visible { outline-color: var(--color-amarillo); }
+
+/* Títulos de sección centrados con un filete */
+.tema-bistro .seccion > h2 { text-align: center; font-weight: 600; letter-spacing: 0.04em; margin-bottom: var(--espacio-6); }
+.tema-bistro .seccion > h2::before { content: ''; display: block; width: 2.5rem; height: 2px; margin: 0 auto var(--espacio-3); background: var(--color-titulo); }
+
+/* Productos: una línea por producto, sin tarjetas */
+.tema-bistro .productos { gap: 0; }
+.tema-bistro .producto { background: transparent; border: 0; border-bottom: 1px solid var(--color-borde); border-radius: 0; box-shadow: none; padding: var(--espacio-4) 0; }
+.tema-bistro .producto__nombre { font-weight: 600; color: var(--color-tinta); }
+.tema-bistro .producto__precio { font-weight: 600; }
+.tema-bistro .producto__desc { font-style: italic; }
+
+/* Con foto: miniatura a la izquierda, nombre y descripción al centro, precio a la derecha */
+.tema-bistro .producto:has(img) { grid-template-columns: 4.75rem minmax(0, 1fr) auto; column-gap: var(--espacio-4); }
+.tema-bistro .producto:has(img) img { grid-column: 1; grid-row: 1 / span 3; width: 4.75rem; height: 4.75rem; object-fit: cover; border-radius: var(--radio-sm); }
+.tema-bistro .producto:has(img) .producto__nombre { grid-column: 2; }
+.tema-bistro .producto:has(img) .producto__precio { grid-column: 3; }
+.tema-bistro .producto:has(img) .producto__desc, .tema-bistro .producto:has(img) .producto__meta { grid-column: 2 / -1; }
+
+.tema-bistro .promo { background: var(--color-superficie); border: 1px solid var(--color-borde); border-left: 4px solid var(--color-amarillo); box-shadow: none; border-radius: 0.375rem; }
+
+.tema-bistro .pie { background: var(--color-titulo); }

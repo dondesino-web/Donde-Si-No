@@ -1,0 +1,9 @@
+---
+import PaginaCarta from '../../../components/carta/PaginaCarta.astro';
+import { esTema } from '../../../lib/dominio/temas.ts';
+
+const { tema } = Astro.params;
+if (!esTema(tema)) return Astro.redirect('/admin/diseno', 303);
+---
+
+<PaginaCarta idioma="es" tema={tema} vistaPrevia />

@@ -1,0 +1,61 @@
+---
+import { actions } from 'astro:actions';
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { TEMAS, temaOPorDefecto } from '../../lib/dominio/temas.ts';
+import { obtenerNegocioAdmin } from '../../lib/repositorios/adminLocalRepo.ts';
+
+const resultado = Astro.getActionResult(actions.guardarTema);
+const aviso = resultado?.data?.ok ? resultado.data.mensaje : undefined;
+const errores = resultado?.data && !resultado.data.ok ? resultado.data.errores : undefined;
+const errorGeneral = resultado?.error ? resultado.error.message : undefined;
+
+const actual = temaOPorDefecto((await obtenerNegocioAdmin(obtenerBd()))?.tema);
+---
+
+<LayoutAdmin titulo="Diseño" ancho>
+	<h1>Diseño de la carta</h1>
+	<p>
+		Elige cómo se ve tu carta. Todos los diseños muestran <strong>los mismos productos</strong>: cambia solo el aspecto. Puedes mirar cada uno con tus
+		productos reales antes de decidir, y cambiar cuando quieras.
+	</p>
+
+	<div aria-live="polite" class="avisos">
+		{aviso && <p class="aviso aviso--ok" role="status">{aviso}</p>}
+		{(errores || errorGeneral) && <p class="aviso aviso--error" role="alert">{Object.values(errores ?? {}).join(' ') || errorGeneral}</p>}
+	</div>
+
+	<form method="POST" action={actions.guardarTema} class="formulario">
+		<fieldset class="temas">
+			<legend class="solo-lectores">Diseño de la carta</legend>
+			{
+				TEMAS.map((tema) => (
+					<div class:list={['tema-tarjeta', { 'tema-tarjeta--actual': tema.id === actual }]}>
+						<label class="tema-tarjeta__opcion">
+							<input type="radio" name="tema" value={tema.id} checked={tema.id === actual} />
+							<span class={`tema-muestra tema-muestra--${tema.id}`} aria-hidden="true">
+								<i class="tema-muestra__barra"></i>
+								<i class="tema-muestra__fila"></i>
+								<i class="tema-muestra__fila"></i>
+								<i class="tema-muestra__fila tema-muestra__fila--corta"></i>
+							</span>
+							<span class="tema-tarjeta__texto">
+								<strong>
+									{tema.nombre}
+									{tema.id === actual && <span class="etiqueta etiqueta--aviso">En uso</span>}
+								</strong>
+								<span class="campo__ayuda">{tema.descripcion}</span>
+							</span>
+						</label>
+						<a class="boton boton--secundario" href={`/admin/vista-previa/${tema.id}`} target="_blank" rel="noopener noreferrer" aria-label={`Ver el diseño ${tema.nombre} con mis productos (se abre en otra pestaña)`}>
+							Ver con mis productos
+						</a>
+					</div>
+				))
+			}
+		</fieldset>
+		<div class="formulario__acciones">
+			<button type="submit" class="boton">Usar este diseño</button>
+		</div>
+	</form>
+</LayoutAdmin>

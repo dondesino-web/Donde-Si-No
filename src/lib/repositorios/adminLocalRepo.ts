@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import type { Bd } from '../db/cliente.ts';
 import { negocio } from '../db/esquema.ts';
+import type { IdTema } from '../dominio/temas.ts';
 import type { DatosLocalFormulario } from '../validacion/local.ts';
 import type { Negocio } from './cartaRepo.ts';
 
@@ -12,6 +13,12 @@ const ID_NEGOCIO = 1;
 
 export function obtenerNegocioAdmin(bd: Bd): Promise<Negocio | undefined> {
 	return bd.select().from(negocio).where(eq(negocio.id, ID_NEGOCIO)).get();
+}
+
+/** Cambia el diseño de la carta pública. Devuelve `false` si el local aún no existe. */
+export async function guardarTema(bd: Bd, tema: IdTema): Promise<boolean> {
+	const filas = await bd.update(negocio).set({ tema, actualizadoEn: new Date() }).where(eq(negocio.id, ID_NEGOCIO)).returning({ id: negocio.id });
+	return filas.length > 0;
 }
 
 /** Devuelve `false` si el local aún no existe (falta ejecutar la semilla). */
