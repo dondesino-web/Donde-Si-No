@@ -46,6 +46,16 @@ test.beforeEach(async ({ context }) => iniciarSesion(context));
 
 const desborde = (page: Page): Promise<number> => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
+/** Qué elementos se salen por la derecha: si una prueba falla, el mensaje dice cuáles. */
+const culpables = (page: Page): Promise<string[]> =>
+	page.evaluate(() => {
+		const ancho = document.documentElement.clientWidth;
+		return [...document.querySelectorAll('body *')]
+			.filter((e) => e.getBoundingClientRect().right > ancho + 0.5 && !e.closest('.nav-categorias, .galeria'))
+			.slice(0, 5)
+			.map((e) => `${e.tagName.toLowerCase()}.${String(e.className)} termina en ${Math.round(e.getBoundingClientRect().right)}px de ${ancho}px`);
+	});
+
 test.describe('elegir el diseño en el panel', () => {
 	test('lista los diseños con su descripción, marca el que está en uso y enlaza a su vista previa', async ({ page }) => {
 		await fijarTema('clasico');
@@ -165,6 +175,16 @@ for (const tema of TEMAS) {
 
 				expect(await desborde(page)).toBeLessThanOrEqual(0);
 				await page.screenshot({ path: `test-results/capturas/tema-${tema}-${ancho}.png`, fullPage: true });
+			});
+		}
+
+		for (const ancho of [320, 375]) {
+			test(`la carta pública en inglés tampoco desborda a ${ancho}px`, async ({ page }) => {
+				await fijarTema(tema);
+				await page.setViewportSize({ width: ancho, height: 900 });
+				await page.goto('/en/');
+
+				expect({ sobra: await desborde(page), culpables: await culpables(page) }).toEqual({ sobra: 0, culpables: [] });
 			});
 		}
 
