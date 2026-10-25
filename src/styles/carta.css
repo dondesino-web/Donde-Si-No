@@ -207,3 +207,7 @@
 	body { background: #fff; font-size: 11pt; }
 	.envoltorio { width: 100%; }
 }
+
+/* Aviso de «vista previa» del panel: esta página no es la que ven los clientes. */
+.vista-previa { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--espacio-1) var(--espacio-4); padding: var(--espacio-2) var(--margen-lateral); background: #fff3b0; color: #1a1a1a; font-size: var(--texto-sm); text-align: center; }
+.vista-previa a { color: #1a1a1a; font-weight: 700; }

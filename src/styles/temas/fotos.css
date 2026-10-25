@@ -1,0 +1,24 @@
+/*
+ * Diseño «Fotos» de la carta pública: tarjetas con la foto grande, de dos en dos en el celular y de tres en tres en pantallas
+ * grandes. Pensado para cuando cada plato tiene su foto; sin foto, la tarjeta muestra solo el texto.
+ */
+.tema-fotos .seccion > h2 { font-size: var(--texto-2xl); font-weight: 800; }
+.tema-fotos .seccion > h2::after { content: ''; display: block; width: 3rem; height: 4px; margin-top: var(--espacio-2); background: var(--color-amarillo); }
+
+.tema-fotos .nav-categorias a { background: var(--color-superficie); }
+.tema-fotos .nav-categorias a:hover { background: var(--color-azul); }
+
+.tema-fotos .productos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--espacio-3); align-items: start; }
+@media (min-width: 48rem) {
+	.tema-fotos .productos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.tema-fotos .producto { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; }
+.tema-fotos .producto > * { padding-inline: var(--espacio-3); }
+.tema-fotos .producto > :last-child { padding-bottom: var(--espacio-3); }
+.tema-fotos .producto img { order: -1; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 0; padding: 0; }
+.tema-fotos .producto__nombre { padding-top: var(--espacio-3); font-size: var(--texto-base); }
+.tema-fotos .producto__precio { text-align: start; font-size: var(--texto-lg); }
+.tema-fotos .producto__desc { padding-top: var(--espacio-1); }
+.tema-fotos .producto__meta { padding-top: var(--espacio-2); }
+.tema-fotos .producto--agotado img { filter: grayscale(1); opacity: 0.6; }

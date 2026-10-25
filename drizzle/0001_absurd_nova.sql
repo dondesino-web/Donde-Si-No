@@ -1,0 +1,1 @@
+ALTER TABLE `negocio` ADD `tema` text DEFAULT 'clasico' NOT NULL;

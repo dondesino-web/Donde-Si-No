@@ -6,6 +6,7 @@ const RUTAS = [
 	'/admin',
 	'/admin/carta',
 	'/admin/carga-rapida',
+	'/admin/diseno',
 	'/admin/promociones',
 	'/admin/menu-del-dia',
 	'/admin/fotos',

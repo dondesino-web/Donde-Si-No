@@ -28,6 +28,7 @@ import {
 	type RespuestaAccion,
 } from './ayudas.ts';
 import { cargaRapida } from './cargaRapida.ts';
+import { diseno } from './diseno.ts';
 import { datosDeFotos } from './fotos.ts';
 import { datosDelLocal } from './local.ts';
 import { promocionesYMenu } from './promociones.ts';
@@ -41,6 +42,7 @@ export const server = {
 	...datosDelLocal,
 	...datosDeFotos,
 	...cargaRapida,
+	...diseno,
 
 	guardarProducto: defineAction({
 		accept: 'form',

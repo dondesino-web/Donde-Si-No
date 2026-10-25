@@ -1,5 +1,6 @@
 ---
 import type { Idioma } from '../../i18n/ui.ts';
+import { buscarTema, temaOPorDefecto, type IdTema } from '../../lib/dominio/temas.ts';
 import { textoLocal, traductor } from '../../i18n/utils.ts';
 import LayoutCarta from '../../layouts/LayoutCarta.astro';
 import { obtenerBd } from '../../lib/db/index.ts';
@@ -13,12 +14,17 @@ import PieLocal from './PieLocal.astro';
 
 interface Props {
 	idioma: Idioma;
+	/** Fuerza un diseño (vista previa del panel). Sin él se usa el que eligió el dueño. */
+	tema?: IdTema;
+	/** Muestra el aviso «vista previa» arriba: esta página no es la que ven los clientes. */
+	vistaPrevia?: boolean;
 }
 
-const { idioma } = Astro.props;
+const { idioma, vistaPrevia = false } = Astro.props;
 const t = traductor(idioma);
 const carta = await obtenerCartaPublica(obtenerBd());
 const { negocio } = carta;
+const tema = temaOPorDefecto(Astro.props.tema ?? negocio.tema);
 const descripcion = textoLocal(idioma, negocio.descripcionEs, negocio.descripcionEn).texto;
 ---
 
@@ -28,7 +34,18 @@ const descripcion = textoLocal(idioma, negocio.descripcionEs, negocio.descripcio
 	titulo={`${negocio.nombre} · ${t('meta.tituloCarta')} · ${t('meta.lugar')}`}
 	descripcion={descripcion}
 	jsonLd={construirJsonLd(carta, idioma, Astro.site!.origin)}
+	tema={tema}
 >
+	{
+		vistaPrevia && (
+			<div class="vista-previa no-imprimir">
+				<p>
+					Vista previa del diseño <strong>{buscarTema(tema).nombre}</strong> con tus productos. Todavía no es lo que ven tus clientes.
+				</p>
+				<a href="/admin/diseno">Volver a Diseño</a>
+			</div>
+		)
+	}
 	<EncabezadoLocal negocio={negocio} idioma={idioma} />
 	<main id="contenido">
 		<BarraAcciones negocio={negocio} idioma={idioma} />

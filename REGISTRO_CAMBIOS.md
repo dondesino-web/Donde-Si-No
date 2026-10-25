@@ -8,6 +8,23 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-24 · Diseños de la carta (temas)
+
+### Añadido
+- **Elegir el diseño de la carta desde el panel** (`/admin/diseno`): cuatro diseños que muestran los mismos productos. Cada uno se puede ver antes con los productos reales (`/admin/vista-previa/<diseño>`, con un aviso de que aún no es lo que ven los clientes) y se cambia con un botón. El cambio refresca la carta pública y su versión en inglés.
+  - **Clásico:** el diseño de siempre.
+  - **Bistró:** claro y elegante, títulos con serifa, cada producto es una línea (nombre y descripción a la izquierda, precio a la derecha, foto pequeña).
+  - **Noche:** fondo oscuro con detalles dorados.
+  - **Fotos:** tarjetas con la foto grande, de dos en dos en el celular y de tres en tres en pantallas grandes.
+- Los diseños solo usan fuentes del sistema (sin descargas) y solo cargan su hoja de estilos cuando se usan: el Clásico no pesa más que antes.
+- **Migración de base de datos** `drizzle/0001_absurd_nova.sql`: agrega la columna `tema` a `negocio` (valor por defecto `clasico`). Solo agrega, no toca datos. Un valor desconocido en esa columna se trata como el Clásico.
+- 7 pruebas unitarias, 4 de integración y 39 E2E (accesibilidad WCAG 2.2 AA y ausencia de scroll horizontal a 320, 375, 768 y 1440 px en cada diseño, con fotos, agotados y recomendados).
+
+### Pendiente al desplegar
+- **Aplicar la migración en Turso antes de fusionar** (`TURSO_DATABASE_URL=… TURSO_AUTH_TOKEN=… npm run db:migrate`): el build no la aplica, y sin la columna la carta pública falla. Es seguro hacerlo antes: el código anterior ignora la columna nueva.
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-24 · Se retira la carga con Excel
 
 ### Eliminado

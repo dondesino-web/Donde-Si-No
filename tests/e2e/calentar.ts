@@ -6,6 +6,8 @@ const RUTAS_DEL_PANEL = [
 	'/admin/login',
 	'/admin',
 	'/admin/carta',
+	'/admin/diseno',
+	'/admin/vista-previa/noche',
 	'/admin/producto/nuevo',
 	'/admin/promociones',
 	'/admin/promocion/nuevo',

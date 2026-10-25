@@ -1,0 +1,44 @@
+/*
+ * Diseño «Noche» de la carta pública: fondo oscuro con detalles dorados.
+ * Solo redefine colores (y unos pocos componentes que llevaban colores fijos): la estructura es la del diseño clásico.
+ * Contraste medido (WCAG): texto #f4efe6 sobre #14110f = 16,4; dorado #ffd100 sobre #14110f = 13,6 y sobre #1f1b18 = 12,2;
+ * gris #b9b0a2 sobre #1f1b18 = 7,4; blanco sobre rojo #c8102e = 5,9.
+ */
+body.tema-noche {
+	--color-fondo: #14110f;
+	--color-superficie: #1f1b18;
+	--color-tinta: #f4efe6;
+	--color-texto-suave: #b9b0a2;
+	--color-borde: #3a352f;
+	--color-borde-fuerte: #8f8678;
+	--color-titulo: #ffd100;
+	--color-precio: #ffd100;
+	--color-foco: #ffd100;
+	--color-ok: #6fdc8c;
+	color-scheme: dark;
+}
+
+.tema-noche .encabezado { background: #0c0a09; border-bottom-color: var(--color-amarillo); }
+.tema-noche .estado { background: #fff; color: #1a1a1a; }
+.tema-noche .estado--abierto { color: #1f7a3a; }
+
+.tema-noche .boton--secundario { background: transparent; color: var(--color-amarillo); border-color: var(--color-amarillo); }
+.tema-noche .boton--secundario:hover { background: var(--color-amarillo); color: #14110f; }
+
+.tema-noche .nav-categorias a { color: var(--color-amarillo); border-color: var(--color-amarillo); }
+.tema-noche .nav-categorias a:hover { background: var(--color-amarillo); color: #14110f; }
+
+.tema-noche .promo { color: #1a1a1a; }
+.tema-noche .menu-dia { color: var(--color-tinta); border-color: var(--color-amarillo); }
+.tema-noche .menu-dia h3 { color: var(--color-amarillo); }
+
+.tema-noche .insignia--destacado { color: #1a1a1a; }
+.tema-noche .insignia--agotado { color: #14110f; }
+.tema-noche .producto { box-shadow: none; }
+.tema-noche .producto img, .tema-noche .galeria img { opacity: 0.95; }
+
+.tema-noche .pie { background: #0c0a09; border-top: 6px solid var(--color-amarillo); }
+
+/* Fotos de tamaño parejo: una foto muy alta no debe empujar el resto de la carta. */
+.tema-noche .producto img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.tema-noche .productos { align-items: start; }

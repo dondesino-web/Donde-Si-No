@@ -3,7 +3,11 @@ import '../styles/global.css';
 import '../styles/carta.css';
 import { LOCALE, LOCALE_OPEN_GRAPH, IDIOMAS, type Idioma } from '../i18n/ui.ts';
 import { otroIdioma, rutaPagina, traductor, type Pagina } from '../i18n/utils.ts';
+import { buscarTema, temaOPorDefecto, type IdTema } from '../lib/dominio/temas.ts';
 import { serializarJsonLd } from '../lib/seo/jsonld.ts';
+import bistro from '../styles/temas/bistro.css?url';
+import fotos from '../styles/temas/fotos.css?url';
+import noche from '../styles/temas/noche.css?url';
 
 interface Props {
 	idioma: Idioma;
@@ -12,9 +16,15 @@ interface Props {
 	descripcion: string;
 	jsonLd?: Record<string, unknown>;
 	clase?: string;
+	/** Diseño de la carta; si falta o no existe, el clásico. */
+	tema?: IdTema | string;
 }
 
 const { idioma, pagina, titulo, descripcion, jsonLd, clase } = Astro.props;
+const tema = buscarTema(Astro.props.tema);
+// El clásico va en la hoja de estilos principal; los demás diseños cargan la suya, solo cuando se usan.
+const hojaDelTema: Partial<Record<string, string>> = { bistro, noche, fotos };
+const hoja = hojaDelTema[temaOPorDefecto(tema.id)];
 const t = traductor(idioma);
 const sitio = Astro.site!;
 const urlDe = (i: Idioma) => new URL(rutaPagina(i, pagina), sitio).href;
@@ -26,7 +36,8 @@ const imagenOg = new URL('/marca/logo-512.jpg', sitio).href;
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#0b2a6f" />
+		<meta name="theme-color" content={tema.colorBarra} />
+		{hoja && <link rel="stylesheet" href={hoja} />}
 		<title>{titulo}</title>
 		<meta name="description" content={descripcion} />
 		<link rel="canonical" href={urlDe(idioma)} />
@@ -46,7 +57,7 @@ const imagenOg = new URL('/marca/logo-512.jpg', sitio).href;
 		<meta name="generator" content={Astro.generator} />
 		{jsonLd && <script is:inline type="application/ld+json" set:html={serializarJsonLd(jsonLd)} />}
 	</head>
-	<body class={clase} data-estadisticas={pagina === 'carta' ? 'true' : undefined}>
+	<body class:list={[clase, `tema-${tema.id}`]} data-estadisticas={pagina === 'carta' ? 'true' : undefined}>
 		<a class="saltar-contenido" href="#contenido">{t('saltar')}</a>
 		<slot />
 	</body>

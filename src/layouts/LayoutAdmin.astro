@@ -23,6 +23,7 @@ const SECCIONES = [
 	{ href: '/admin/estadisticas', texto: 'Estadísticas', prefijos: [] },
 	{ href: '/admin/qr', texto: 'QR', prefijos: [] },
 	{ href: '/admin/local', texto: 'Local', prefijos: [] },
+	{ href: '/admin/diseno', texto: 'Diseño', prefijos: ['/admin/vista-previa'] },
 ];
 const ruta = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const estaEn = (base: string) => ruta === base || ruta.startsWith(`${base}/`);
