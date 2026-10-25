@@ -36,8 +36,11 @@ describe('tema de diseño', () => {
 		await guardarTema(prueba.bd, 'bistro');
 
 		const despues = await obtenerNegocioAdmin(prueba.bd);
-		expect(despues).toMatchObject({ ...antes, tema: 'bistro' });
-		expect(despues?.actualizadoEn.getTime()).toBeGreaterThanOrEqual(antes!.actualizadoEn.getTime());
+		// La fecha de modificación sí cambia al guardar (a veces en el mismo segundo): se compara aparte.
+		const { actualizadoEn: fechaAntes, ...restoAntes } = antes!;
+		const { actualizadoEn: fechaDespues, ...restoDespues } = despues!;
+		expect(restoDespues).toEqual({ ...restoAntes, tema: 'bistro' });
+		expect(fechaDespues.getTime()).toBeGreaterThanOrEqual(fechaAntes.getTime());
 	});
 
 	it('devuelve false si el local todavía no existe', async () => {
