@@ -30,7 +30,6 @@ import {
 import { cargaRapida } from './cargaRapida.ts';
 import { datosDeFotos } from './fotos.ts';
 import { datosDelLocal } from './local.ts';
-import { planilla } from './planilla.ts';
 import { promocionesYMenu } from './promociones.ts';
 import { cadena } from '../lib/validacion/comun.ts';
 import { leerImagen, urlsAEliminar } from '../lib/validacion/imagenFormulario.ts';
@@ -42,7 +41,6 @@ export const server = {
 	...datosDelLocal,
 	...datosDeFotos,
 	...cargaRapida,
-	...planilla,
 
 	guardarProducto: defineAction({
 		accept: 'form',

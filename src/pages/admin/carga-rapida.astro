@@ -17,39 +17,8 @@ const categoriaInicial = Number(Astro.url.searchParams.get('categoria')) || unde
 <LayoutAdmin titulo="Carga rápida">
 	<h1>Carga rápida</h1>
 	<p>
-		Carga o actualiza muchos productos de una vez, con una planilla de Excel o escribiendo una lista. Después puedes cambiar cualquier dato,
-		uno por uno, en <a href="/admin/carta">Carta</a>.
+		Crea varios productos de una vez. Después puedes cambiar cualquier dato, uno por uno, en <a href="/admin/carta">Carta</a>.
 	</p>
-
-	<section class="carga-excel" aria-labelledby="titulo-excel" data-excel>
-		<h2 id="titulo-excel">Con Excel</h2>
-		<p>Descarga la planilla con tu carta de hoy, cámbiala en Excel y vuelve a subirla. Antes de guardar nada te mostramos un resumen para que lo revises.</p>
-		<ol class="pasos">
-			<li>
-				<p><strong>Descarga</strong> la planilla actual. Cada vez que quieras cambiar la carta con Excel, descárgala de nuevo.</p>
-				<a class="boton" href="/admin/carta.xlsx" download>Descargar planilla (.xlsx)</a>
-			</li>
-			<li>
-				<p><strong>Modifícala</strong> en Excel y guárdala como «Libro de Excel (.xlsx)». Las reglas están en la hoja «Instrucciones» del archivo.</p>
-			</li>
-			<li>
-				<p><strong>Súbela</strong> para revisar los cambios.</p>
-				<form class="formulario" data-excel-formulario>
-					<div class="campo">
-						<label for="archivo-excel">Planilla modificada</label>
-						<input id="archivo-excel" name="archivo" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required />
-					</div>
-					<div class="formulario__acciones">
-						<button type="submit" class="boton boton--secundario">Revisar cambios</button>
-					</div>
-				</form>
-			</li>
-		</ol>
-		<div class="carga-excel__resultado" data-excel-resultado aria-live="polite"></div>
-		<noscript><p class="aviso aviso--error">Subir la planilla necesita JavaScript. Mientras tanto puedes escribir la lista aquí abajo.</p></noscript>
-	</section>
-
-	<h2 class="carga-titulo-lista">Escribiendo una lista</h2>
 
 	<div aria-live="polite" class="avisos">
 		{aviso && <p class="aviso aviso--ok" role="status">{aviso} <a href="/admin/carta">Ver la carta</a></p>}
@@ -104,10 +73,6 @@ Lasagna</pre>
 		</div>
 	</form>
 </LayoutAdmin>
-
-<script>
-	import '../../scripts/cargaExcel.ts';
-</script>
 
 <script>
 	// Si hay un error, la página se recarga: se guarda lo escrito para no perderlo (puede ser una lista larga).

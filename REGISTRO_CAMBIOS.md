@@ -8,18 +8,11 @@
 
 ---
 
-## [Sin Versión / En Desarrollo] - 2026-10-24 · Carga con Excel
+## [Sin Versión / En Desarrollo] - 2026-10-24 · Se retira la carga con Excel
 
-### Añadido
-- **Planilla de Excel de la carta** (`/admin/carga-rapida` → «Con Excel»): se **descarga** la carta actual (`/admin/carta.xlsx`), se modifica en Excel y se **sube** para actualizar la base. Es un ciclo de ida y vuelta: descargar la última planilla, cambiarla, subirla.
-- La hoja «Carta» trae una fila por producto con Categoría, Producto, Descripción, Precio, Disponible, Visible, Destacado, nombre y descripción en inglés, más dos columnas técnicas grises (ID y Versión). La hoja «Instrucciones» explica las reglas en español y lista las categorías.
-- **Revisión antes de guardar:** al subir, el panel muestra un resumen (productos nuevos, modificados con las columnas que cambian, categorías nuevas, cambios de orden, sin cambios y avisos) y solo aplica cuando se confirma.
-- **Reglas de seguridad:** una fila con ID modifica ese producto y una sin ID crea uno nuevo; **nunca se borra nada** (borrar una fila no borra el producto); todo o nada ante un error, con el número de fila; todo se aplica en una sola transacción; un precio vacío es «Consultar»; las columnas que falten no se tocan; la foto, los alérgenos y las etiquetas se conservan.
-- **Conflictos:** si un producto cambió en el panel después de descargar la planilla y su fila también trae cambios, se omite y se avisa, en vez de pisar el cambio.
-- **El orden de las filas** dentro de cada categoría pasa a ser el orden de la carta; lo que no está en la planilla queda al final.
-- Límites: archivo .xlsx de hasta 1 MB y 1000 productos por vez. Los títulos se reconocen sin distinguir mayúsculas ni tildes y en cualquier orden.
-- Dependencias nuevas: `write-excel-file` y `read-excel-file` (mantenidas, con pocas dependencias y sin avisos en `npm audit`).
-- 37 pruebas unitarias, 13 de integración y 10 E2E.
+### Eliminado
+- **Carga con Excel** (planilla descargable y subida desde Carga rápida), añadida horas antes en el PR #7: por decisión del responsable, la carta se gestiona solo desde el panel. Se quitan la descarga `/admin/carta.xlsx`, la lectura y el plan de cambios de la planilla, sus acciones, pruebas y las dependencias `write-excel-file` y `read-excel-file`.
+- Sigue disponible la **Carga rápida escribiendo una lista** (`nombre; precio; descripción`) y todo lo que se edita producto por producto en Carta.
 
 ---
 

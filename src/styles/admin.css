@@ -302,20 +302,3 @@ fieldset fieldset.campo { border-style: dashed; }
 
 .carta-nueva > summary h2 { font-size: var(--texto-xl); }
 .carta-nueva .carta-categoria__cuerpo { padding-top: var(--espacio-2); }
-
-/* ---------- Carga con Excel ---------- */
-.carga-excel { margin-block: var(--espacio-6); padding: var(--espacio-4); background: var(--color-superficie); border: 1px solid var(--color-borde); border-radius: var(--radio-md); box-shadow: var(--sombra-tarjeta); }
-.carga-excel > h2 { margin-top: 0; }
-.pasos { list-style: none; padding: 0; margin: var(--espacio-4) 0; display: grid; gap: var(--espacio-4); counter-reset: paso; }
-.pasos > li { position: relative; padding-inline-start: 2.75rem; counter-increment: paso; }
-.pasos > li::before { content: counter(paso); position: absolute; inset-inline-start: 0; top: 0; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--color-azul); color: #fff; font-weight: 800; }
-.pasos .boton { width: auto; margin-top: var(--espacio-2); }
-.carga-excel__resultado { margin-top: var(--espacio-4); }
-.carga-excel__resultado:empty { display: none; }
-.carga-excel__estado { color: var(--color-texto-suave); font-weight: 600; }
-.carga-excel__titulo { margin-top: 0; }
-.resumen-excel { display: grid; gap: var(--espacio-2); margin-block: var(--espacio-3); }
-.resumen-excel h3 { font-size: var(--texto-lg); margin: var(--espacio-3) 0 0; }
-.resumen-excel ul, .aviso ul { margin: var(--espacio-1) 0 0; padding-inline-start: var(--espacio-6); font-weight: 400; overflow-wrap: anywhere; }
-.aviso--atencion { border-color: var(--color-borde-fuerte); background: var(--color-amarillo); color: var(--color-tinta); }
-.carga-titulo-lista { margin-top: var(--espacio-8); }
