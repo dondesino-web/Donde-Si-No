@@ -79,6 +79,7 @@ export function cartaDePrueba(cambios: Partial<CartaPublica> = {}): CartaPublica
 		promociones: [],
 		menuDia: null,
 		fotos: [],
+		atributos: [],
 		...cambios,
 	};
 }

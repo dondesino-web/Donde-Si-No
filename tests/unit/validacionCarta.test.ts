@@ -32,9 +32,11 @@ describe('parsearPrecio', () => {
 	});
 });
 
+const CATALOGO = { alergenos: ['gluten', 'huevo', 'leche'], etiquetas: ['picante', 'vegetariano'] };
+
 describe('validarProducto', () => {
 	it('acepta un producto mínimo y rellena los valores por defecto', () => {
-		const resultado = validarProducto(formulario(BASE));
+		const resultado = validarProducto(formulario(BASE), CATALOGO);
 
 		expect(resultado).toEqual({
 			ok: true,
@@ -68,6 +70,7 @@ describe('validarProducto', () => {
 				destacado: 'on',
 				visible: 'on',
 			}),
+			CATALOGO,
 		);
 
 		expect(resultado).toMatchObject({
@@ -89,6 +92,7 @@ describe('validarProducto', () => {
 	it('informa los errores por campo, en español', () => {
 		const resultado = validarProducto(
 			formulario({ categoriaId: 'x', nombreEs: '   ', precio: '-5', alergenos: ['polvo-magico'] }),
+			CATALOGO,
 		);
 
 		expect(resultado.ok).toBe(false);
@@ -99,21 +103,21 @@ describe('validarProducto', () => {
 	});
 
 	it('elimina alérgenos repetidos y rechaza listas desmedidas', () => {
-		const repetidos = validarProducto(formulario({ ...BASE, alergenos: ['gluten', 'huevo', 'gluten'] }));
-		const desmedida = validarProducto(formulario({ ...BASE, alergenos: Array(50).fill('gluten') }));
+		const repetidos = validarProducto(formulario({ ...BASE, alergenos: ['gluten', 'huevo', 'gluten'] }), CATALOGO);
+		const desmedida = validarProducto(formulario({ ...BASE, alergenos: Array(50).fill('gluten') }), CATALOGO);
 
 		expect(repetidos).toMatchObject({ ok: true, datos: { alergenos: ['gluten', 'huevo'] } });
 		expect(desmedida).toMatchObject({ ok: false, errores: { alergenos: expect.any(String) } });
 	});
 
 	it.each(['1e2', '0x10', ' 5 ', '-3', '2.5', '99999999999'])('rechaza categoriaId %j', (valor) => {
-		const resultado = validarProducto(formulario({ ...BASE, categoriaId: valor }));
+		const resultado = validarProducto(formulario({ ...BASE, categoriaId: valor }), CATALOGO);
 
 		expect(resultado).toMatchObject({ ok: false, errores: { categoriaId: 'Elige una categoría.' } });
 	});
 
 	it('rechaza textos demasiado largos', () => {
-		const resultado = validarProducto(formulario({ ...BASE, nombreEs: 'x'.repeat(81), descripcionEs: 'y'.repeat(301) }));
+		const resultado = validarProducto(formulario({ ...BASE, nombreEs: 'x'.repeat(81), descripcionEs: 'y'.repeat(301) }), CATALOGO);
 
 		expect(resultado.ok).toBe(false);
 		if (resultado.ok) return;

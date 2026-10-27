@@ -20,22 +20,14 @@ export interface Servicios {
 	consumoLocal: boolean;
 }
 
-/** Alérgenos comunes. Se muestran siempre en texto; el ícono es decorativo. */
-export const ALERGENOS = [
-	'gluten',
-	'huevo',
-	'leche',
-	'soya',
-	'mani',
-	'frutos_secos',
-	'pescado',
-	'mariscos',
-	'sulfitos',
-] as const;
-export type Alergeno = (typeof ALERGENOS)[number];
-
-export const ETIQUETAS = ['vegetariano', 'picante', 'nuevo'] as const;
-export type Etiqueta = (typeof ETIQUETAS)[number];
+/**
+ * Alérgenos y etiquetas son catálogos que la persona administra desde el panel (tabla `atributo`).
+ * Cada producto guarda la `clave` estable de los que lleva, así renombrar uno no rompe nada.
+ */
+export const TIPOS_ATRIBUTO = ['alergeno', 'etiqueta'] as const;
+export type TipoAtributo = (typeof TIPOS_ATRIBUTO)[number];
+export type Alergeno = string;
+export type Etiqueta = string;
 
 /** Eventos que cuentan las estadísticas. La base rechaza cualquier otro (evita que se llene de basura). */
 export const EVENTOS_ESTADISTICA = [

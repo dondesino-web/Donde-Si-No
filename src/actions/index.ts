@@ -1,5 +1,6 @@
 import { defineAction } from 'astro:actions';
 import { obtenerBd } from '../lib/db/index.ts';
+import { listarAtributos } from '../lib/repositorios/adminAtributosRepo.ts';
 import {
 	actualizarCategoria,
 	actualizarProducto,
@@ -27,6 +28,7 @@ import {
 	valoresDe,
 	type RespuestaAccion,
 } from './ayudas.ts';
+import { atributos } from './atributos.ts';
 import { cargaRapida } from './cargaRapida.ts';
 import { diseno } from './diseno.ts';
 import { datosDeFotos } from './fotos.ts';
@@ -38,6 +40,7 @@ import { PRECIO_MAXIMO, parsearPrecio, validarCategoria, validarProducto } from 
 
 
 export const server = {
+	...atributos,
 	...promocionesYMenu,
 	...datosDelLocal,
 	...datosDeFotos,
@@ -54,7 +57,11 @@ export const server = {
 			if (id !== undefined && !actual) return noEncontrado('El producto');
 
 			// Los errores del producto y de la foto se informan juntos.
-			const validado = validarProducto(formulario);
+			const catalogo = await listarAtributos(bd);
+			const validado = validarProducto(formulario, {
+				alergenos: catalogo.filter((a) => a.tipo === 'alergeno').map((a) => a.clave),
+				etiquetas: catalogo.filter((a) => a.tipo === 'etiqueta').map((a) => a.clave),
+			});
 			const foto = leerImagen(formulario, {
 				actual: actual?.imagen ?? null,
 				reconoce: reconoceFoto,

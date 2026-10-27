@@ -1,5 +1,5 @@
 import { sql, type SQL } from 'drizzle-orm';
-import { check, index, integer, primaryKey, real, sqliteTable, text, type AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
+import { check, index, integer, primaryKey, real, sqliteTable, text, uniqueIndex, type AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
 import {
 	EVENTOS_ESTADISTICA,
 	type Alergeno,
@@ -8,6 +8,8 @@ import {
 	type Horario,
 	type Imagen,
 	type Servicios,
+	type TipoAtributo,
+	TIPOS_ATRIBUTO,
 } from '../dominio/tipos.ts';
 
 // Las columnas se nombran en camelCase y Drizzle las guarda en snake_case (`casing: 'snake_case'`).
@@ -67,6 +69,23 @@ export const categoria = sqliteTable('categoria', {
 	orden: integer().notNull().default(0),
 	visible: booleano(true),
 });
+
+/** Catálogo de alérgenos («Contiene») y etiquetas. Los productos guardan la `clave`, no el nombre. */
+export const atributo = sqliteTable(
+	'atributo',
+	{
+		id: id(),
+		tipo: text().$type<TipoAtributo>().notNull(),
+		clave: text().notNull(),
+		nombreEs: text().notNull(),
+		nombreEn: text(),
+		orden: integer().notNull().default(0),
+	},
+	(t) => [
+		uniqueIndex('atributo_tipo_clave_idx').on(t.tipo, t.clave),
+		check('atributo_tipo_conocido', sql`${t.tipo} in (${listaSql(TIPOS_ATRIBUTO)})`),
+	],
+);
 
 export const producto = sqliteTable(
 	'producto',

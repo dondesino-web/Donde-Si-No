@@ -26,10 +26,3 @@ const fallo = resultado?.data && !resultado.data.ok ? resultado.data : undefined
 		<button type="submit" class="boton boton--peligro" data-confirmar={`¿Eliminar la promoción ${promocion.tituloEs}? No se puede deshacer.`}>Eliminar promoción</button>
 	</form>
 </LayoutAdmin>
-
-<script>
-	document.addEventListener('submit', (evento) => {
-		const mensaje = ((evento as SubmitEvent).submitter as HTMLElement | null)?.dataset.confirmar;
-		if (mensaje && !confirm(mensaje)) evento.preventDefault();
-	});
-</script>

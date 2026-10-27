@@ -30,6 +30,7 @@ describe('esquema de la base de datos', () => {
 		const tablas = filas.map((f) => f.name).filter((nombre) => !nombre.startsWith('__drizzle'));
 
 		expect(tablas).toEqual([
+			'atributo',
 			'categoria',
 			'estadistica_diaria',
 			'foto_destacada',

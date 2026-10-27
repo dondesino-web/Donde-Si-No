@@ -50,7 +50,7 @@ const descripcion = textoLocal(idioma, negocio.descripcionEs, negocio.descripcio
 	<main id="contenido">
 		<BarraAcciones negocio={negocio} idioma={idioma} />
 		<Destacados carta={carta} idioma={idioma} />
-		<Categorias categorias={carta.categorias} idioma={idioma} />
+		<Categorias categorias={carta.categorias} atributos={carta.atributos} idioma={idioma} />
 	</main>
 	<PieLocal negocio={negocio} idioma={idioma} />
 </LayoutCarta>

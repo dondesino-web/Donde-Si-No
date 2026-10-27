@@ -101,13 +101,18 @@ const cuenta = (n: number, uno: string, varios: string): string => `${n} ${n ===
 									data-estados={estadosDe(p).join(' ')}
 								>
 									<div class="fila-carta__info">
-										<a class="fila-carta__nombre" href={`/admin/producto/${p.id}`}>{p.nombreEs}</a>
-										<p class="fila-carta__detalle">
-											{p.precio === null && <span class="etiqueta etiqueta--aviso">Sin precio</span>}
-											{!p.visible && <span class="etiqueta">Oculto</span>}
-											{!p.disponible && <span class="etiqueta">Agotado</span>}
-											{p.descripcionEs && <span class="fila-carta__descripcion">{p.descripcionEs}</span>}
-										</p>
+										<span class="fila-carta__avatar" aria-hidden="true">
+											{p.imagen ? <img src={p.imagen.sm} alt="" width="48" height="48" loading="lazy" decoding="async" /> : p.nombreEs.trim().charAt(0).toUpperCase()}
+										</span>
+										<div class="fila-carta__texto">
+											<a class="fila-carta__nombre" href={`/admin/producto/${p.id}`}>{p.nombreEs}</a>
+											<p class="fila-carta__detalle">
+												{p.precio === null && <span class="etiqueta etiqueta--aviso">Sin precio</span>}
+												{!p.visible && <span class="etiqueta etiqueta--oculto">Oculto</span>}
+												{!p.disponible && <span class="etiqueta etiqueta--agotado">Agotado</span>}
+												{p.descripcionEs && <span class="fila-carta__descripcion">{p.descripcionEs}</span>}
+											</p>
+										</div>
 									</div>
 
 									<form method="POST" action={actions.cambiarPrecio} class="fila-carta__precio">
@@ -194,11 +199,4 @@ const cuenta = (n: number, uno: string, varios: string): string => `${n} ${n ===
 	import '../../scripts/panelCarta.ts';
 </script>
 
-<script>
-	// Confirma las acciones destructivas sin depender de JavaScript para el resto del panel.
-	document.addEventListener('submit', (evento) => {
-		const boton = (evento as SubmitEvent).submitter as HTMLElement | null;
-		const mensaje = boton?.dataset.confirmar;
-		if (mensaje && !confirm(mensaje)) evento.preventDefault();
-	});
-</script>
+

@@ -1,4 +1,5 @@
 ---
+import Icono, { type NombreIcono } from '../../components/admin/Icono.astro';
 import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
 import { obtenerBd } from '../../lib/db/index.ts';
 import { rangoDeDias } from '../../lib/dominio/fechas.ts';
@@ -12,33 +13,67 @@ const deHoy = totales(semana.slice(-1));
 const deLaSemana = totales(semana);
 
 const clics = (conteos: ConteosDia): number => EVENTOS_DE_CLIC.reduce((suma, evento) => suma + conteos[evento], 0);
-const filas = [
-	{ nombre: 'Visitas a la carta', hoy: deHoy.visita, semana: deLaSemana.visita },
-	{ nombre: 'Escaneos del QR', hoy: deHoy.qr_escaneo, semana: deLaSemana.qr_escaneo },
-	{ nombre: 'Clics en llamar, mapa, reseña…', hoy: clics(deHoy), semana: clics(deLaSemana) },
+
+/** Serie diaria → puntos de una línea SVG de 100 × 28 (el máximo toca el borde de arriba). */
+const lineaDe = (valores: number[]): string => {
+	const maximo = Math.max(1, ...valores);
+	const paso = 100 / Math.max(1, valores.length - 1);
+	return valores.map((v, i) => `${(i * paso).toFixed(1)},${(26 - (v / maximo) * 24).toFixed(1)}`).join(' ');
+};
+
+const tarjetas: { nombre: string; icono: NombreIcono; hoy: number; semana: number; serie: number[]; tono: string }[] = [
+	{ nombre: 'Visitas a la carta', icono: 'carta', hoy: deHoy.visita, semana: deLaSemana.visita, serie: semana.map((d) => d.conteos.visita), tono: 'azul' },
+	{ nombre: 'Escaneos del QR', icono: 'qr', hoy: deHoy.qr_escaneo, semana: deLaSemana.qr_escaneo, serie: semana.map((d) => d.conteos.qr_escaneo), tono: 'rojo' },
+	{ nombre: 'Clics en llamar, mapa y reseña', icono: 'telefono', hoy: clics(deHoy), semana: clics(deLaSemana), serie: semana.map((d) => clics(d.conteos)), tono: 'verde' },
+];
+
+const accesos: { href: string; titulo: string; texto: string; icono: NombreIcono; destacado?: boolean }[] = [
+	{ href: '/admin/carta', titulo: 'Editar la carta', texto: 'Precios, disponibilidad y orden de los productos.', icono: 'carta', destacado: true },
+	{ href: '/admin/carga-rapida', titulo: 'Carga rápida de productos', texto: 'Pega una lista y crea varios de una vez.', icono: 'rapida' },
+	{ href: '/admin/promociones', titulo: 'Promociones', texto: 'Ofertas con foto y vigencia.', icono: 'promos' },
+	{ href: '/admin/menu-del-dia', titulo: 'Menú del día', texto: 'Entrada, fondo y postre de hoy.', icono: 'menu' },
+	{ href: '/admin/fotos', titulo: 'Fotos destacadas', texto: 'La galería de la portada.', icono: 'fotos' },
+	{ href: '/admin/local', titulo: 'Datos del local, horario y redes', texto: 'Teléfono, dirección y horarios.', icono: 'local' },
+	{ href: '/admin/diseno', titulo: 'Diseño de la carta', texto: 'Elige cómo se ve para tus clientes.', icono: 'diseno' },
+	{ href: '/admin/qr', titulo: 'Código QR y tarjeta para mesas', texto: 'Descárgalo o imprímelo.', icono: 'qr' },
 ];
 ---
 
-<LayoutAdmin titulo="Inicio">
+<LayoutAdmin titulo="Inicio" ancho>
 	<h1>Panel de la carta</h1>
 
 	<section aria-labelledby="movimiento">
 		<h2 id="movimiento">Movimiento de la carta</h2>
-		<dl class="resumen">
+		<dl class="resumen resumen--tarjetas">
 			{
-				filas.map((fila) => (
-					<div class="resumen__dato">
-						<dt>{fila.nombre}</dt>
-						<dd>{fila.hoy} <span class="resumen__unidad">hoy</span></dd>
-						<dd class="resumen__semana">{fila.semana} en los últimos 7 días</dd>
+				tarjetas.map((t) => (
+					<div class={`resumen__dato resumen__dato--${t.tono}`}>
+						<dt>
+							<span class="resumen__icono">
+								<Icono nombre={t.icono} tamano={18} />
+							</span>
+							{t.nombre}
+						</dt>
+						<dd>
+							{t.hoy} <span class="resumen__unidad">hoy</span>
+						</dd>
+						<dd class="resumen__semana">{t.semana} en los últimos 7 días</dd>
+						<svg class="resumen__linea" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+							<polyline points={lineaDe(t.serie)} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+						</svg>
 					</div>
 				))
 			}
 		</dl>
-		<p><a href="/admin/estadisticas">Ver todas las estadísticas</a></p>
+		<p>
+			<a class="enlace-flecha" href="/admin/estadisticas">
+				Ver todas las estadísticas
+				<Icono nombre="flecha" tamano={16} />
+			</a>
+		</p>
 	</section>
 
-	<section id="instalar-app" aria-labelledby="instalar-titulo" hidden>
+	<section id="instalar-app" class="instalar" aria-labelledby="instalar-titulo" hidden>
 		<h2 id="instalar-titulo">Instala el panel en tu teléfono</h2>
 		<p>Queda como una app más: se abre con un toque, sin escribir la dirección y sin barra del navegador.</p>
 		<button type="button" id="instalar-boton" class="boton" hidden>Instalar app</button>
@@ -54,14 +89,21 @@ const filas = [
 	</section>
 
 	<h2>Accesos rápidos</h2>
-	<ul class="accesos">
-		<li><a class="boton" href="/admin/carta">Editar la carta</a></li>
-		<li><a class="boton boton--secundario" href="/admin/carga-rapida">Carga rápida de productos</a></li>
-		<li><a class="boton boton--secundario" href="/admin/promociones">Promociones</a></li>
-		<li><a class="boton boton--secundario" href="/admin/menu-del-dia">Menú del día</a></li>
-		<li><a class="boton boton--secundario" href="/admin/fotos">Fotos destacadas</a></li>
-		<li><a class="boton boton--secundario" href="/admin/local">Datos del local, horario y redes</a></li>
-		<li><a class="boton boton--secundario" href="/admin/diseno">Diseño de la carta</a></li>
-		<li><a class="boton boton--secundario" href="/admin/qr">Código QR y tarjeta para mesas</a></li>
+	<ul class="accesos accesos--bento">
+		{
+			accesos.map((a) => (
+				<li class:list={{ 'acceso--destacado': a.destacado }}>
+					<a class="acceso" href={a.href}>
+						<span class="acceso__icono">
+							<Icono nombre={a.icono} tamano={22} />
+						</span>
+						<span class="acceso__texto">
+							<strong>{a.titulo}</strong>
+							<span>{a.texto}</span>
+						</span>
+					</a>
+				</li>
+			))
+		}
 	</ul>
 </LayoutAdmin>

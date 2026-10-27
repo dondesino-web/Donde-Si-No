@@ -1,6 +1,8 @@
 ---
 import '../styles/global.css';
 import '../styles/admin.css';
+import '../styles/admin-carta.css';
+import Icono, { type NombreIcono } from '../components/admin/Icono.astro';
 
 interface Props {
 	titulo: string;
@@ -13,21 +15,25 @@ interface Props {
 const { titulo, sinNavegacion = false, ancho = false } = Astro.props;
 
 /** `prefijos` agrupa las pantallas internas (editar un producto cuenta como «Carta»). */
-const SECCIONES = [
-	{ href: '/admin', texto: 'Inicio', prefijos: [] },
-	{ href: '/admin/carta', texto: 'Carta', prefijos: ['/admin/producto'] },
-	{ href: '/admin/carga-rapida', texto: 'Carga rápida', prefijos: [] },
-	{ href: '/admin/promociones', texto: 'Promos', prefijos: ['/admin/promocion'] },
-	{ href: '/admin/menu-del-dia', texto: 'Menú del día', prefijos: [] },
-	{ href: '/admin/fotos', texto: 'Fotos', prefijos: [] },
-	{ href: '/admin/estadisticas', texto: 'Estadísticas', prefijos: [] },
-	{ href: '/admin/qr', texto: 'QR', prefijos: [] },
-	{ href: '/admin/local', texto: 'Local', prefijos: [] },
-	{ href: '/admin/diseno', texto: 'Diseño', prefijos: ['/admin/vista-previa'] },
+const SECCIONES: { href: string; texto: string; icono: NombreIcono; prefijos: string[] }[] = [
+	{ href: '/admin', texto: 'Inicio', icono: 'inicio', prefijos: [] },
+	{ href: '/admin/carta', texto: 'Carta', icono: 'carta', prefijos: ['/admin/producto'] },
+	{ href: '/admin/carga-rapida', texto: 'Carga rápida', icono: 'rapida', prefijos: [] },
+	{ href: '/admin/promociones', texto: 'Promos', icono: 'promos', prefijos: ['/admin/promocion'] },
+	{ href: '/admin/menu-del-dia', texto: 'Menú del día', icono: 'menu', prefijos: [] },
+	{ href: '/admin/etiquetas', texto: 'Etiquetas', icono: 'etiquetas', prefijos: [] },
+	{ href: '/admin/fotos', texto: 'Fotos', icono: 'fotos', prefijos: [] },
+	{ href: '/admin/estadisticas', texto: 'Estadísticas', icono: 'estadisticas', prefijos: [] },
+	{ href: '/admin/qr', texto: 'QR', icono: 'qr', prefijos: [] },
+	{ href: '/admin/local', texto: 'Local', icono: 'local', prefijos: [] },
+	{ href: '/admin/diseno', texto: 'Diseño', icono: 'diseno', prefijos: ['/admin/vista-previa'] },
 ];
+/** Accesos de la barra inferior del celular; el resto vive bajo «Más». */
+const PRINCIPALES = ['/admin', '/admin/carta', '/admin/promociones'];
 const ruta = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const estaEn = (base: string) => ruta === base || ruta.startsWith(`${base}/`);
 const actual = SECCIONES.find((s) => (s.href === '/admin' ? ruta === '/admin' : [s.href, ...s.prefijos].some(estaEn)));
+const inferiores = SECCIONES.filter((s) => PRINCIPALES.includes(s.href));
 ---
 
 <!doctype html>
@@ -44,18 +50,38 @@ const actual = SECCIONES.find((s) => (s.href === '/admin' ? ruta === '/admin' : 
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-title" content="Panel" />
 	</head>
-	<body class="admin">
+	<body class:list={['admin', { 'admin--con-barra': !sinNavegacion }]}>
 		<a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
 		{
 			!sinNavegacion && (
 				<header class="admin-barra no-imprimir">
+					<a class="admin-barra__marca" href="/admin">
+						<img src="/marca/logo-160.webp" width="36" height="36" alt="" />
+						<span>
+							Dónde Si No<small>Panel de la carta</small>
+						</span>
+					</a>
 					<span class="admin-barra__seccion">{actual?.texto ?? 'Panel'}</span>
-					<button type="button" class="admin-barra__menu" aria-expanded="false" aria-controls="menu-panel">Menú</button>
+					<button type="button" class="admin-barra__menu" aria-expanded="false" aria-controls="menu-panel">
+						Menú
+					</button>
 					<nav aria-label="Panel" class="admin-barra__nav" id="menu-panel">
-						{SECCIONES.map((s) => <a href={s.href} aria-current={s === actual ? 'page' : undefined}>{s.texto}</a>)}
-						<a href="/" target="_blank" rel="noopener noreferrer">Ver carta</a>
+						{SECCIONES.map((s) => (
+							<a href={s.href} aria-current={s === actual ? 'page' : undefined}>
+								<Icono nombre={s.icono} />
+								<span>{s.texto}</span>
+							</a>
+						))}
+						<span class="admin-barra__separador" aria-hidden="true" />
+						<a href="/" target="_blank" rel="noopener noreferrer">
+							<Icono nombre="ver" />
+							<span>Ver carta</span>
+						</a>
 						<form method="post" action="/admin/salir">
-							<button type="submit" class="boton boton--secundario admin-barra__salir">Salir</button>
+							<button type="submit" class="boton boton--secundario admin-barra__salir">
+								<Icono nombre="salir" />
+								Salir
+							</button>
 						</form>
 					</nav>
 				</header>
@@ -64,11 +90,38 @@ const actual = SECCIONES.find((s) => (s.href === '/admin' ? ruta === '/admin' : 
 		<main id="contenido" class:list={['admin-contenido', { 'admin-contenido--ancho': ancho }]}>
 			<slot />
 		</main>
+		{
+			!sinNavegacion && (
+				<nav class="admin-inferior no-imprimir" aria-label="Accesos principales">
+					{inferiores.map((s) => (
+						<a href={s.href} aria-current={s === actual ? 'page' : undefined}>
+							<Icono nombre={s.icono} tamano={22} />
+							<span>{s.texto}</span>
+						</a>
+					))}
+					<button type="button" class="admin-inferior__mas" aria-controls="menu-panel">
+						<Icono nombre="mas" tamano={22} />
+						<span>Más</span>
+					</button>
+				</nav>
+			)
+		}
+		<dialog class="dialogo" id="dialogo-confirmar" aria-labelledby="dialogo-titulo">
+			<form method="dialog">
+				<h2 id="dialogo-titulo">¿Seguro?</h2>
+				<p id="dialogo-mensaje"></p>
+				<div class="dialogo__acciones">
+					<button type="submit" value="cancelar" class="boton boton--secundario">Cancelar</button>
+					<button type="submit" value="confirmar" class="boton boton--peligro-solido" id="dialogo-aceptar">Sí, eliminar</button>
+				</div>
+			</form>
+		</dialog>
 	</body>
 </html>
 
 <script>
 	import '../scripts/panelInstalable.ts';
+	import '../scripts/confirmar.ts';
 </script>
 
 <script>
@@ -77,10 +130,17 @@ const actual = SECCIONES.find((s) => (s.href === '/admin' ? ruta === '/admin' : 
 	const boton = barra?.querySelector<HTMLButtonElement>('.admin-barra__menu');
 	if (barra && boton) {
 		barra.dataset.js = '';
-		boton.addEventListener('click', () => {
-			const abierto = boton.getAttribute('aria-expanded') !== 'true';
+		document.body.dataset.panelJs = '';
+		const alternar = (abierto: boolean) => {
 			boton.setAttribute('aria-expanded', String(abierto));
 			barra.toggleAttribute('data-abierto', abierto);
+		};
+		boton.addEventListener('click', () => alternar(boton.getAttribute('aria-expanded') !== 'true'));
+		// «Más» de la barra inferior abre el mismo menú, que vive arriba.
+		document.querySelector('.admin-inferior__mas')?.addEventListener('click', () => {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+			alternar(true);
+			barra.querySelector<HTMLAnchorElement>('.admin-barra__nav a')?.focus({ preventScroll: true });
 		});
 	}
 </script>
