@@ -91,8 +91,9 @@ test('edita el producto, lo cambia a «Consultar» y lo elimina', async ({ page 
 
 	await page.goto('/admin/carta');
 	await page.getByRole('link', { name: NOMBRE, exact: true }).click();
-	page.once('dialog', (dialogo) => dialogo.accept());
+	await page.locator('html[data-confirmar-listo]').waitFor({ state: 'attached' });
 	await page.getByRole('button', { name: 'Eliminar producto' }).click();
+	await page.getByRole('button', { name: 'Sí, eliminar' }).click();
 
 	await expect(page).toHaveURL(/aviso=eliminado$/);
 	await page.goto('/');

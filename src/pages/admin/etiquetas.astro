@@ -1,0 +1,100 @@
+---
+import { actions } from 'astro:actions';
+import LayoutAdmin from '../../layouts/LayoutAdmin.astro';
+import { obtenerBd } from '../../lib/db/index.ts';
+import { listarAtributos } from '../../lib/repositorios/adminAtributosRepo.ts';
+import type { TipoAtributo } from '../../lib/dominio/tipos.ts';
+
+// Solo una acción se envía por petición: se muestra el resultado de la que corresponda.
+const resultado = [actions.guardarAtributo, actions.eliminarAtributo].map((accion) => Astro.getActionResult(accion)).find((r) => r !== undefined);
+const aviso = resultado?.data?.ok ? resultado.data.mensaje : undefined;
+const errores = resultado?.data && !resultado.data.ok ? resultado.data.errores : undefined;
+const errorGeneral = resultado?.error ? resultado.error.message : undefined;
+
+const todos = await listarAtributos(obtenerBd());
+
+const GRUPOS: { tipo: TipoAtributo; titulo: string; ayuda: string; uno: string; ejemplo: string }[] = [
+	{ tipo: 'etiqueta', titulo: 'Etiquetas', ayuda: 'Insignias que acompañan al producto en la carta: «Vegetariano», «Picante», «Nuevo»…', uno: 'etiqueta', ejemplo: 'Casero' },
+	{ tipo: 'alergeno', titulo: 'Contiene (alérgenos)', ayuda: 'Lo que se lista después de «Contiene:» en cada producto: gluten, maní, mariscos…', uno: 'alérgeno', ejemplo: 'Apio' },
+];
+---
+
+<LayoutAdmin titulo="Etiquetas">
+	<header class="carta-cabecera">
+		<div>
+			<h1>Etiquetas y alérgenos</h1>
+			<p>Créalos, cámbiales el nombre o elimínalos. Después los eliges en cada producto.</p>
+		</div>
+	</header>
+
+	<div aria-live="polite" class="avisos">
+		{aviso && <p class="aviso aviso--ok" role="status">{aviso}</p>}
+		{(errores || errorGeneral) && <p class="aviso aviso--error" role="alert">{Object.values(errores ?? {}).join(' ') || errorGeneral}</p>}
+	</div>
+
+	{
+		GRUPOS.map((grupo) => {
+			const filas = todos.filter((a) => a.tipo === grupo.tipo);
+			return (
+				<section class="atributos" aria-labelledby={`titulo-${grupo.tipo}`}>
+					<h2 id={`titulo-${grupo.tipo}`}>
+						{grupo.titulo} <span class="atributos__cuenta">{filas.length}</span>
+					</h2>
+					<p class="atributos__ayuda">{grupo.ayuda}</p>
+
+					<div class="atributos__tabla">
+						<div class="atributo atributo--cabecera" aria-hidden="true">
+							<span>Nombre</span>
+							<span>En inglés <small>(opcional)</small></span>
+							<span></span>
+						</div>
+
+						{filas.length === 0 && <p class="carta-vacia">Aún no hay {grupo.uno === 'etiqueta' ? 'etiquetas' : 'alérgenos'}. Crea el primero abajo.</p>}
+
+						<ul class="atributos__lista">
+							{filas.map((a) => (
+								<li>
+									<form method="POST" action={actions.guardarAtributo} class="atributo">
+										<input type="hidden" name="id" value={a.id} />
+										<input type="hidden" name="tipo" value={a.tipo} />
+										<label class="solo-lectores" for={`es-${a.id}`}>Nombre de {a.nombreEs}</label>
+										<input id={`es-${a.id}`} name="nombreEs" required maxlength="40" value={a.nombreEs} autocomplete="off" />
+										<label class="solo-lectores" for={`en-${a.id}`}>Nombre en inglés de {a.nombreEs}</label>
+										<input id={`en-${a.id}`} name="nombreEn" maxlength="40" value={a.nombreEn ?? ''} placeholder="Opcional" autocomplete="off" />
+										<div class="atributo__acciones">
+											<button type="submit" class="boton boton--secundario">
+												Guardar<span class="solo-lectores"> cambios de {a.nombreEs}</span>
+											</button>
+											<button
+												type="submit"
+												class="boton boton--texto-peligro"
+												form={`eliminar-${a.id}`}
+												data-confirmar={`¿Eliminar «${a.nombreEs}»? Se quitará de todos los productos que lo tienen.`}
+											>
+												Eliminar<span class="solo-lectores"> {a.nombreEs}</span>
+											</button>
+										</div>
+									</form>
+									<form id={`eliminar-${a.id}`} method="POST" action={actions.eliminarAtributo}>
+										<input type="hidden" name="id" value={a.id} />
+									</form>
+								</li>
+							))}
+						</ul>
+
+						<form method="POST" action={actions.guardarAtributo} class="atributo atributo--nuevo">
+							<input type="hidden" name="tipo" value={grupo.tipo} />
+							<label class="solo-lectores" for={`nuevo-es-${grupo.tipo}`}>Nombre de la nueva {grupo.uno}</label>
+							<input id={`nuevo-es-${grupo.tipo}`} name="nombreEs" required maxlength="40" placeholder={`Nueva ${grupo.uno}… (ej. ${grupo.ejemplo})`} autocomplete="off" />
+							<label class="solo-lectores" for={`nuevo-en-${grupo.tipo}`}>Nombre en inglés de la nueva {grupo.uno}</label>
+							<input id={`nuevo-en-${grupo.tipo}`} name="nombreEn" maxlength="40" placeholder="En inglés (opcional)" autocomplete="off" />
+							<div class="atributo__acciones">
+								<button type="submit" class="boton">+ Crear</button>
+							</div>
+						</form>
+					</div>
+				</section>
+			);
+		})
+	}
+</LayoutAdmin>

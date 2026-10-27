@@ -3,6 +3,7 @@ import { actions } from 'astro:actions';
 import FormularioProducto from '../../../components/admin/FormularioProducto.astro';
 import LayoutAdmin from '../../../layouts/LayoutAdmin.astro';
 import { obtenerBd } from '../../../lib/db/index.ts';
+import { listarAtributos } from '../../../lib/repositorios/adminAtributosRepo.ts';
 import { listarCartaAdmin, obtenerProducto } from '../../../lib/repositorios/adminCartaRepo.ts';
 
 // Primero los resultados que redirigen: tras eliminar, el producto ya no existe y no debe responder 404.
@@ -16,22 +17,16 @@ const producto = Number.isInteger(id) && id > 0 ? await obtenerProducto(bd, id) 
 if (!producto) return new Response('Producto no encontrado', { status: 404 });
 
 const categorias = await listarCartaAdmin(bd);
+const atributos = await listarAtributos(bd);
 const fallo = resultado?.data && !resultado.data.ok ? resultado.data : undefined;
 ---
 
 <LayoutAdmin titulo={`Editar ${producto.nombreEs}`}>
 	<h1>Editar producto</h1>
-	<FormularioProducto categorias={categorias} producto={producto} errores={fallo?.errores} valores={fallo?.valores} />
+	<FormularioProducto categorias={categorias} atributos={atributos} producto={producto} errores={fallo?.errores} valores={fallo?.valores} />
 
 	<form method="POST" action={actions.eliminarProducto} class="formulario">
 		<input type="hidden" name="id" value={producto.id} />
 		<button type="submit" class="boton boton--peligro" data-confirmar={`¿Eliminar ${producto.nombreEs}? No se puede deshacer.`}>Eliminar producto</button>
 	</form>
 </LayoutAdmin>
-
-<script>
-	document.addEventListener('submit', (evento) => {
-		const mensaje = ((evento as SubmitEvent).submitter as HTMLElement | null)?.dataset.confirmar;
-		if (mensaje && !confirm(mensaje)) evento.preventDefault();
-	});
-</script>

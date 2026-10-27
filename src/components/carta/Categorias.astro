@@ -2,15 +2,17 @@
 import type { Idioma } from '../../i18n/ui.ts';
 import { textoLocal, traductor } from '../../i18n/utils.ts';
 import { formatearPrecio } from '../../lib/dominio/formato.ts';
-import type { CategoriaConProductos } from '../../lib/repositorios/cartaRepo.ts';
+import { nombresDeAtributos } from '../../lib/dominio/atributos.ts';
+import type { Atributo, CategoriaConProductos } from '../../lib/repositorios/cartaRepo.ts';
 import Foto from './Foto.astro';
 
 interface Props {
 	categorias: CategoriaConProductos[];
+	atributos: Atributo[];
 	idioma: Idioma;
 }
 
-const { categorias, idioma } = Astro.props;
+const { categorias, atributos, idioma } = Astro.props;
 const t = traductor(idioma);
 ---
 
@@ -46,6 +48,8 @@ const t = traductor(idioma);
 								const nom = textoLocal(idioma, p.nombreEs, p.nombreEn);
 								const desc = textoLocal(idioma, p.descripcionEs, p.descripcionEn);
 								const precio = formatearPrecio(p.precio, idioma);
+								const etiquetas = nombresDeAtributos(atributos, 'etiqueta', p.etiquetas, idioma);
+								const alergenos = nombresDeAtributos(atributos, 'alergeno', p.alergenos, idioma);
 								return (
 									<li class:list={['producto', { 'producto--agotado': !p.disponible }]}>
 										<h3 class="producto__nombre" lang={nom.idioma}>
@@ -60,14 +64,14 @@ const t = traductor(idioma);
 											</p>
 										)}
 										{p.imagen && <Foto imagen={p.imagen} idioma={idioma} />}
-										{(!p.disponible || p.destacado || p.etiquetas.length > 0 || p.alergenos.length > 0) && (
+										{(!p.disponible || p.destacado || etiquetas.length > 0 || alergenos.length > 0) && (
 											<div class="producto__meta">
 												{!p.disponible && <span class="insignia insignia--agotado">{t('producto.agotado')}</span>}
 												{p.destacado && <span class="insignia insignia--destacado">{t('producto.recomendado')}</span>}
-												{p.etiquetas.map((e) => <span class="insignia">{t(`etiqueta.${e}`)}</span>)}
-												{p.alergenos.length > 0 && (
+												{etiquetas.map((e) => <span class="insignia">{e}</span>)}
+												{alergenos.length > 0 && (
 													<span class="alergenos">
-														{t('alergenos.contiene')}: {p.alergenos.map((a) => t(`alergeno.${a}`)).join(', ')}
+														{t('alergenos.contiene')}: {alergenos.join(', ')}
 													</span>
 												)}
 											</div>

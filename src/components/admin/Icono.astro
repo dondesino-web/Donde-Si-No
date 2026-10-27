@@ -1,0 +1,35 @@
+---
+/** Iconos de línea del panel (estilo Lucide, dibujados en una cuadrícula de 24 px). Decorativos: el texto vecino los nombra. */
+const ICONOS = {
+	inicio: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>',
+	carta: '<path d="M2 4.5A1.5 1.5 0 0 1 3.5 3H10a2 2 0 0 1 2 2v16a2 2 0 0 0-2-2H2z"/><path d="M22 4.5A1.5 1.5 0 0 0 20.5 3H14a2 2 0 0 0-2 2v16a2 2 0 0 1 2-2h8z"/>',
+	rapida: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+	promos: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/>',
+	menu: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+	etiquetas: '<path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+	fotos: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.8"/><path d="m21 16-4.5-4.5L6 21"/>',
+	estadisticas: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+	qr: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/>',
+	local: '<path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.5V21h14v-8.5"/><path d="M10 21v-5h4v5"/>',
+	diseno: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.8-.5-1.2-.3-.4-.5-.7-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/>',
+	ver: '<path d="M15 3h6v6M10 14 21 3"/><path d="M18 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/>',
+	salir: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>',
+	mas: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
+	flecha: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+	ok: '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 9.5"/>',
+	alerta: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/>',
+	vacio: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+	telefono: '<rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/>',
+} as const;
+
+export type NombreIcono = keyof typeof ICONOS;
+
+interface Props {
+	nombre: NombreIcono;
+	tamano?: number;
+}
+
+const { nombre, tamano = 20 } = Astro.props;
+---
+
+<svg class="icono" width={tamano} height={tamano} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" set:html={ICONOS[nombre]} />

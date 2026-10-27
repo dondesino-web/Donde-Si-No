@@ -165,8 +165,9 @@ test('una promoción puede llevar foto y eliminarla borra los archivos', async (
 
 	await page.goto('/admin/promociones');
 	await page.getByRole('link', { name: PROMO, exact: true }).click();
-	page.once('dialog', (dialogo) => dialogo.accept());
+	await page.locator('html[data-confirmar-listo]').waitFor({ state: 'attached' });
 	await page.getByRole('button', { name: 'Eliminar promoción' }).click();
+	await page.getByRole('button', { name: 'Sí, eliminar' }).click();
 	await expect(page).toHaveURL(/aviso=eliminada$/);
 	expect(archivosSubidos()).not.toContain(nombreDeArchivo(sm));
 	expect(archivosSubidos()).not.toContain(nombreDeArchivo(lg));
@@ -193,9 +194,10 @@ test('la galería: agrega, ordena y elimina fotos destacadas', async ({ page }) 
 	expect(await alts()).toEqual(['Galeria E2E dos', 'Galeria E2E uno']);
 
 	await page.goto('/admin/fotos');
-	page.on('dialog', (dialogo) => dialogo.accept());
 	for (const alt of ['Galeria E2E uno', 'Galeria E2E dos']) {
+		await page.locator('html[data-confirmar-listo]').waitFor({ state: 'attached' });
 		await page.getByRole('button', { name: new RegExp(`Eliminar.*${alt}`) }).click();
+		await page.getByRole('button', { name: 'Sí, eliminar' }).click();
 		await expect(page.getByRole('status').filter({ hasText: 'Foto eliminada.' })).toBeVisible();
 	}
 	await page.goto('/');
@@ -266,8 +268,9 @@ test('eliminar un producto borra su foto del almacén', async ({ page }) => {
 	expect(presentes).toHaveLength(2);
 
 	await page.getByRole('link', { name: PRODUCTO, exact: true }).click();
-	page.once('dialog', (dialogo) => dialogo.accept());
+	await page.locator('html[data-confirmar-listo]').waitFor({ state: 'attached' });
 	await page.getByRole('button', { name: 'Eliminar producto' }).click();
+	await page.getByRole('button', { name: 'Sí, eliminar' }).click();
 	await expect(page).toHaveURL(/aviso=eliminado$/);
 
 	for (const archivo of presentes) expect(archivosSubidos()).not.toContain(archivo);

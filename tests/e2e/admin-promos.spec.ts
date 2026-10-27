@@ -135,8 +135,9 @@ test('edita y elimina la promoción', async ({ page }) => {
 	await expect(page).toHaveURL(/aviso=guardada$/);
 
 	await page.getByRole('link', { name: PROMO, exact: true }).click();
-	page.once('dialog', (dialogo) => dialogo.accept());
+	await page.locator('html[data-confirmar-listo]').waitFor({ state: 'attached' });
 	await page.getByRole('button', { name: 'Eliminar promoción' }).click();
+	await page.getByRole('button', { name: 'Sí, eliminar' }).click();
 
 	await expect(page).toHaveURL(/aviso=eliminada$/);
 	await expect(page.getByRole('link', { name: PROMO, exact: true })).toHaveCount(0);

@@ -1,0 +1,141 @@
+/* Se carga después de admin.css: reemplaza el estilo de la lista de la carta por uno sobrio, en líneas finas y densidad de tablero. */
+
+/* ---------- Cabecera y herramientas ---------- */
+.carta-cabecera h1 { font-size: var(--texto-xl); font-weight: 700; letter-spacing: -0.01em; }
+.carta-cabecera p { font-size: var(--texto-sm); }
+.carta-acciones .boton { min-height: 2.5rem; padding-inline: var(--espacio-4); font-size: var(--texto-sm); }
+
+.carta-herramientas {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--espacio-2) var(--espacio-3);
+	padding-block: var(--espacio-2);
+	margin-bottom: var(--espacio-2);
+	border-bottom: 0;
+}
+.carta-buscar {
+	flex: 1 1 14rem;
+	width: auto;
+	min-height: 2.5rem;
+	padding-inline-start: 2.6rem;
+	border: 1px solid var(--color-borde);
+	border-radius: var(--radio-sm);
+	background: var(--color-superficie) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23595959' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 0.85rem center / 1.1rem;
+}
+.carta-buscar:focus-visible { border-color: var(--color-azul); outline-offset: 1px; }
+.carta-estado { flex: 1 1 100%; margin: 0; }
+.carta-estado:empty { display: none; }
+
+/* Filtros como control segmentado */
+.carta-filtros { flex: 0 1 auto; gap: 2px; padding: 3px; background: #f0ebde; border-radius: var(--radio-sm); }
+.filtro {
+	min-height: 2.25rem;
+	padding-inline: var(--espacio-3);
+	gap: var(--espacio-2);
+	border: 0;
+	border-radius: 0.375rem;
+	background: transparent;
+	color: var(--color-texto-suave);
+	font-size: var(--texto-sm);
+	font-weight: 600;
+	box-shadow: none;
+}
+.filtro:hover:not([aria-pressed='true']) { background: rgb(255 255 255 / 0.6); color: var(--color-tinta); }
+.filtro[aria-pressed='true'] { background: var(--color-superficie); color: var(--color-azul); box-shadow: 0 1px 2px rgb(26 26 26 / 0.12); }
+.filtro__numero { min-width: 0; height: auto; padding: 0; background: none; color: inherit; font-size: var(--texto-xs); font-weight: 600; opacity: 0.7; }
+.filtro[aria-pressed='true'] .filtro__numero { background: none; color: inherit; opacity: 1; }
+.filtro--ordenar { margin-inline-start: var(--espacio-2); border-radius: 0.375rem; }
+
+/* ---------- Categorías: grupos sin caja, el contenido va en una tabla ---------- */
+.carta-categoria { margin-block: var(--espacio-4); background: none; border: 0; border-radius: 0; box-shadow: none; overflow: visible; }
+.carta-categoria > summary { min-height: 2.5rem; padding: var(--espacio-1) 0; gap: var(--espacio-2); background: none; border: 0; }
+.carta-categoria > summary:hover { background: none; }
+.carta-categoria > summary::before {
+	content: '';
+	flex: none;
+	width: 1.1rem;
+	height: 1.1rem;
+	background: var(--color-texto-suave);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 6 6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 6 6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.carta-categoria__titulo { font-size: var(--texto-base); font-weight: 700; letter-spacing: 0; }
+.carta-categoria__cuenta { min-width: 0; padding: 0; border: 0; background: none; color: var(--color-texto-suave); font-size: var(--texto-sm); font-weight: 500; }
+
+.carta-categoria__cuerpo {
+	padding: 0;
+	background: var(--color-superficie);
+	border: 1px solid var(--color-borde);
+	border-radius: var(--radio-md);
+	box-shadow: 0 1px 2px rgb(26 26 26 / 0.04);
+	overflow: hidden;
+}
+.carta-categoria__barra { margin: 0; padding: var(--espacio-2) var(--espacio-3); border-bottom: 1px solid var(--color-borde); background: #fbf9f3; }
+.carta-categoria__barra .boton { min-height: 2.25rem; padding-inline: var(--espacio-3); font-size: var(--texto-sm); }
+.carta-categoria__barra .boton--secundario { border: 1px solid var(--color-borde-fuerte); color: var(--color-tinta); background: var(--color-superficie); }
+.carta-categoria__barra .boton--secundario:hover { background: var(--color-tinta); border-color: var(--color-tinta); color: #fff; }
+.carta-categoria__cuerpo > .carta-vacia { margin: 0; padding: var(--espacio-6) var(--espacio-4); border: 0; background: none; font-size: var(--texto-sm); }
+
+/* ---------- Filas ---------- */
+.fila-lista { display: block; padding: 0; margin: 0; }
+.fila-carta {
+	padding: var(--espacio-3);
+	border-top: 1px solid var(--color-borde);
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	transform: none;
+	transition: background var(--duracion-rapida);
+}
+.fila-carta:first-child { border-top: 0; }
+.fila-carta:hover { background: #fbf9f3; box-shadow: none; transform: none; }
+.fila-carta--apagada .fila-carta__nombre { color: var(--color-texto-suave); }
+
+.fila-carta__info { display: flex; align-items: center; gap: var(--espacio-3); }
+.fila-carta__texto { display: grid; gap: 2px; min-width: 0; padding: 0; }
+.fila-carta__nombre { font-size: var(--texto-base); font-weight: 600; color: var(--color-tinta); text-decoration: none; }
+.fila-carta__nombre:hover { color: var(--color-azul); text-decoration: underline; }
+.fila-carta__detalle { gap: var(--espacio-1) var(--espacio-3); font-size: var(--texto-xs); }
+.fila-carta__descripcion { display: block; max-width: 28rem; }
+
+/* La foto solo aparece cuando existe: una letra sobre un cuadro no aporta nada */
+.fila-carta__avatar { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; background: #f0ebde; border: 1px solid var(--color-borde); font-size: var(--texto-base); }
+.fila-carta__avatar:not(:has(img)) { display: none; }
+.fila-carta--apagada .fila-carta__avatar { filter: grayscale(1); opacity: 0.6; }
+
+/* Estados: un punto de color y texto, sin cajas */
+.etiqueta { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0; border: 0; border-radius: 0; background: none; color: var(--color-texto-suave); font-size: var(--texto-xs); font-weight: 600; }
+.etiqueta::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--punto, var(--color-borde-fuerte)); }
+.etiqueta--aviso { --punto: var(--color-amarillo); background: none; border: 0; color: var(--color-tinta); }
+.etiqueta--agotado { --punto: var(--color-rojo); background: none; border: 0; color: var(--color-texto-suave); }
+.etiqueta--oculto { --punto: var(--color-borde-fuerte); background: none; border: 0; color: var(--color-texto-suave); }
+
+/* Controles de la fila */
+.entrada-precio { min-height: 2.25rem; padding-inline: var(--espacio-2); border: 1px solid var(--color-borde-fuerte); border-radius: 0.5rem; background: var(--color-superficie); }
+.entrada-precio input { width: 5.5rem; font-size: var(--texto-base); font-weight: 600; }
+.fila-carta__precio .boton { min-height: 2.25rem; padding-inline: var(--espacio-3); font-size: var(--texto-sm); }
+.interruptor__pista { width: 2.25rem; height: 1.3rem; }
+.interruptor__pomo { top: 0.15rem; left: 0.15rem; width: 1rem; height: 1rem; }
+.interruptor[aria-checked='true'] .interruptor__pomo { transform: translateX(0.95rem); }
+.interruptor__texto { min-width: 5rem; font-size: var(--texto-sm); font-weight: 500; color: var(--color-texto-suave); }
+.interruptor[aria-checked='true'] .interruptor__texto, .interruptor[aria-checked='false'] .interruptor__texto { color: var(--color-texto-suave); }
+.controles-orden .boton--icono { width: 2.25rem; min-height: 2.25rem; }
+
+@media (min-width: 48rem) {
+	.fila-carta { grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: 'info precio estado orden'; gap: var(--espacio-4); }
+}
+
+/* ---------- Editar categoría y crear una nueva ---------- */
+.carta-categoria__editar { margin: 0; padding: 0 var(--espacio-3); border-top: 1px solid var(--color-borde); }
+.carta-categoria__editar > summary { min-height: 2.5rem; font-size: var(--texto-sm); font-weight: 600; color: var(--color-texto-suave); }
+.carta-categoria__editar > summary:hover { color: var(--color-azul); }
+.carta-categoria__editar[open] > summary { color: var(--color-azul); }
+.carta-nueva { background: none; border: 0; }
+.carta-nueva > summary { min-height: 2.5rem; }
+
+.carta-nueva .carta-categoria__cuerpo { padding: var(--espacio-3); border-style: dashed; box-shadow: none; background: none; }
+
+/* `.admin-contenido h2` (admin.css) pesa más que una clase sola: se repite el contenedor para ganarle. */
+.admin-contenido .carta-categoria__titulo { margin: 0; font-size: var(--texto-base); font-weight: 700; color: var(--color-tinta); }
+.admin-contenido .carta-nueva .carta-categoria__titulo { color: var(--color-texto-suave); }

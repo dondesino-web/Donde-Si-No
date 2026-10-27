@@ -8,6 +8,21 @@
 
 ---
 
+## [Sin Versión / En Desarrollo] - 2026-10-27 · Etiquetas y alérgenos editables, y nuevo estilo del panel
+
+### Añadido
+- **Etiquetas y alérgenos («Contiene») administrables** (`/admin/etiquetas`): se pueden crear, renombrar (con nombre en inglés opcional) y eliminar. Antes eran listas fijas en el código.
+  - Los productos guardan la clave estable de cada uno: renombrar nunca los desenlaza. Al eliminar, se quita también de todos los productos que lo llevaban, en una sola transacción.
+  - No se permiten nombres repetidos dentro de la misma lista (sin distinguir mayúsculas ni tildes).
+  - El formulario de producto y la carta pública (en español e inglés) leen el catálogo.
+- **Migración de base de datos** `drizzle/0002_atributos.sql`: crea la tabla `atributo` y carga los 9 alérgenos y 3 etiquetas de siempre, así los productos existentes no cambian.
+- Panel con navegación lateral, inicio con tarjetas, diálogo propio para confirmar eliminaciones y la lista de la carta en estilo tabla.
+
+### Pendiente al desplegar
+- **Aplicar la migración en Turso antes de fusionar** (`TURSO_DATABASE_URL=… TURSO_AUTH_TOKEN=… npm run db:migrate`): sin la tabla, la carta pública falla. Es seguro hacerlo antes: el código anterior la ignora.
+
+---
+
 ## [Sin Versión / En Desarrollo] - 2026-10-24 · Diseños de la carta (temas)
 
 ### Añadido

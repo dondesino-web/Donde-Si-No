@@ -73,10 +73,3 @@ const hayLugar = fotos.length < MAX_FOTOS;
 		)
 	}
 </LayoutAdmin>
-
-<script>
-	document.addEventListener('submit', (evento) => {
-		const mensaje = ((evento as SubmitEvent).submitter as HTMLElement | null)?.dataset.confirmar;
-		if (mensaje && !confirm(mensaje)) evento.preventDefault();
-	});
-</script>

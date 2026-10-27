@@ -1,12 +1,13 @@
 ---
 import { actions } from 'astro:actions';
-import { traductor } from '../../i18n/utils.ts';
-import { ALERGENOS, ETIQUETAS } from '../../lib/dominio/tipos.ts';
+import type { Atributo } from '../../lib/repositorios/adminAtributosRepo.ts';
 import type { Categoria, Producto } from '../../lib/repositorios/cartaRepo.ts';
 import CampoFoto from './CampoFoto.astro';
 
 interface Props {
 	categorias: Categoria[];
+	/** Catálogo de etiquetas y alérgenos que se pueden marcar. */
+	atributos: Atributo[];
 	/** Producto que se edita; sin él, el formulario crea uno nuevo. */
 	producto?: Producto;
 	categoriaInicial?: number;
@@ -15,8 +16,9 @@ interface Props {
 	errores?: Record<string, string>;
 }
 
-const { categorias, producto, categoriaInicial, valores, errores = {} } = Astro.props;
-const t = traductor('es');
+const { categorias, atributos, producto, categoriaInicial, valores, errores = {} } = Astro.props;
+const alergenos = atributos.filter((a) => a.tipo === 'alergeno');
+const etiquetas = atributos.filter((a) => a.tipo === 'etiqueta');
 
 const texto = (campo: string, respaldo: string): string => valores?.[campo]?.[0] ?? respaldo;
 const marcada = (campo: string, respaldo: boolean): boolean => (valores ? campo in valores : respaldo);
@@ -81,29 +83,33 @@ const describedby = (campo: string) => (errores[campo] ? `error-${campo}` : unde
 		<legend>Contiene (alérgenos)</legend>
 		<div class="casillas">
 			{
-				ALERGENOS.map((a) => (
+				alergenos.map((a) => (
 					<label class="casilla">
-						<input type="checkbox" name="alergenos" value={a} checked={enLista('alergenos', a, producto?.alergenos ?? [])} />
-						{t(`alergeno.${a}`)}
+						<input type="checkbox" name="alergenos" value={a.clave} checked={enLista('alergenos', a.clave, producto?.alergenos ?? [])} />
+						{a.nombreEs}
 					</label>
 				))
 			}
 		</div>
+		{alergenos.length === 0 && <p class="campo__ayuda">Aún no hay alérgenos. <a href="/admin/etiquetas">Créalos aquí</a>.</p>}
 		{errores.alergenos && <p class="campo__error">{errores.alergenos}</p>}
+		<p class="campo__ayuda"><a href="/admin/etiquetas">Administrar etiquetas y alérgenos</a></p>
 	</fieldset>
 
 	<fieldset class="campo">
 		<legend>Etiquetas</legend>
 		<div class="casillas">
 			{
-				ETIQUETAS.map((e) => (
+				etiquetas.map((e) => (
 					<label class="casilla">
-						<input type="checkbox" name="etiquetas" value={e} checked={enLista('etiquetas', e, producto?.etiquetas ?? [])} />
-						{t(`etiqueta.${e}`)}
+						<input type="checkbox" name="etiquetas" value={e.clave} checked={enLista('etiquetas', e.clave, producto?.etiquetas ?? [])} />
+						{e.nombreEs}
 					</label>
 				))
 			}
 		</div>
+		{etiquetas.length === 0 && <p class="campo__ayuda">Aún no hay etiquetas. <a href="/admin/etiquetas">Créalas aquí</a>.</p>}
+		{errores.etiquetas && <p class="campo__error">{errores.etiquetas}</p>}
 	</fieldset>
 
 	<fieldset class="campo">
